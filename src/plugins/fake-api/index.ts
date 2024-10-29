@@ -17,6 +17,7 @@ import { handlerPagesDatatable } from '@db/pages/datatable/index'
 import { handlerPagesFaq } from '@db/pages/faq/index'
 import { handlerPagesHelpCenter } from '@db/pages/help-center/index'
 import { handlerPagesProfile } from '@db/pages/profile/index'
+import { handlerAppsgates } from './handlers/apps/gates'
 
 const worker = setupWorker(
   ...handlerAppsEcommerce,
@@ -35,6 +36,7 @@ const worker = setupWorker(
   ...handlerAppLogistics,
   ...handlerAuth,
   ...handlerDashboard,
+  ...handlerAppsgates
 )
 
 export default function () {

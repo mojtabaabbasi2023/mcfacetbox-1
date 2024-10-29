@@ -1,18 +1,28 @@
-import { createApp } from 'vue'
-
-import App from '@/App.vue'
-import { registerPlugins } from '@core/utils/plugins'
+import App from '@/App.vue';
+import { registerPlugins } from '@core/utils/plugins';
+import { createApp } from 'vue';
+import Toast, { PluginOptions, POSITION } from "vue-toastification";
 
 // Styles
-import "@/assets/fonts/Vazir/vazirfont.css"
-import '@core/scss/template/index.scss'
-import '@styles/styles.scss'
+import "@/assets/fonts/Vazir/vazirfont.css";
+import '@core/scss/template/index.scss';
+import '@styles/styles.scss';
+import "vue-toastification/dist/index.css";
+
+
+
+
+const options: PluginOptions = {
+    rtl: true, timeout: 30000, position: POSITION.TOP_RIGHT,
+    transition: "Vue-Toastification__fade", hideProgressBar: true
+    // You can set your default options here
+};
 
 
 // Create vue app
 const app = createApp(App)
-
 // Register plugins
+app.use(Toast, options)
 registerPlugins(app)
 
 // Mount vue app

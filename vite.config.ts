@@ -12,6 +12,7 @@ import Layouts from 'vite-plugin-vue-layouts'
 import vuetify from 'vite-plugin-vuetify'
 import svgLoader from 'vite-svg-loader'
 
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -103,6 +104,10 @@ export default defineConfig({
       '@configured-variables': fileURLToPath(new URL('./src/assets/styles/variables/_template.scss', import.meta.url)),
       '@db': fileURLToPath(new URL('./src/plugins/fake-api/handlers/', import.meta.url)),
       '@api-utils': fileURLToPath(new URL('./src/plugins/fake-api/utils/', import.meta.url)),
+      '@types': fileURLToPath(new URL('./src/types/', import.meta.url)),
+      '@models': fileURLToPath(new URL('./src/models/', import.meta.url)),
+      '@store': fileURLToPath(new URL('./src/store/', import.meta.url)),
+
     },
   },
   build: {

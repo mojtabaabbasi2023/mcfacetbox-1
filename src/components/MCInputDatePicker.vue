@@ -42,14 +42,8 @@ const emit = defineEmits<Emit>()
 
 const acceptDate = () => {
     if (draftDate.value != undefined) {
-        // if (typeof selectedDate.value == 'string') {
-        //     return selectedDate.value
-        // }
-        // else {
         selectedDate.value = date.format(draftDate.value, 'keyboardDate')
-        // }
         emit('update:selectedDate', selectedDate.value)
-        // console.log('selectedDate', date.format(selectedDate.value, 'keyboardDate'), date.toISO(selectedDate.value));
     }
     isDialogVisible.value = false
 }
