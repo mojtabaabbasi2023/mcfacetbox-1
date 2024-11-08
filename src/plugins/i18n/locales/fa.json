@@ -8,6 +8,7 @@
     "email": "پست الکترونیک",
     "mobilenumber": "شماره همراه",
     "gate": {
+        "pageTitle": "درگاه ها",
         "title": "عنوان درگاه",
         "addedit": "افزودن / ویرایش درگاه",
         "delete": "حذف درگاه",
@@ -18,11 +19,13 @@
     },
     "userManagement": "مدیریت کاربران",
     "user": {
+        "pageTitle": "کاربران",
         "add": "افزودن کاربر",
         "delete": "حذف کاربر",
         "management": "مدیریت کاربران"
     },
     "role": {
+        "pageTitle": "نقش ها",
         "add": "افزودن نقش",
         "delete": "حذف نقش"
     },
