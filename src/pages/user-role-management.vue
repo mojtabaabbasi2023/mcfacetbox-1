@@ -165,8 +165,8 @@ const roleDataAdded = (gateDataId: number) => {
         </VRow>
         <!-- 👉 Add New User -->
         <MCDialogUserAdd ref="dialogUser" v-model:is-dialog-visible="isAddNewUserDialogVisible"
-            @gate-data-added="userDataAdded" :api-url="userApiUrl" />
+            @user-data-added="userDataAdded" :api-url="userApiUrl" />
         <MCDialogGateAdd ref="dialogRole" v-model:is-dialog-visible="isAddNewRoleDialogVisible"
-            @gate-data-added="roleDataAdded" :api-url="userRoleApiUrl" />
+            @role-data-added="roleDataAdded" :api-url="userRoleApiUrl" />
     </section>
 </template>
