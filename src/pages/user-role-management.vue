@@ -97,9 +97,7 @@ const roleDataAdded = (gateDataId: number) => {
         <VRow id="apex-chart-wrapper">
 
             <VCol cols="12">
-                <VCard>
-
-                    <VDivider />
+                <VCard variant="outlined">
 
                     <MCDataTable ref="mcdatatableUser" :headers="userHeaders" :api-url="userApiUrl"
                         @edit-item="userEdit">
@@ -140,7 +138,7 @@ const roleDataAdded = (gateDataId: number) => {
         <VRow>
             <VCol cols="12">
 
-                <VCard>
+                <VCard variant="outlined">
 
                     <MCDataTable ref="mcdatatableUserRole" :headers="userHeaders" :api-url="userRoleApiUrl"
                         @edit-item="userEdit">

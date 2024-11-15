@@ -82,7 +82,9 @@ const gateDataAdded = (gateDataId: number) => {
         <VRow id="apex-chart-wrapper">
 
             <VCol cols="12" md="4">
-                <VCard title="Statistics">
+                <VCard title="کاربران فعال / سال" variant="flat">
+                    <VDivider />
+
                     <VCardText>
                         <ApexChartStatistics />
                     </VCardText>
@@ -90,10 +92,10 @@ const gateDataAdded = (gateDataId: number) => {
             </VCol>
             <!-- 👉  Area chart -->
             <VCol cols="12" md="8">
-                <VCard>
+                <VCard variant="flat">
+
                     <VCardItem class="d-flex flex-wrap justify-space-between gap-4">
-                        <VCardTitle>Area Chart</VCardTitle>
-                        <VCardSubtitle>Commercial networks</VCardSubtitle>
+                        <VCardTitle>کاربران فعال / سال / ماه</VCardTitle>
 
                         <template #append>
                             <div class="date-picker-wrapper">
@@ -103,6 +105,7 @@ const gateDataAdded = (gateDataId: number) => {
                             </div>
                         </template>
                     </VCardItem>
+                    <VDivider />
 
                     <VCardText>
                         <ApexChartAreaChart />
@@ -114,9 +117,7 @@ const gateDataAdded = (gateDataId: number) => {
         <!-- 👉 Statistics -->
         <VRow>
             <VCol cols="12">
-                <VCard>
-
-                    <VDivider />
+                <VCard variant="outlined">
 
                     <MCDataTable ref="mcdatatable" :headers="gateHeaders" :api-url="gateApiUrl" @edit-item="gateEdit">
 
@@ -144,3 +145,10 @@ const gateDataAdded = (gateDataId: number) => {
             :gate-api-url="gateApiUrl" />
     </section>
 </template>
+
+<style lang="scss">
+.apexcharts-canvas {
+    direction: rtl;
+    /* کنترل راست به چپ */
+}
+</style>
