@@ -145,10 +145,3 @@ const gateDataAdded = (gateDataId: number) => {
             :gate-api-url="gateApiUrl" />
     </section>
 </template>
-
-<style lang="scss">
-.apexcharts-canvas {
-    direction: rtl;
-    /* کنترل راست به چپ */
-}
-</style>
