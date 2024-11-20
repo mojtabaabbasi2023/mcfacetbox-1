@@ -1,12 +1,12 @@
-import { baseDataTableModel, ISimpleTree } from "./baseModels";
+import { baseDataTableModel, ISimpleDTO } from "./baseModels";
 
 
 
 export interface IRole extends baseDataTableModel {
     id: number;
     title: string;
-    permissions: ISimpleTree[];
-    projects: ISimpleTree[];
+    permissions: ISimpleDTO[];
+    projects: ISimpleDTO[];
     createDate: string;
     isActive: boolean;
     description: string;
@@ -16,8 +16,8 @@ export class RoleModel implements IRole {
     [x: string]: any;
     id: number = 0;
     title: string = "";
-    permissions: ISimpleTree[] = [];
-    projects: ISimpleTree[] = [];
+    permissions: ISimpleDTO[] = [];
+    projects: ISimpleDTO[] = [];
     createDate: string = "";
     isActive: boolean = false;
     description: string = "";

@@ -6,7 +6,7 @@ export interface ISimpleDTO {
 export interface ISimpleTree extends Record<string, any> {
     id: number;
     title: string;
-    children: ISimpleTree[]
+    children?: ISimpleTree[]
 }
 
 

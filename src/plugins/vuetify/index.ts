@@ -14,6 +14,7 @@ import { staticPrimaryColor, staticPrimaryDarkenColor, themes } from './theme'
 // Styles
 import { cookieRef } from '@/@layouts/stores/config'
 import '@core/scss/template/libs/vuetify/index.scss'
+import 'vuetify/lib/styles/main.sass'
 import 'vuetify/styles'
 
 

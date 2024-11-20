@@ -3,11 +3,11 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue';
 import { serviceAdd, serviceUpdate } from '@/services/genericServices';
-import { ISimpleTree } from '@/types/baseModels';
+import { ISimpleDTO, ISimpleTree } from '@/types/baseModels';
 import { IRole, RoleModel } from '@/types/rolePermission';
 import { useToast } from "vue-toastification";
 import type { VForm } from 'vuetify/components/VForm';
-import { VTreeview } from 'vuetify/lib/labs/components.mjs';
+import { VTreeview } from 'vuetify/labs/VTreeview';
 
 const { t } = useI18n({ useScope: 'global' })
 const toast = useToast();
@@ -30,10 +30,11 @@ const emit = defineEmits<Emit>()
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const isloading = ref(false)
+const treeprojects = ref<ISimpleDTO[]>([])
 const roleData = reactive<IRole>(new RoleModel())
-const projectList = reactive<ISimpleTree[]>([{ id: 1, title: 'موسوعه یک', children: [{ id: 2, title: 'درخت یک', children: [] }, { id: 3, title: 'درخت دو', children: [] }] }, { id: 4, title: 'موسوعه دو', children: [{ id: 5, title: 'درخت سه', children: [] }, { id: 6, title: 'درخت چهار', children: [] }] }])
-const permissionList = reactive<ISimpleTree[]>([{ id: 1, title: 'ماژول درخت', children: [{ id: 2, title: 'افزودن نود', children: [] }, { id: 3, title: 'جابجایی نود', children: [] }] }, { id: 4, title: 'فیش نگار', children: [{ id: 5, title: 'افزودن فیش', children: [] }, { id: 6, title: 'اتصال فیش', children: [] }] }])
-
+const projectList = reactive<ISimpleTree[]>([{ id: 1, title: 'موسوعه یک', children: [{ id: 2, title: 'درخت یک' }, { id: 3, title: 'درخت دو' }] }, { id: 4, title: 'موسوعه دو', children: [{ id: 5, title: 'درخت سه' }, { id: 6, title: 'درخت چهار', children: [{ id: 7, title: 'درخت پنج' }, { id: 8, title: 'درخت شش' }] }] }])
+const permissionList = reactive<ISimpleTree[]>([{ id: 1, title: 'ماژول درخت', children: [{ id: 2, title: 'افزودن نود' }, { id: 3, title: 'جابجایی نود' }] }, { id: 4, title: 'فیش نگار', children: [{ id: 5, title: 'افزودن فیش' }, { id: 6, title: 'اتصال فیش' }] }])
+// const selectionType = ref<SelectStrategyProp>('classic')
 // const selectedRoles = ref([5, 1])
 
 // watch(() => props.isDialogVisible, (newvalue, oldvalue) => {
@@ -89,9 +90,9 @@ const onSubmit = () => {
         }
     })
 }
-// watch(userData.role, (newdata, olddata) => {
-//     console.log('watchuserdata', newdata, olddata);
-// })
+watch(roleData, (newdata, olddata) => {
+    console.log('watchroledata', newdata, olddata);
+})
 const onReset = () => {
     roleData.id = 0;
     emit('update:isDialogVisible', false)
@@ -115,10 +116,8 @@ defineExpose({ updateUser })
         <!-- <PerfectScrollbar :options="{ wheelPropagation: false }"> -->
         <VCard flat :title="$t('role.addedit')" :subtitle="$t('role.addeditsubtitle')">
             <VCardText>
-                <!-- 👉 Form -->
                 <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
                     <VRow>
-                        <!-- 👉 Gate Title-->
                         <VCol cols="12">
                             <AppTextField v-model="roleData.title"
                                 :rules="[requiredValidator(roleData.title, $t('validatorrequired'))]"
@@ -128,12 +127,20 @@ defineExpose({ updateUser })
                         <VCol cols="12">
                             <VRow>
                                 <VCol cols="6" sm="6">
-                                    <VTreeview :items="projectList" item-value="id" item-title="title"
-                                        select-strategy="leaf" return-object selectable></VTreeview>
+                                    <VTreeview :items="projectList" v-model="roleData.projects"
+                                        expand-icon="mdi-menu-left" item-value="id" item-title="title"
+                                        select-strategy='classic' height="300px" lines="one" return-object selectable>
+
+                                    </VTreeview>
                                 </VCol>
                                 <VCol cols="6" sm="6">
-                                    <VTreeview :items="permissionList" item-value="id" item-title="title"
-                                        select-strategy="classic" return-object selectable></VTreeview>
+                                    <VTreeview :items="permissionList" height="300px" v-model="roleData.permissions"
+                                        item-value="id" item-title="title" expand-icon="mdi-menu-left"
+                                        select-strategy="classic" return-object selectable>
+                                        <template v-slot:header="{ props }">
+                                            <span>jsrs </span>
+                                        </template>
+                                    </VTreeview>
                                 </VCol>
                             </VRow>
 

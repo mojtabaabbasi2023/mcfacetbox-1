@@ -98,6 +98,9 @@ const sources: BundleScriptConfig = {
         "user-outline",
         "file-tree-outline",
         "text-box-search-outline",
+        "menu-down",
+        "menu-right",
+        "menu-left"
       ],
     },
     {
