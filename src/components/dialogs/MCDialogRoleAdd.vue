@@ -137,8 +137,14 @@ defineExpose({ updateRole })
                                 <VCol cols="6" sm="6" style="overflow-x: auto;">
                                     <VTreeview :items="projectList" v-model:selected="selectedProjects"
                                         expand-icon="mdi-menu-left" item-value="id" item-title="title"
-                                        select-strategy='classic' height="300px" width="100%" selectable lines="one">
-
+                                        select-strategy='classic' height="300px" lines="one" selectable>
+                                        <template v-slot:title="{ item }">
+                                            <VTooltip :text="item.title">
+                                                <template v-slot:activator="{ props }">
+                                                    <span v-bind="props"> {{ item.title }}</span>
+                                                </template>
+                                            </VTooltip>
+                                        </template>
                                     </VTreeview>
                                 </VCol>
                                 <VCol cols="6" sm="6">
@@ -147,6 +153,13 @@ defineExpose({ updateRole })
                                         expand-icon="mdi-menu-left" select-strategy="classic" selectable>
                                         <template v-slot:header="{ props }">
                                             <span>jsrs </span>
+                                        </template>
+                                        <template v-slot:title="{ item }">
+                                            <VTooltip :text="item.title">
+                                                <template v-slot:activator="{ props }">
+                                                    <span v-bind="props"> {{ item.title }}</span>
+                                                </template>
+                                            </VTooltip>
                                         </template>
                                     </VTreeview>
                                 </VCol>
