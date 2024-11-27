@@ -28,13 +28,14 @@ const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const isloading = ref(false)
 const projectData = reactive<IProject>(new ProjectModel())
+const treeList = reactive([{ id: 1, title: 'پژوهشگر' }, { id: 2, title: 'مدیر کل' }, { id: 3, title: 'ناظر' }, { id: 4, title: 'ارزیاب یک' }, { id: 5, title: 'ارزیاب دو' }, { id: 6, title: 'مدیر نظارت' }, { id: 7, title: 'خواندنی' }])
+const selectedTrees = ref<Number[]>([])
+
 // const selectedRoles = ref([5, 1])
 
-// watch(() => props.isDialogVisible, (newvalue, oldvalue) => {
-//     if (!newvalue) {
-//         userData.id = 0;
-//     }
-// })
+watch(selectedTrees, (newvalue, oldvalue) => {
+    projectData.trees = treeList.filter((item) => selectedTrees.value.includes(item.id))
+})
 async function projectAdd() {
 
     const { serviceData, serviceError } = await serviceAdd<IProject>(projectData, props.apiUrl == undefined ? '' : props.apiUrl)
@@ -54,8 +55,6 @@ async function projectAdd() {
 async function projectEdit() {
 
     const { serviceData, serviceError } = await serviceUpdate<IProject>(projectData, projectData.id, props.apiUrl == undefined ? '' : props.apiUrl)
-    console.log('gateedit', serviceData.value, serviceError.value);
-
     if (serviceData.value) {
         toast.success(t("alert.dataActionSuccess"));
         emit('projectDataUpdated', serviceData.value)
@@ -85,6 +84,7 @@ const onSubmit = () => {
 //     console.log('watchuserdata', newdata, olddata);
 // })
 const onReset = () => {
+    isloading.value = false
     projectData.id = 0;
     emit('update:isDialogVisible', false)
     refForm.value?.reset()
@@ -93,6 +93,8 @@ const onReset = () => {
 
 const updateProject = (projectDataItem: IProject) => {
     objectMap(projectData, useCloned(projectDataItem))
+    selectedTrees.value = projectData.trees.map(item => item.id)
+
 }
 
 
@@ -115,10 +117,23 @@ defineExpose({ updateProject })
                         </VCol>
                         <VCol cols="12">
                             <VRow>
+                                <!-- 👉 Name -->
+                                <VCol sm="10" cols="12">
+                                    <AppAutocomplete :items="treeList" v-model="selectedTrees" item-title="title"
+                                        item-value="id" :label="$t('role.treeselect')"
+                                        :rules="[requiredValidator(projectData.trees, $t('validatorrequired'))]" chips
+                                        closable-chips multiple>
+
+                                    </AppAutocomplete>
+                                    <!-- :rules="[requiredValidator(userData.role, $t('validatorrequired'))]"  -->
+
+                                </VCol>
+
                                 <VCol sm="2" cols="12" align-self="end">
                                     <VSwitch v-model="projectData.isActive" :label="$t('active')" />
                                 </VCol>
                             </VRow>
+
                         </VCol>
                         <VCol cols="12">
                             <AppTextarea v-model="projectData.description" :label="$t('description')"

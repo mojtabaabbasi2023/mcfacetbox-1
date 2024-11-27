@@ -16,8 +16,7 @@ export const db: DB = {
             selectable: false,
             disabled: true,
             title: "مدیر",
-
-
+            trees: []
         },
         {
             id: 2,
@@ -29,8 +28,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "کاربر",
-
-
+            trees: []
         },
         {
             id: 3,
@@ -42,8 +40,7 @@ export const db: DB = {
             selectable: true,
             disabled: true,
             title: "مهمان",
-
-
+            trees: []
         },
         {
             id: 4,
@@ -55,8 +52,7 @@ export const db: DB = {
             selectable: false,
             disabled: false,
             title: "مدیر سیستم",
-
-
+            trees: []
         },
         {
             id: 5,
@@ -68,8 +64,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "توسعه‌دهنده",
-
-
+            trees: []
         }
         ,
         {
@@ -82,8 +77,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "طراح",
-
-
+            trees: []
         },
         {
             id: 7,
@@ -95,8 +89,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "تحلیل‌گر",
-
-
+            trees: []
         },
         {
             id: 8,
@@ -108,8 +101,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "بازاریاب",
-
-
+            trees: []
         },
         {
             id: 9,
@@ -121,8 +113,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "پشتیبان",
-
-
+            trees: []
         },
         {
             id: 10,
@@ -134,8 +125,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "مدیر پروژه",
-
-
+            trees: []
         },
         {
             id: 11,
@@ -147,8 +137,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "حسابدار",
-
-
+            trees: []
         },
         {
             id: 12,
@@ -160,8 +149,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "مسئول منابع انسانی",
-
-
+            trees: []
         },
         {
             id: 13,
@@ -173,8 +161,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "مدیر محصول",
-
-
+            trees: []
         },
         {
             id: 14,
@@ -186,8 +173,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "مدیر فروش",
-
-
+            trees: []
         },
         {
             id: 15,
@@ -199,8 +185,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "مدیر بازاریابی",
-
-
+            trees: []
         },
         {
             id: 16,
@@ -212,8 +197,7 @@ export const db: DB = {
             selectable: false,
             disabled: false,
             title: "مدیر فناوری اطلاعات",
-
-
+            trees: []
         },
         {
             id: 17,
@@ -225,8 +209,7 @@ export const db: DB = {
             selectable: true,
             disabled: true,
             title: "مدیر امنیت",
-
-
+            trees: []
         },
         {
             id: 18,
@@ -238,8 +221,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "مدیر شبکه",
-
-
+            trees: []
         },
         {
             id: 19,
@@ -251,8 +233,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "تحلیل‌گر داده",
-
-
+            trees: []
         },
         {
             id: 20,
@@ -264,8 +245,7 @@ export const db: DB = {
             selectable: true,
             disabled: false,
             title: "سرپرست",
-
-
+            trees: []
         }
     ]
 }

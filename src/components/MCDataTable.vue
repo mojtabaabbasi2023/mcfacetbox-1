@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { serviceDelete } from '@/services/genericServices';
-import { baseDataTableModel } from '@/types/baseDataTable';
+import { baseDataTableModel } from '@/types/baseModels';
 import Swal from 'sweetalert2';
 import { useToast } from "vue-toastification";
 import { VDataTableServer } from 'vuetify/lib/components/index.mjs';
@@ -137,7 +137,7 @@ const deleteAction = async (item: baseDataTableModel, index: number) => {
 
 }
 const updateHighlightedItem = (index: number) => {
-    highlightedItemIndex.value = index; // به‌روزرسانی ایندکس هایلایت شده  
+    highlightedItemIndex.value = index; // به‌روزرسانی ایندکس هایلایت شده
 };
 defineExpose({ refreshData })
 
@@ -204,7 +204,7 @@ defineExpose({ refreshData })
                             <IconBtn v-show="props.activeEditAction" @click="updateAction(item)">
                                 <VIcon icon="tabler-eye" />
                             </IconBtn>
-                            <slot name="action" :item="item"></slot>
+                            <slot name="action" :value="item"></slot>
                         </div>
                         <span v-else>{{ item[header.key] }}</span>
 
@@ -228,8 +228,7 @@ defineExpose({ refreshData })
     padding: 0;
 }
 
-.v-data-table__tr:has(td:first-child input[type='checkbox']:checked) {
+.v-data-table__tr:has(td:first-child input[type="checkbox"]:checked) {
     background-color: #f2f2f2;
-
 }
 </style>

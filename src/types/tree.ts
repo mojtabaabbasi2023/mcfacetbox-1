@@ -2,20 +2,20 @@ import { baseDataTableModel, ISimpleDTO } from "./baseModels";
 
 
 
-export interface IProject extends baseDataTableModel {
+export interface ITreeTitle extends baseDataTableModel {
     id: number;
     title: string;
-    trees: ISimpleDTO[];
+    book: ISimpleDTO[];
     createDate: string;
     isActive: boolean;
     description: string;
 }
 
-export class ProjectModel implements IProject {
+export class TreeTitle implements ITreeTitle {
     [x: string]: any;
     id: number = 0;
     title: string = "";
-    trees: ISimpleDTO[] = [];
+    book: ISimpleDTO[] = [];
     createDate: string = "";
     isActive: boolean = false;
     description: string = "";

@@ -81,6 +81,7 @@ const onSubmit = () => {
 }
 
 const onReset = () => {
+    isloading.value = false
     gateData.value.id = 0;
     emit('update:isDialogVisible', false)
     refForm.value?.reset()

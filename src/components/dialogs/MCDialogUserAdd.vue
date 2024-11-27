@@ -54,8 +54,6 @@ async function userAdd() {
 async function userEdit() {
 
     const { serviceData, serviceError } = await serviceUpdate<IUser>(userData, userData.id, props.apiUrl == undefined ? '' : props.apiUrl)
-    console.log('gateedit', serviceData.value, serviceError.value);
-
     if (serviceData.value) {
         toast.success(t("alert.dataActionSuccess"));
         emit('userDataUpdated', serviceData.value)
@@ -72,7 +70,6 @@ const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
             isloading.value = true
-            isloading.value = false
             if (userData.id > 0) {
                 userEdit()
             }
@@ -88,6 +85,7 @@ const onSubmit = () => {
 // })
 const onReset = () => {
     userData.id = 0;
+    isloading.value = false
     emit('update:isDialogVisible', false)
     refForm.value?.reset()
     refForm.value?.resetValidation()

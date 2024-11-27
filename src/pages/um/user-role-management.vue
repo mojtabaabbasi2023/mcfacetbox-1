@@ -114,7 +114,7 @@ const roleDataAdded = (gateDataId: number) => {
                         <template #item.role="{ value }">
                             <div class="d-flex align-center gap-x-4">
 
-                                {{ value.role.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
+                                {{ value.role && value.role.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
                             </div>
                         </template>
                         <template #item.isActive="{ value }">
@@ -149,7 +149,8 @@ const roleDataAdded = (gateDataId: number) => {
                         <template #item.permissions="{ value }">
                             <div class="d-flex align-center gap-x-4">
 
-                                {{ value.permissions.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
+                                {{ value.permissions && value.permissions.map((item: ISimpleDTO) =>
+                                    `${item.title}`).join(' ,') }}
                             </div>
                             <!-- {{ value + "asdasdasd" }} -->
                         </template>

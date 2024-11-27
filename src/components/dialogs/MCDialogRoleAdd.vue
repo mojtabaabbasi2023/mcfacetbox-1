@@ -82,7 +82,6 @@ const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
             isloading.value = true
-            isloading.value = false
             if (roleData.id > 0) {
                 roleEdit()
             }
@@ -95,6 +94,7 @@ const onSubmit = () => {
 
 function onReset() {
     roleData.id = 0;
+    isloading.value = false
     roleData.permissions.splice(0);
     roleData.projects.splice(0);
     selectedPermissions.value.splice(0)

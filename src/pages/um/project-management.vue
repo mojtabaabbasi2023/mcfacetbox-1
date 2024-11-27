@@ -1,8 +1,9 @@
 <script setup lang="ts">
-//!SECTION این فرم برای مدیریت پنل ها در این سامانه میباشد
+//!SECTION این فرم برای مدیریت پروژه ها در این سامانه میباشد
 import MCDataTable from '@/components/MCDataTable.vue';
+import { ISimpleDTO } from '@/types/baseModels';
 import { useToast } from "vue-toastification";
-import { VCol, VDialog } from 'vuetify/lib/components/index.mjs';
+import { VDialog } from 'vuetify/lib/components/index.mjs';
 
 
 const { t } = useI18n({ useScope: 'global' })
@@ -19,6 +20,7 @@ const toast = useToast();
 // GateHeaders
 const projectHeaders = [
     { title: t('project.title'), key: 'title' },
+    { title: t('role.trees'), key: 'trees' },
     { title: t('createDate'), key: 'createDate' },
     { title: t('description'), key: 'description' },
     { title: t('status'), key: 'isActive', sortable: false },
@@ -34,7 +36,7 @@ const treeHeaders = [
 
 const projectEdit = (dataItem: Record<string, any>) => {
     isAddNewProjectDialogVisible.value = true
-    dialogProject.value.updateUser({ ...dataItem })
+    dialogProject.value.updateProject({ ...dataItem })
 }
 
 const treeEdit = (dataItem: Record<string, any>) => {
@@ -47,6 +49,9 @@ const projectDataAdded = (projectDataId: number) => {
 }
 const treeDataAdded = (treeDataId: number) => {
     mcdatatableTree.value.refreshData()
+}
+
+const selectBook = (treeid: number) => {
 }
 
 </script>
@@ -65,6 +70,12 @@ const treeDataAdded = (treeDataId: number) => {
                     <VDivider />
                     <MCDataTable ref="mcdatatableProject" :headers="projectHeaders" :api-url="projectApiUrl"
                         @edit-item="projectEdit">
+                        <template #item.trees="{ value }">
+                            <div class="d-flex align-center gap-x-4">
+
+                                {{ value.trees && value.trees.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
+                            </div>
+                        </template>
                         <template #item.isActive="{ value }">
                             <VChip :color="resolveActiveColor(value.isActive)"
                                 :class="`text-${resolveActiveColor(value.isActive)}`" size="small"
@@ -78,9 +89,9 @@ const treeDataAdded = (treeDataId: number) => {
         </VRow>
 
         <VRow no-gutters justify="space-between" align="center" class="mt-6">
-            <div class="page-title"> {{ $t('role.pageTitle') }}</div>
+            <div class="page-title"> {{ $t('tree.pageTitle') }}</div>
             <VBtn @click="isAddNewTreeDialogVisible = true" prepend-icon="tabler-plus">
-                {{ $t('role.add') }}
+                {{ $t('tree.add') }}
             </VBtn>
         </VRow>
         <VRow>
@@ -90,6 +101,11 @@ const treeDataAdded = (treeDataId: number) => {
 
                     <MCDataTable ref="mcdatatableTree" :headers="treeHeaders" :api-url="treeApiUrl"
                         @edit-item="treeEdit">
+                        <template #action="{ value }">
+                            <IconBtn @click="selectBook(value.id)">
+                                <VIcon icon="Books" />
+                            </IconBtn>
+                        </template>
                         <template #item.isActive="{ value }">
                             <VChip :color="resolveActiveColor(value.isActive)"
                                 :class="`text-${resolveActiveColor(value.isActive)}`" size="small"
@@ -103,7 +119,7 @@ const treeDataAdded = (treeDataId: number) => {
         </VRow>
         <!-- 👉 Add New User -->
         <MCDialogProjectAdd ref="dialogProject" v-model:is-dialog-visible="isAddNewProjectDialogVisible"
-            @user-data-added="projectDataAdded" :api-url="projectApiUrl" />
+            @project-data-added="projectDataAdded" :api-url="projectApiUrl" />
         <MCDialogGateAdd ref="dialogTree" v-model:is-dialog-visible="isAddNewTreeDialogVisible"
             @role-data-added="treeDataAdded" :api-url="treeApiUrl" />
     </section>
