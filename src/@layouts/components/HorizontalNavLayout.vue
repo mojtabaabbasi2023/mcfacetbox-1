@@ -20,12 +20,9 @@ const configStore = useLayoutConfigStore()
       <!-- 👉 Navbar -->
       <div class="layout-navbar">
         <div class="navbar-content-container">
-          <slot name="navbar" />
-        </div>
-      </div>
-      <!-- 👉 Navigation -->
-      <div class="layout-horizontal-nav">
-        <!-- <RouterLink to="/" class="app-logo d-flex align-center gap-x-3">
+          <!-- 👉 Navigation -->
+          <div class="layout-horizontal-nav">
+            <!-- <RouterLink to="/" class="app-logo d-flex align-center gap-x-3">
           <VNodeRenderer :nodes="appLogo" />
 
           <h1 class="app-title font-weight-bold leading-normal text-xl text-capitalize">
@@ -33,14 +30,18 @@ const configStore = useLayoutConfigStore()
           </h1>
         </RouterLink> -->
 
-        <div class="horizontal-nav-content-container">
-          <HorizontalNav :nav-items="navItems" />
-        </div>
-        <!-- <VSpacer /> -->
-        <!-- <div class="navbar-content-container">
+            <div class="horizontal-nav-content-container">
+              <HorizontalNav :nav-items="navItems" />
+            </div>
+            <!-- <VSpacer /> -->
+            <!-- <div class="navbar-content-container">
           <slot name="navbar" />
         </div> -->
+          </div>
+          <slot name="navbar" />
+        </div>
       </div>
+
     </div>
 
     <main class="layout-page-content">

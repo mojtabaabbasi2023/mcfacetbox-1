@@ -1,6 +1,9 @@
-.page-title {
-    font-weight: bold;
-    font-size: 1.5em;
+.layout-navbar {
+    .navbar-content-container {
+        .app-logo {
+            order: -1;
+        }
+    }
 }
 
 div {
@@ -19,13 +22,9 @@ div {
     }
 }
 
-//rs main
-.main {
-    .splitpanes {
-        .splitpanes__splitter {
-            border: none !important;
-        }
-    }
+.page-title {
+    font-weight: bold;
+    font-size: 1.5em;
 }
 
 .v-treeview {
@@ -34,6 +33,15 @@ div {
             .v-list-item__prepend {
                 padding-right: 30px;
             }
+        }
+    }
+}
+
+//rs main
+.main {
+    .splitpanes {
+        .splitpanes__splitter {
+            border: none !important;
         }
     }
 }
