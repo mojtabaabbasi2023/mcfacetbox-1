@@ -199,13 +199,3 @@ defineExpose({ updateRole })
     </VDialog>
 
 </template>
-<!-- <style lang="css">
-.v-treeview-node__label {
-    overflow: initial;
-    text-overflow: initial;
-}
-
-.v-navigation-drawer__content {
-    overflow-x: auto;
-}
-</style> -->

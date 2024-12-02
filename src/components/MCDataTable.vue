@@ -132,6 +132,9 @@ const deleteAction = async (item: baseDataTableModel, index: number) => {
             }
             selectedItem.value.splice(index, 1)
         }
+        else {
+            selectedItem.value.splice(index, 1)
+        }
     })
     return
 
@@ -202,7 +205,7 @@ defineExpose({ refreshData })
                                 </VProgressCircular>
                             </IconBtn>
                             <IconBtn v-show="props.activeEditAction" @click="updateAction(item)">
-                                <VIcon icon="tabler-eye" />
+                                <VIcon icon="tabler-pencil" />
                             </IconBtn>
                             <slot name="action" :value="item"></slot>
                         </div>

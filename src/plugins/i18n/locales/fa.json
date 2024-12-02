@@ -56,7 +56,8 @@
         "addedit": "افزودن / ویرایش درخت",
         "delete": "حذف درخت",
         "management": "مدیریت درخت ها",
-        "addeditsubtitle": "اطلاعات مورد نظر برای درخت را وارد نمایید"
+        "addeditsubtitle": "اطلاعات مورد نظر برای درخت را وارد نمایید",
+        "autorizedbook": "کتب مجاز"
     },
     "createDate": "تاریخ ایجاد",
     "expireDate": "تاریخ انقضاء",

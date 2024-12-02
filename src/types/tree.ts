@@ -11,7 +11,7 @@ export interface ITreeTitle extends baseDataTableModel {
     description: string;
 }
 
-export class TreeTitle implements ITreeTitle {
+export class TreeTitleModel implements ITreeTitle {
     [x: string]: any;
     id: number = 0;
     title: string = "";
@@ -23,7 +23,5 @@ export class TreeTitle implements ITreeTitle {
     isLoading: boolean = false;
     selectable: boolean = false;
     disabled: boolean = false;
-
-
 
 }

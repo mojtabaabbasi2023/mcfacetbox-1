@@ -8,7 +8,7 @@ const menu = ref(false);
 
 <template>
     <div class="main">
-        <Splitpanes style="height: calc(100vh - 157px);" :rtl="true" class="default-theme">
+        <Splitpanes style="block-size: calc(100vh - 157px);" :rtl="true" class="default-theme">
             <Pane size="30">
                 <MCWindow title="درخت خانواده" @open="menu = true" />
             </Pane>
@@ -16,7 +16,12 @@ const menu = ref(false);
             <Pane>
                 <Splitpanes horizontal :rtl="true" class="default-theme">
                     <Pane>
-                        <MCWindow title="گردآوری اطلاعات" @open="menu = true" />
+                        <MCWindow title="گردآوری اطلاعات" @open="menu = true">
+                            <template #default>
+                                //TODO - تست کامپوننت تب بار، این کد موقتی است
+                                <MCSearchResultTabBox></MCSearchResultTabBox>
+                            </template>
+                        </MCWindow>
                     </Pane>
 
                     <Pane>

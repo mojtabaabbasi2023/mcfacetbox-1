@@ -19,6 +19,8 @@ import { handlerPagesHelpCenter } from '@db/pages/help-center/index'
 import { handlerPagesProfile } from '@db/pages/profile/index'
 import { handlerAppsgates } from './handlers/apps/gates'
 import { handlerAppsProjects } from './handlers/apps/projects'
+import { handlerAppsTrees } from './handlers/apps/trees'
+
 import { handlerAppsRoles } from './handlers/apps/roles'
 
 
@@ -42,7 +44,9 @@ const worker = setupWorker(
     ...handlerDashboard,
     ...handlerAppsgates,
     ...handlerAppsRoles,
-    ...handlerAppsProjects
+    ...handlerAppsProjects,
+    ...handlerAppsTrees
+
 )
 
 export default function () {

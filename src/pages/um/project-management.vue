@@ -14,7 +14,7 @@ const dialogTree = ref(VDialog)
 const isAddNewProjectDialogVisible = ref(false)
 const isAddNewTreeDialogVisible = ref(false)
 const projectApiUrl = '/apps/Projects'
-const treeApiUrl = '/apps/Tree'
+const treeApiUrl = '/apps/Trees'
 
 const toast = useToast();
 // GateHeaders
@@ -28,10 +28,12 @@ const projectHeaders = [
 ]
 const treeHeaders = [
     { title: t('tree.title'), key: 'title' },
+    { title: t('tree.autorizedbook'), key: 'book' },
     { title: t('description'), key: 'description' },
     { title: t('createDate'), key: 'createDate' },
     { title: t('status'), key: 'isActive', sortable: false },
     { title: t('actions'), key: 'actions', sortable: false },
+
 ]
 
 const projectEdit = (dataItem: Record<string, any>) => {
@@ -41,13 +43,13 @@ const projectEdit = (dataItem: Record<string, any>) => {
 
 const treeEdit = (dataItem: Record<string, any>) => {
     isAddNewTreeDialogVisible.value = true
-    dialogTree.value.updateUser({ ...dataItem })
+    dialogTree.value.updateTreeTitle({ ...dataItem })
 }
 
 const projectDataAdded = (projectDataId: number) => {
     mcdatatableProject.value.refreshData()
 }
-const treeDataAdded = (treeDataId: number) => {
+const treeTitleDataAdded = (treeDataId: number) => {
     mcdatatableTree.value.refreshData()
 }
 
@@ -101,9 +103,15 @@ const selectBook = (treeid: number) => {
 
                     <MCDataTable ref="mcdatatableTree" :headers="treeHeaders" :api-url="treeApiUrl"
                         @edit-item="treeEdit">
+                        <template #item.book="{ value }">
+                            <div class="d-flex align-center gap-x-4">
+
+                                {{ value.book && value.book.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
+                            </div>
+                        </template>
                         <template #action="{ value }">
                             <IconBtn @click="selectBook(value.id)">
-                                <VIcon icon="Books" />
+                                <VIcon icon="tabler-books" />
                             </IconBtn>
                         </template>
                         <template #item.isActive="{ value }">
@@ -120,7 +128,7 @@ const selectBook = (treeid: number) => {
         <!-- 👉 Add New User -->
         <MCDialogProjectAdd ref="dialogProject" v-model:is-dialog-visible="isAddNewProjectDialogVisible"
             @project-data-added="projectDataAdded" :api-url="projectApiUrl" />
-        <MCDialogGateAdd ref="dialogTree" v-model:is-dialog-visible="isAddNewTreeDialogVisible"
-            @role-data-added="treeDataAdded" :api-url="treeApiUrl" />
+        <MCDialogTreeAdd ref="dialogTree" v-model:is-dialog-visible="isAddNewTreeDialogVisible"
+            @tree-title-data-added="treeTitleDataAdded" :api-url="treeApiUrl" />
     </section>
 </template>
