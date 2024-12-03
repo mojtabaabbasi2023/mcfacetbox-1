@@ -1,4 +1,4 @@
-import { ISimpleDTO } from "./baseModels";
+import { ISimpleDTO, ISimpleSelectableDTO } from "./baseModels";
 
 
 
@@ -14,7 +14,7 @@ export interface ISearchResult {
 export interface ISearchResultTabBoxItem {
     id: number;
     title: string;
-    content: ISimpleDTO[];
+    content: ISimpleSelectableDTO[];
 
 }
 export interface ISearchResultTabBox {

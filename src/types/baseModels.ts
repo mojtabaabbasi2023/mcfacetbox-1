@@ -3,6 +3,14 @@ export interface ISimpleDTO {
     title: string
 }
 
+export interface ISimpleSelectableDTO {
+    id: number;
+    text: string,
+    selectable?: boolean,
+    selected?: boolean
+
+}
+
 export interface ISimpleTree extends Record<string, any> {
     id: number;
     title: string;
