@@ -10,6 +10,8 @@ const selectedProjects = ref<Number[]>([])
 // watch(selectedProjects, (newvalue, oldvalue) => {
 //     roleData.projects = convertSimpleTreeToSimpleDtoArray(projectList).filter((item) => selectedProjects.value.includes(item.id))
 // })
+const infoSearch = ref();
+function getInfoSearch() { }
 </script>
 
 <template>
@@ -53,9 +55,9 @@ const selectedProjects = ref<Number[]>([])
                                 <VContainer>
                                     <VRow>
                                         <VCol cols="12" md="6" class="mx-auto">
-                                            <VTextField v-model="searchQuery" placeholder="جستجو"
+                                            <VTextField v-model="infoSearch" placeholder="جستجو"
                                                 append-inner-icon="mdi-magnify" class="search-bar"
-                                                @input="performSearch" @click:append-inner="onClick" single-line>
+                                                @click:append-inner="getInfoSearch" single-line>
                                             </VTextField>
                                         </VCol>
                                     </VRow>
