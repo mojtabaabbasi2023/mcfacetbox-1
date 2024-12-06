@@ -32,6 +32,16 @@ const menu = ref(false);
                     <Pane>
                         <MCWindow title="گردآوری اطلاعات" @open="menu = true">
                             <template #default>
+                                <VContainer>
+                                    <VRow>
+                                        <VCol cols="12" md="6" class="mx-auto">
+                                            <VTextField v-model="searchQuery" placeholder="جستجو"
+                                                append-inner-icon="mdi-magnify" class="search-bar"
+                                                @input="performSearch" @click:append-inner="onClick" single-line>
+                                            </VTextField>
+                                        </VCol>
+                                    </VRow>
+                                </VContainer>
                                 //TODO - تست کامپوننت تب بار، این کد موقتی است
                                 <MCSearchResultTabBox></MCSearchResultTabBox>
                             </template>
