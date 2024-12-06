@@ -1,9 +1,17 @@
 //rs main
 .main {
     .splitpanes {
-        .splitpanes__splitter {
-            border: none !important;
+        &.default-theme {
+            .splitpanes__splitter {
+                border: none !important;
+                background-color: transparent !important;
+            }
+
+            .splitpanes__pane {
+                background-color: transparent;
+            }
         }
+
     }
 
     .tool-bar {
