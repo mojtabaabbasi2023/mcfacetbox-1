@@ -10,7 +10,21 @@ const menu = ref(false);
     <div class="main">
         <Splitpanes style="block-size: calc(100vh - 157px);" :rtl="true" class="default-theme">
             <Pane size="30">
-                <MCWindow title="درخت خانواده" @open="menu = true" />
+                <MCWindow title="درخت خانواده" @open="menu = true" class="family-tree">
+                    <VRow no-gutters class="btn-box family-tree-toolbar">
+                        <IconBtn @click="" size="small">
+                            <VIcon icon="tabler-search" size="22" />
+                        </IconBtn>
+                        <IconBtn @click="" size="small">
+                            <VIcon icon="tabler-select" size="22" />
+                        </IconBtn>
+                        <IconBtn @click="" size="small">
+                            <VIcon icon="tabler-trash-x" size="22" />
+                        </IconBtn>
+
+                    </VRow>
+                </MCWindow>
+
             </Pane>
 
             <Pane>
