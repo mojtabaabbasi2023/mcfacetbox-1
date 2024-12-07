@@ -21,7 +21,7 @@ interface Emit {
         class="tool-bar"
       >
         <div class="title">
-          {{ title }}
+          {{ props.title }}
         </div>
         <div>
           <VRow
@@ -53,5 +53,3 @@ interface Emit {
     </div>
   </div>
 </template>
-
-<style lang="scss"></style>
