@@ -31,7 +31,7 @@ div {
     .v-list-item {
         &:not(.v-list-group__header) {
             .v-list-item__prepend {
-                padding-inline-end: 30px;
+                padding-inline-start: 30px;
             }
         }
     }
