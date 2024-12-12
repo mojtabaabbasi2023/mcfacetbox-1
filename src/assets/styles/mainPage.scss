@@ -25,7 +25,7 @@
 
   .content-box {
     padding: 4px;
-    background-color: #f8f7fa;
+    // background-color: #f8f7fa;
     block-size: 100%;
   }
 
@@ -123,6 +123,31 @@
         block-size: 40px;
         opacity: 1;
         transition: all ease-in 0.3s;
+      }
+    }
+  }
+
+  .mc-data-shelf {
+    .data-shelf-toolbar {
+      border-radius: 6px;
+
+      &:not(.v-theme--dark) {
+        background-color: rgba(var(--v-theme-primary), 0.1);
+      }
+
+      margin-block-start: 10px !important;
+
+      button {
+        border-radius: 5px;
+        margin: 0 5px;
+
+        // &:hover {
+        //   .v-icon {
+        //     color: white !important;
+        //   }
+
+        //   background-color: rgb(var(--v-theme-primary)) !important;
+        // }
       }
     }
   }
