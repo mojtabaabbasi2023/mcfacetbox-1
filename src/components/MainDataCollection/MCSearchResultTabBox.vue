@@ -4,7 +4,13 @@ import ContextMenu from '@imengyu/vue3-context-menu';
 import { isUndefined } from '@sindresorhus/is';
 
 const props = defineProps({
-  dataitems: { type: SearchResultTabBoxModel, default: new SearchResultTabBoxModel() },
+  dataitems: {
+    type: SearchResultTabBoxModel,
+    required: true,
+    validator: value => {
+      return value instanceof SearchResultTabBoxModel // Ensure the instance is correct
+    },
+  },
 })
 
 const tabdatamodel = ref()
