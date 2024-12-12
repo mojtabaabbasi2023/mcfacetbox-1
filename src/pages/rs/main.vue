@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import MCMainDataCollection from '@/components/MainDataCollection/MCMainDataCollection.vue';
-import MCMainDataShelf from '@/components/MainDataShelf/MCMainDataShelf.vue';
-import { Pane, Splitpanes } from 'splitpanes';
+import { Pane, Splitpanes } from 'splitpanes'
+import MCMainDataCollection from '@/components/MainDataCollection/MCMainDataCollection.vue'
+import MCMainDataShelf from '@/components/MainDataShelf/MCMainDataShelf.vue'
 
-import 'splitpanes/dist/splitpanes.css';
+import 'splitpanes/dist/splitpanes.css'
 
 const menu = ref(false)
 const isComponentSwitch = ref(true)
@@ -17,27 +17,44 @@ function changeWindowTitle(status: boolean) {
 
 <template>
   <div class="main">
-    <Splitpanes style="block-size: calc(100vh - 70px);" rtl class="default-theme">
+    <Splitpanes
+      style="block-size: calc(100vh - 70px);"
+      rtl
+      class="default-theme"
+    >
       <Pane size="30">
-        <MCWindow title="درخت خانواده" class="family-tree" @close="menu = true">
+        <MCWindow
+          title="درخت خانواده"
+          class="family-tree"
+          @close="menu = true"
+        >
           <MCMainTree />
         </MCWindow>
       </Pane>
 
       <Pane>
-        <Splitpanes horizontal rtl class="default-theme">
+        <Splitpanes
+          horizontal
+          rtl
+          class="default-theme"
+        >
           <Pane>
-            <MCWindow :title="changeWindowTitle(isComponentSwitch)" @move="isComponentSwitch = !isComponentSwitch">
+            <MCWindow
+              :title="changeWindowTitle(isComponentSwitch)"
+              @move="isComponentSwitch = !isComponentSwitch"
+            >
               <template #default>
                 <!-- <component :is="MCMainDataCollection" /> -->
-                <MCMainDataCollection style="block-size: 100;" />
+                <MCMainDataCollection />
               </template>
             </MCWindow>
           </Pane>
 
           <Pane>
-            <MCWindow :title="changeWindowTitle(isComponentSwitch === false)"
-              @move="isComponentSwitch = !isComponentSwitch">
+            <MCWindow
+              :title="changeWindowTitle(isComponentSwitch === false)"
+              @move="isComponentSwitch = !isComponentSwitch"
+            >
               <template #default>
                 <!-- <component :is="MCMainDataShelf" /> -->
               </template>

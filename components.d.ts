@@ -364,7 +364,6 @@ declare module 'vue' {
     ProductDescriptionEditor: typeof import('./src/@core/components/ProductDescriptionEditor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    S: typeof import('./src/components/s.vue')['default']
     ScrollToTop: typeof import('./src/@core/components/ScrollToTop.vue')['default']
     Shortcuts: typeof import('./src/@core/components/Shortcuts.vue')['default']
     TablePagination: typeof import('./src/@core/components/TablePagination.vue')['default']
@@ -374,6 +373,5 @@ declare module 'vue' {
     TimelineOutlined: typeof import('./src/views/demos/components/timeline/TimelineOutlined.vue')['default']
     TimelineWithIcons: typeof import('./src/views/demos/components/timeline/TimelineWithIcons.vue')['default']
     TiptapEditor: typeof import('./src/@core/components/TiptapEditor.vue')['default']
-    VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
 }

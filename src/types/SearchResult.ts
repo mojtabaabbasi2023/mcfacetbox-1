@@ -16,7 +16,7 @@ export interface ISearchResultTabBoxItem {
     content: ISimpleSelectableDTO[];
 
 }
-export interface ISearchResultTabBox {
+export interface ISearchResultTabBox extends Record<string, any> {
     id: number;
     content: ISearchResultTabBoxItem[]
 }
