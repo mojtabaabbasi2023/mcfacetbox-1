@@ -22,51 +22,35 @@ interface Emit {
 
 <template>
   <div>
-    <VRow
-      no-gutters
-      class="btn-box family-tree-toolbar"
-    >
-      <IconBtn
-        size="small"
-        @click=""
-      >
-        <VIcon
-          icon="tabler-search"
-          size="22"
-        />
+    <VRow no-gutters class="btn-box family-tree-toolbar">
+      <IconBtn size="small" @click="">
+        <VIcon icon="tabler-search" size="22" />
       </IconBtn>
-      <IconBtn
-        size="small"
-        @click=""
-      >
-        <VIcon
-          icon="tabler-select"
-          size="22"
-        />
+      <IconBtn size="small" @click="">
+        <VIcon icon="tabler-box-multiple" size="22" />
       </IconBtn>
-      <IconBtn
-        size="small"
-        @click=""
-      >
-        <VIcon
-          icon="tabler-trash-x"
-          size="22"
-        />
+      <IconBtn size="small" @click="">
+        <VIcon icon="tabler-select" size="22" />
       </IconBtn>
+      <IconBtn size="small" @click="">
+        <VIcon icon="tabler-trash-x" size="22" />
+      </IconBtn>
+      <IconBtn size="small" @click="">
+        <VIcon icon="tabler-plug-connected" size="22" />
+      </IconBtn>
+      <IconBtn size="small" @click="">
+        <VIcon icon="tabler-brand-openai" size="22" />
+      </IconBtn>
+      <IconBtn size="small" @click="">
+        <VIcon icon="tabler-eraser" size="22" />
+      </IconBtn>
+
+
     </VRow>
 
-    <VTreeview
-      v-model:selected="selectedProjects"
-      :items="projectList"
-      expand-icon="mdi-menu-left"
-      item-value="id"
-      item-title="title"
-      select-strategy="classic"
-      style="block-size: calc(100vh - 267px);"
-      lines="one"
-      selectable
-      density="compact"
-    >
+    <VTreeview v-model:selected="selectedProjects" :items="projectList" expand-icon="mdi-menu-left" item-value="id"
+      item-title="title" select-strategy="classic" style="block-size: calc(100vh - 267px);" lines="one" selectable
+      density="compact">
       <template #title="{ item }">
         <VTooltip :text="item.title">
           <template #activator="{ props }">
