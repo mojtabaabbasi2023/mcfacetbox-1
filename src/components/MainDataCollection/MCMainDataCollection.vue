@@ -84,7 +84,7 @@ function getInfoSearch() { }
             </VBtn>
           </template>
           <template v-slot:append>
-            <VBtn icon size="small" @click="getInfoSearch">
+            <VBtn icon size="small" @click="">
               <!-- <VIcon icon="tabler-brand-openai" size="22" /> -->
               ai
             </VBtn>
