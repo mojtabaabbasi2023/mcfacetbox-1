@@ -8,32 +8,32 @@
 
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-box-multiple" size="22" />
-        </VBtn icon>
+        </VBtn>
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-search" size="22" />
-        </VBtn icon>
+        </VBtn>
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-filter" size="22" />
-        </VBtn icon>
+        </VBtn>
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-list-tree" size="22" />
-        </VBtn icon>
+        </VBtn>
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-separator-vertical" size="22" />
-        </VBtn icon>
+        </VBtn>
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-trash-x" size="22" />
-        </VBtn icon>
+        </VBtn>
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-plug-connected-x" size="22" />
-        </VBtn icon>
+        </VBtn>
 
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-square-plus" size="22" />
-        </VBtn icon>
+        </VBtn>
         <VBtn icon size="small" @click="" variant='tonal'>
           <VIcon icon="tabler-eye-plus" size="22" />
-        </VBtn icon>
+        </VBtn>
       </VToolbar>
     </VCol>
   </VRow>

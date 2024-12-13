@@ -71,8 +71,25 @@ function getInfoSearch() { }
   <VContainer class="mc-data-container">
     <VRow>
       <VCol cols="12" md="6" class="mx-auto">
-        <VTextField v-model="infoSearch" placeholder="جستجو" append-inner-icon="mdi-magnify" class="search-bar"
-          single-line @click:append-inner="getInfoSearch" />
+        <VTextField v-model="infoSearch" placeholder="جستجو" class="search-bar" single-line>
+          <template v-slot:append-inner>
+            <VBtn icon size="small" @click="getInfoSearch" variant='text'>
+              <VIcon icon="tabler-search" size="22" />
+            </VBtn>
+            <VBtn icon size="small" @click="" variant='text'>
+              <VIcon icon="tabler-settings" size="22" />
+            </VBtn>
+            <VBtn icon size="small" @click="" variant='text'>
+              <VIcon icon="tabler-history" size="22" />
+            </VBtn>
+          </template>
+          <template v-slot:append>
+            <VBtn icon size="small" @click="getInfoSearch">
+              <!-- <VIcon icon="tabler-brand-openai" size="22" /> -->
+              ai
+            </VBtn>
+          </template>
+        </VTextField>
       </VCol>
     </VRow>
 

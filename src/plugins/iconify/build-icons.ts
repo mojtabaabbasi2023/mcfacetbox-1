@@ -100,7 +100,9 @@ const sources: BundleScriptConfig = {
         "text-box-search-outline",
         "menu-down",
         "menu-right",
-        "menu-left"
+        "menu-left",
+        "mdi-magnify",
+        "settings-outline"
       ],
     },
     {
