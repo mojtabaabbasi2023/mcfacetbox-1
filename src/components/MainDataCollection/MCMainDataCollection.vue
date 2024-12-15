@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { GridResult } from '@/types/baseModels';
-import type { ISearchResultTabBox } from '@/types/SearchResult';
+import type { GridResult, ISimpleSelectableDTO } from '@/types/baseModels'
+import type { ISearchResultTabBox } from '@/types/SearchResult'
 
 const itemsPerPage = ref(5)
 const page = ref(1)
@@ -32,6 +32,7 @@ setTimeout(async () => {
 const loadmore = ref(null)
 const infoSearch = ref()
 const loading = ref(false)
+const testfacetlist = ref<ISimpleSelectableDTO[][]>([[{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }], [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }]])
 
 const { stop } = useIntersectionObserver(
   loadmore,
@@ -72,18 +73,18 @@ function getInfoSearch() { }
     <VRow>
       <VCol cols="12" md="6" class="mx-auto">
         <VTextField v-model="infoSearch" placeholder="جستجو" class="search-bar" single-line>
-          <template v-slot:append-inner>
-            <VBtn icon size="small" @click="getInfoSearch" variant='text'>
+          <template #append-inner>
+            <VBtn icon size="small" variant="text" @click="getInfoSearch">
               <VIcon icon="tabler-search" size="22" />
             </VBtn>
-            <VBtn icon size="small" @click="" variant='text'>
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-settings" size="22" />
             </VBtn>
-            <VBtn icon size="small" @click="" variant='text'>
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-history" size="22" />
             </VBtn>
           </template>
-          <template v-slot:append>
+          <template #append>
             <VBtn icon size="small" @click="">
               <!-- <VIcon icon="tabler-brand-openai" size="22" /> -->
               ai
@@ -93,46 +94,36 @@ function getInfoSearch() { }
       </VCol>
     </VRow>
 
-    <VRow class="mc-data-scroll">
-      <VCol>
+    <VRow>
+      <VCol md="3">
+        <div>
+          <MCFacetBox
+            v-for="(item, i) in testfacetlist" :key="i" searchable :dataitems="item"
+            :facettitle="$t('tree.autorizedbook')" class="mb-2"
+          />
+        </div>
+      </VCol>
+      <VCol class="mc-data-scroll" md="9">
         <div>
           <MCSearchResultTabBox v-for="(item, i) in resultdataItems" :key="i" :dataitems="item" />
           <div v-show="!loadingdata" ref="loadmore" />
         </div>
-
-        <!--
-          <VDataIterator
-          :items="resultdataItems"
-          items-per-page="100000"
-          :loading="loadingdata"
-          @update:current-items="updatecurrentitems"
-          >
-          <template #default="{ items }">
-          <MCSearchResultTabBox
-          v-for="(item, i) in items"
-          :key="i"
-          ref="dcItemsRef"
-          :dataitems="item.raw"
-          />
-          <div
-          v-show="!loadingdata"
-          ref="loadmore"
-          />
-          </template>
-<template #loader>
-          <VProgressCircular
-          size="40"
-          indeterminate
-          />
-          </template>
--->
-        <!-- </VDataIterator> -->
       </VCol>
     </VRow>
     <VRow>
-      <div v-show="loading" class="loading-container">
-        <VProgressCircular size="40" indeterminate />
+      <div v-show="loadingdata" class="loading-container">
+        <VProgressCircular size="20" width="2" indeterminate />
       </div>
     </VRow>
   </VContainer>
 </template>
+
+<style lang="css">
+.v-list-item--density-compact:not(.v-list-item--nav).v-list-item--one-line {
+  padding: 0 !important;
+}
+
+.v-list-item-action--start {
+  margin-inline: 0 0;
+}
+</style>

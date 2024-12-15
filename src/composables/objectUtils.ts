@@ -19,3 +19,18 @@ export function convertSimpleTreeToSimpleDtoArray(tree: ISimpleTree[]): ISimpleD
         return [...currentEntry, ...childrenEntries];
     });
 }
+
+//👉 -  تابع نرمالسازی متن
+export function normalizeText(text: string): string {
+    return text.toLowerCase().replace(/[^\w\s]/g, '').trim();
+}
+
+//👉 - جستجو در فیلد دلخواه متنی از یک شیء
+export function searchItems<T>(items: T[], searchText: string, field: keyof T): T[] {
+    const normalizedSearchText = normalizeText(searchText);
+    console.log('searchtext', normalizedSearchText, searchText);
+
+    return items.filter(item =>
+        normalizeText(item[field]?.toString() || '').includes(normalizedSearchText)
+    );
+}

@@ -352,6 +352,7 @@ declare module 'vue' {
     MCDialogRoleAdd: typeof import('./src/components/dialogs/MCDialogRoleAdd.vue')['default']
     MCDialogTreeAdd: typeof import('./src/components/dialogs/MCDialogTreeAdd.vue')['default']
     MCDialogUserAdd: typeof import('./src/components/dialogs/MCDialogUserAdd.vue')['default']
+    MCFacetBox: typeof import('./src/components/MCFacetBox.vue')['default']
     MCInputDatePicker: typeof import('./src/components/MCInputDatePicker.vue')['default']
     MCMainDataCollection: typeof import('./src/components/MainDataCollection/MCMainDataCollection.vue')['default']
     MCMainDataShelf: typeof import('./src/components/MainDataShelf/MCMainDataShelf.vue')['default']
@@ -373,6 +374,5 @@ declare module 'vue' {
     TimelineOutlined: typeof import('./src/views/demos/components/timeline/TimelineOutlined.vue')['default']
     TimelineWithIcons: typeof import('./src/views/demos/components/timeline/TimelineWithIcons.vue')['default']
     TiptapEditor: typeof import('./src/@core/components/TiptapEditor.vue')['default']
-    VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
 }

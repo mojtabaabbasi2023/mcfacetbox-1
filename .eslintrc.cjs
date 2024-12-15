@@ -49,6 +49,14 @@ module.exports = {
   ],
   ignorePatterns: ['src/plugins/iconify/*.js', 'node_modules', 'dist', '*.d.ts', 'vendor'],
   rules: {
+    'vue/max-attributes-per-line': ['error', {
+      singleline: {
+        max: 4,
+      },
+      multiline: {
+        max: 4,
+      },
+    }],
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
 

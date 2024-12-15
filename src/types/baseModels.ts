@@ -32,3 +32,10 @@ export interface baseDataTableModel extends Record<string, any> {
     selectable: boolean,
     disabled: boolean
 }
+
+export class SimpleSelectableDTOModel implements ISimpleSelectableDTO {
+    id: number = 0;
+    text: string = '';
+    selectable?: boolean | undefined = false;
+    selected?: boolean | undefined = false;
+}
