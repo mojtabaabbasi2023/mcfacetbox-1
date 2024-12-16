@@ -94,16 +94,14 @@ function getInfoSearch() { }
       </VCol>
     </VRow>
 
-    <VRow>
+    <VRow class="mc-data-scroll" :dense="true">
       <VCol md="3">
         <div>
-          <MCFacetBox
-            v-for="(item, i) in testfacetlist" :key="i" searchable :dataitems="item"
-            :facettitle="$t('tree.autorizedbook')" class="mb-2"
-          />
+          <MCFacetBox v-for="(item, i) in testfacetlist" :key="i" searchable :dataitems="item"
+            :facettitle="$t('tree.autorizedbook')" class="mb-2" />
         </div>
       </VCol>
-      <VCol class="mc-data-scroll" md="9">
+      <VCol md="9">
         <div>
           <MCSearchResultTabBox v-for="(item, i) in resultdataItems" :key="i" :dataitems="item" />
           <div v-show="!loadingdata" ref="loadmore" />

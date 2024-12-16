@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ISimpleSelectableDTO } from '@/types/baseModels'
+import type { ISimpleSelectableDTO } from '@/types/baseModels';
 
 interface Props {
   dataitems: ISimpleSelectableDTO[]
@@ -26,27 +26,18 @@ function searchinfacet(e: any) {
 </script>
 
 <template>
-  <VCard>
-    <VList
-      v-model:selected="selectedItems"
-      lines="one"
-      select-strategy="leaf"
-    >
-      <VListSubheader>{{ props.facettitle }}</VListSubheader>
-      <VTextField
-        v-show="props.searchable" :label="$t('search')" prepend-inner-icon="tabler-search" clearable
-        :model-value="facetDateItem"
-        @update:model-value="searchinfacet"
-      />
-      <VListItem
-        v-for="item in props.dataitems"
-        :key="item.id"
-        :title="item.text"
-        :value="item.text"
-      >
+  <VCard class="mc-facet-box" variant="flat">
+    <VCardTitle>{{ props.facettitle }}</VCardTitle>
+    <div class="search-container">
+      <VTextField v-show="props.searchable" :placeholder="$t('search')" prepend-inner-icon="tabler-search" clearable
+        :model-value="facetDateItem" @update:model-value="searchinfacet" density='compact' />
+    </div>
+    <VList v-model:selected="selectedItems" lines="one" select-strategy="leaf">
+
+      <VListItem v-for="item in props.dataitems" :key="item.id" :title="item.text" :value="item.text">
         <template #prepend="{ isSelected }">
           <VListItemAction start>
-            <VCheckbox :model-value="isSelected" />
+            <VCheckbox :model-value="isSelected" density='compact' />
           </VListItemAction>
         </template>
       </VListItem>
