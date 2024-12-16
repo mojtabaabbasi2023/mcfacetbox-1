@@ -98,7 +98,7 @@ function getInfoSearch() { }
       </VCol>
     </VRow>
     <!-- v-for="(item, i) in testfacetlist" :key="i"  -->
-    <VRow>
+    <VRow class="mc-data-scroll" :dense="true">
       <VCol md="3">
         <div>
           <MCFacetBox v-for="item in testfacetlist" :key="item.key"

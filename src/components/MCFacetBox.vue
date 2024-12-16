@@ -41,11 +41,14 @@ function searchinfacet(e: any) {
 </script>
 
 <template>
-  <VCard>
-    <VList v-model:selected="selectedFacetItems" lines="one" select-strategy="leaf" :return-object="false">
-      <VListSubheader>{{ props.facettitle }}</VListSubheader>
+  <VCard class="mc-facet-box" variant="flat">
+    <VCardTitle>{{ props.facettitle }}</VCardTitle>
+    <div class="search-container">
       <VTextField v-show="props.searchable" :placeholder="$t('search')" append-inner-icon="tabler-search" clearable
-        variant="solo-filled" @update:model-value="searchinfacet" />
+        @update:model-value="searchinfacet" density='compact' />
+    </div>
+
+    <VList v-model:selected="selectedFacetItems" lines="one" select-strategy="leaf" :return-object="false">
       <VListItem v-for="item in filteredItems" :key="item.id" :title="item.text" :value="item.id">
         <template #prepend="{ isSelected }">
           <VListItemAction start>
