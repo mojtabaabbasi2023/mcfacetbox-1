@@ -53,14 +53,14 @@ const selectTreeNode = (item: ISimpleTree) => {
 
     <VTreeview
       v-model:selected="selectedProjects" :items="projectList" expand-icon="mdi-menu-left" item-value="id"
-      item-title="title" style="block-size: calc(100vh - 267px);" lines="one" activatable
+      item-title="title" style="block-size: calc(100vh - 267px);cursor: default;" lines="one" activatable
       density="compact"
     >
       <template #title="{ item }">
         <div @dblclick="selectTreeNode(item)">
           <VTooltip :text="item.title">
             <template #activator="{ props }">
-              <span v-bind="props" :style="item.selected ? 'color:red' : 'color:black'"> {{ item.title }}</span>
+              <span v-bind="props" class="no-select" :style="item.selected ? 'color:red' : 'color:black'"> {{ item.title }}</span>
             </template>
           </VTooltip>
         </div>
