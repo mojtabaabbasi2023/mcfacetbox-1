@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import ContextMenu from '@imengyu/vue3-context-menu'
-import { isUndefined } from '@sindresorhus/is'
-import type { ISearchResultTabBox } from '@/types/SearchResult'
+import type { ISearchResultTabBox } from '@/types/SearchResult';
+import ContextMenu from '@imengyu/vue3-context-menu';
+import { isUndefined } from '@sindresorhus/is';
 
 interface Props {
   dataitems: ISearchResultTabBox
@@ -108,7 +108,7 @@ const onContextMenu = (e: MouseEvent) => {
     <VTabs v-model="tabdatamodel" align-tabs="start" density="compact" class="border-t-sm">
       <VTab
         v-for="item in props.dataitems.content" :key="item.id" :text="item.title" :value="item.id"
-        variant="elevated" size="small"
+        variant="elevated" size="small" elevation="5"
       />
     </VTabs>
   </VCard>

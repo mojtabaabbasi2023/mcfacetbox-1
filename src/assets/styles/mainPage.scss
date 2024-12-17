@@ -186,15 +186,14 @@
 
             .v-tab {
                 border-radius: 6px;
-                box-shadow: 0 1px 4px rgba(0, 0, 0, 15%);
                 margin-inline-start: 5px;
 
-                &:hover,
-                &:focus {
-                    background-color: rgba(var(--v-theme-primary), 0.1) !important;
-                    box-shadow: 0 1px 4px rgba(var(--v-theme-primary), 0.15);
-                    color: rgb(var(--v-theme-primary)) !important;
-                }
+                // &:hover,
+                // &:focus {
+                //     background-color: rgba(var(--v-theme-primary), 0.1) !important;
+                //     box-shadow: 0 1px 4px rgba(var(--v-theme-primary), 0.15);
+                //     color: rgb(var(--v-theme-primary)) !important;
+                // }
 
                 .v-tab__slider {
                     display: none;
