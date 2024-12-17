@@ -18,6 +18,11 @@ interface Emit {
   (e: 'close'): void // ایونت جدید close اضافه شد
   (e: 'open'): void // ایونت جدید close اضافه شد
 }
+
+const selectTreeNode = (item: ISimpleTree) => {
+  treeNodeDeselectAll(projectList)
+  item.selected = !item.selected
+}
 </script>
 
 <template>
@@ -52,11 +57,13 @@ interface Emit {
       density="compact"
     >
       <template #title="{ item }">
-        <VTooltip :text="item.title">
-          <template #activator="{ props }">
-            <span v-bind="props"> {{ item.title }}</span>
-          </template>
-        </VTooltip>
+        <div @dblclick="selectTreeNode(item)">
+          <VTooltip :text="item.title">
+            <template #activator="{ props }">
+              <span v-bind="props" :style="item.selected ? 'color:red' : 'color:black'"> {{ item.title }}</span>
+            </template>
+          </VTooltip>
+        </div>
       </template>
     </VTreeview>
   </div>

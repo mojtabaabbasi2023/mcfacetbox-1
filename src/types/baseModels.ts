@@ -21,6 +21,7 @@ export interface ISimpleSelectableDTO {
 export interface ISimpleTree extends Record<string, any> {
     id: number;
     title: string;
+    selected?: boolean
     children?: ISimpleTree[]
 }
 
