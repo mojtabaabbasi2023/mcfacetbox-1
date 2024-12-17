@@ -35,6 +35,9 @@
         overflow-y: scroll;
     }
 
+    .no-select {
+        user-select: none;
+    }
 
     .content {
         position: relative;
@@ -52,12 +55,15 @@
 
             .v-card-title {
                 font-size: 1em;
-                margin: 3px 0;
-                padding: 0 10px;
+                margin-block: 3px;
+                margin-inline: 0;
+                padding-block: 0;
+                padding-inline: 10px;
             }
 
             .v-text-field {
-                padding: 0 10px;
+                padding-block: 0;
+                padding-inline: 10px;
 
                 &:not(.v-theme--dark) {
                     .v-field {
@@ -71,11 +77,12 @@
             }
 
             .v-list {
-                overflow-y: auto;
-                max-height: 148px;
-                background-color: transparent;
-                padding: 4px 0;
                 border-radius: 0;
+                background-color: transparent;
+                max-block-size: 148px;
+                overflow-y: auto;
+                padding-block: 4px;
+                padding-inline: 0;
 
                 &::-webkit-scrollbar {
                     inline-size: 4px;
@@ -96,14 +103,14 @@
                         margin-inline-end: 0;
 
                         input {
-                            width: 13px;
-                            height: 13px;
+                            block-size: 13px;
+                            inline-size: 13px;
                         }
                     }
                 }
 
                 .v-list-item {
-                    min-height: 28px;
+                    min-block-size: 28px;
 
                     .v-list-item-title {
                         font-size: 0.9em;
@@ -111,7 +118,7 @@
 
                     .v-list-item__prepend {
                         .v-list-item__spacer {
-                            width: 0;
+                            inline-size: 0;
                         }
                     }
                 }
@@ -120,7 +127,8 @@
 
         .mc-data-container {
             block-size: 100%;
-            padding: 4px 0;
+            padding-block: 4px;
+            padding-inline: 0;
 
             .loading-container {
                 position: absolute;
