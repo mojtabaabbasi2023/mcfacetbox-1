@@ -31,7 +31,7 @@
     }
 
     .mc-data-scroll {
-        block-size: calc(100% - 78px);
+        block-size: calc(100% - 110px);
         overflow-y: scroll;
     }
 
@@ -129,6 +129,10 @@
             block-size: 100%;
             padding-block: 4px;
             padding-inline: 0;
+
+            .data-collection-tabs {
+                margin: 5px 0;
+            }
 
             .loading-container {
                 position: absolute;

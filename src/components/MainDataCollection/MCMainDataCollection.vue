@@ -70,6 +70,8 @@ onFetchResponse(response => {
 })
 
 function getInfoSearch() { }
+
+const dataTabValue = ref(null);
 </script>
 
 <template>
@@ -98,23 +100,34 @@ function getInfoSearch() { }
       </VCol>
     </VRow>
     <!-- v-for="(item, i) in testfacetlist" :key="i"  -->
-    <VRow class="mc-data-scroll" dense>
-      <VCol md="3">
-        <div>
-          <MCFacetBox
-            v-for="item in testfacetlist" :key="item.key"
-            v-model:selected-items="selectedFacetItems[item.key]" searchable :dataitems="item.facetGroups"
-            :facettitle="$t('tree.autorizedbook')" class="mb-2"
-          />
-        </div>
-      </VCol>
-      <VCol md="9">
-        <div>
-          <MCSearchResultTabBox v-for="(item, i) in resultdataItems" :key="i" :dataitems="item" />
-          <div v-show="!loadingdata" ref="loadmore" />
-        </div>
-      </VCol>
-    </VRow>
+
+    <v-tabs v-model="dataTabValue" density="compact" :hide-slider="true" class="data-collection-tabs">
+      <v-tab :value="1" variant="elevated" rounded="sm">حدیث</v-tab>
+      <v-tab :value="2" variant="elevated" rounded="sm">قرآن</v-tab>
+      <v-tab :value="3" variant="elevated" rounded="sm">لغت</v-tab>
+      <v-tab :value="4" variant="elevated" rounded="sm">موضوع</v-tab>
+    </v-tabs>
+
+    <v-tabs-window v-model="dataTabValue" class="mc-data-scroll">
+      <v-tabs-window-item :value="1">
+        <VRow dense>
+          <VCol md="3">
+            <div>
+              <MCFacetBox v-for="item in testfacetlist" :key="item.key"
+                v-model:selected-items="selectedFacetItems[item.key]" searchable :dataitems="item.facetGroups"
+                :facettitle="$t('tree.autorizedbook')" class="mb-2" />
+            </div>
+          </VCol>
+          <VCol md="9">
+            <div>
+              <MCSearchResultTabBox v-for="(item, i) in resultdataItems" :key="i" :dataitems="item" />
+              <div v-show="!loadingdata" ref="loadmore" />
+            </div>
+          </VCol>
+        </VRow>
+      </v-tabs-window-item>
+    </v-tabs-window>
+
     <VRow dense>
       <div v-show="loadingdata" class="loading-container">
         <VProgressCircular size="20" width="2" indeterminate />
