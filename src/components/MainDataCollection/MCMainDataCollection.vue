@@ -79,7 +79,9 @@ const dataTabValue = ref(null)
 
 <template>
   <VContainer class="mc-data-container">
-    <VRow dense>
+    <VRow dense class="align-center">
+      <VCol cols="12" md="3">
+      </VCol>
       <VCol cols="12" md="6" class="mx-auto">
         <VTextField v-model="infoSearch" :placeholder="$t('search')" class="search-bar" single-line>
           <template #append-inner>
@@ -102,6 +104,10 @@ const dataTabValue = ref(null)
           -->
         </VTextField>
       </VCol>
+
+      <VCol cols="12" md="3" class="number-found">
+        موارد یافت شده
+      </VCol>
     </VRow>
     <!-- v-for="(item, i) in testfacetlist" :key="i"  -->
 
@@ -122,11 +128,9 @@ const dataTabValue = ref(null)
         <VRow dense>
           <VCol md="3">
             <div>
-              <MCFacetBox
-                v-for="item in testfacetlist" :key="item.key"
-                v-model:selected-items="selectedFacetItems[item.key]" searchable
-                :dataitems="item.facetGroups" :facettitle="$t('tree.autorizedbook')" class="mb-2"
-              />
+              <MCFacetBox v-for="item in testfacetlist" :key="item.key"
+                v-model:selected-items="selectedFacetItems[item.key]" searchable :dataitems="item.facetGroups"
+                :facettitle="$t('tree.autorizedbook')" class="mb-2" />
             </div>
           </VCol>
           <VCol md="9">
