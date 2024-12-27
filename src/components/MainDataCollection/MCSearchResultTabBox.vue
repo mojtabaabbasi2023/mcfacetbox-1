@@ -69,34 +69,29 @@ const onContextMenu = (e: MouseEvent) => {
           <VCardText>
             <VDataIterator :items="item.content" :items-per-page="1">
               <template #default="{ items }">
-                <div
-                  v-for="(textData, j) in items" :key="j" class="d-flex justify-start align-start box"
-                  @contextmenu="onContextMenu($event)"
-                >
+                <VRow v-for="(textData, j) in items" :key="j" no-gutters class="justify-start align-start box"
+                  @contextmenu="onContextMenu($event)">
                   <VCheckbox
                     v-if="(isUndefined(textData.raw.selectable) && item.content.length > 1) || (textData.raw.selectable)"
-                    v-model="textData.raw.selected" density="compact"
-                  />
+                    v-model="textData.raw.selected" density="compact" />
 
-                  <p>
-                    {{ textData.raw.text }}
-                  </p>
-                </div>
+                  <VCol class="data-box-content">
+                    <p class="text">
+                      {{ textData.raw.text }}
+                    </p>
+                    <!-- <div class="foot-note">این قسمت محل پاورقی</div> -->
+                  </VCol>
+                </VRow>
               </template>
 
               <template #footer="{ page, pageCount, prevPage, nextPage }">
                 <VFooter v-if="item.content.length > 1">
                   <div class="d-flex justify-end w-100">
                     <span class="ml-2">{{ page }} {{ $t('of') }} {{ pageCount }}</span>
-                    <VBtn
-                      variant="plain"
-                      :disabled="page === 1" class="me-2" icon="mdi-chevron-right" size="xsmall"
-                      @click="prevPage"
-                    />
-                    <VBtn
-                      variant="plain" :disabled="page === pageCount" icon="mdi-chevron-left" size="xsmall"
-                      @click="nextPage"
-                    />
+                    <VBtn variant="plain" :disabled="page === 1" class="me-2" icon="mdi-chevron-right" size="xsmall"
+                      @click="prevPage" />
+                    <VBtn variant="plain" :disabled="page === pageCount" icon="mdi-chevron-left" size="xsmall"
+                      @click="nextPage" />
                   </div>
                 </VFooter>
               </template>
@@ -106,10 +101,8 @@ const onContextMenu = (e: MouseEvent) => {
       </VTabsWindowItem>
     </VTabsWindow>
     <VTabs v-model="tabdatamodel" align-tabs="start" density="compact" class="border-t-sm">
-      <VTab
-        v-for="item in props.dataitems.content" :key="item.id" :text="item.title" :value="item.id"
-        variant="elevated" size="small" elevation="5"
-      />
+      <VTab v-for="item in props.dataitems.content" :key="item.id" :text="item.title" :value="item.id"
+        variant="elevated" size="small" elevation="5" />
     </VTabs>
   </VCard>
 </template>
