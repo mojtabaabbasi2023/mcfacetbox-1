@@ -48,82 +48,7 @@
         padding-block: 0;
         padding-inline: 12px;
 
-        .mc-facet-box {
-            &:not(.v-theme--dark) {
-                background-color: rgba(var(--v-theme-primary), 0.1);
-            }
 
-            .v-card-title {
-                font-size: 1em;
-                margin-block: 3px;
-                margin-inline: 0;
-                padding-block: 0;
-                padding-inline: 10px;
-            }
-
-            .v-text-field {
-                padding-block: 0;
-                padding-inline: 10px;
-
-                &:not(.v-theme--dark) {
-                    .v-field {
-                        background-color: white;
-
-                        .v-field__outline {
-                            display: none;
-                        }
-                    }
-                }
-            }
-
-            .v-list {
-                border-radius: 0;
-                background-color: transparent;
-                max-block-size: 148px;
-                overflow-y: auto;
-                padding-block: 4px;
-                padding-inline: 0;
-
-                &::-webkit-scrollbar {
-                    inline-size: 4px;
-                }
-
-                &::-webkit-scrollbar-track {
-                    border-radius: 2.5px;
-                    background: #ccd0dc;
-                }
-
-                &::-webkit-scrollbar-thumb {
-                    border-radius: 2.5px;
-                    background: #576363;
-                }
-
-                .v-input {
-                    .v-selection-control {
-                        margin-inline-end: 0;
-
-                        input {
-                            block-size: 13px;
-                            inline-size: 13px;
-                        }
-                    }
-                }
-
-                .v-list-item {
-                    min-block-size: 28px;
-
-                    .v-list-item-title {
-                        font-size: 0.9em;
-                    }
-
-                    .v-list-item__prepend {
-                        .v-list-item__spacer {
-                            inline-size: 0;
-                        }
-                    }
-                }
-            }
-        }
 
         .mc-data-container {
             block-size: 100%;
@@ -257,5 +182,117 @@
         }
 
 
+    }
+}
+
+.mc-facet-box {
+    &:not(.v-theme--dark) {
+        background-color: rgba(var(--v-theme-primary), 0.1);
+    }
+
+    .v-card-title {
+        font-size: 1em;
+        margin-block: 3px;
+        margin-inline: 0;
+        padding-block: 0;
+        padding-inline: 10px;
+    }
+
+    .v-text-field {
+        padding-block: 0;
+        padding-inline: 10px;
+
+        &:not(.v-theme--dark) {
+            .v-field {
+                background-color: white;
+
+                .v-field__outline {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .v-list {
+        border-radius: 0;
+        background-color: transparent;
+        max-block-size: 148px;
+        overflow-y: auto;
+        padding-block: 4px;
+        padding-inline: 0;
+
+        &::-webkit-scrollbar {
+            inline-size: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            border-radius: 2.5px;
+            background: #ccd0dc;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            border-radius: 2.5px;
+            background: #576363;
+        }
+
+        .v-input {
+            .v-selection-control {
+                margin-inline-end: 0;
+
+                input {
+                    block-size: 13px;
+                    inline-size: 13px;
+                }
+            }
+        }
+
+        .v-list-item {
+            min-block-size: 28px;
+
+            .v-list-item-title {
+                font-size: 0.9em;
+            }
+
+            .v-list-item__prepend {
+                .v-list-item__spacer {
+                    inline-size: 0;
+                }
+            }
+        }
+    }
+}
+
+.mc-dialog-bookselect {
+    .v-card-item {
+        padding: 12px 12px 0 !important;
+    }
+
+    .v-card-text {
+        padding: 12px !important;
+    }
+
+    .book-item {
+        margin-block-end: 5px;
+        padding: 5px;
+        box-shadow: 0 0 5px rgba(var(--v-shadow-key-umbra-color), 0.15), 0 0 transparent, 0 0 transparent !important;
+        margin-block-end: 10px;
+    }
+
+    .book-title {
+        margin-block-end: 5px;
+        display: block;
+        color: rgb(var(--v-theme-primary));
+
+        em {
+            font-style: normal;
+            background-color: yellow;
+            font-weight: bold;
+            color: black;
+        }
+    }
+
+    p {
+        margin-block-end: 3px;
+        font-size: 0.9em;
     }
 }

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 // !SECTION این دیالوگ برای افزودن و یا ویرایش یک پروژه میباشد
+import { useToast } from 'vue-toastification'
 import type { IBookSearchResult } from '@/types/book'
 import { BookSearchRequestModel } from '@/types/book'
 import type { IProject } from '@/types/project'
 import { ProjectModel } from '@/types/project'
 import type { IFacetBox, IFacetItem } from '@/types/SearchResult'
-import { useToast } from 'vue-toastification'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
@@ -77,8 +77,8 @@ const onReset = () => {
   searchbooktitle.value = ''
   resultbookItems.value = { facetList: [], pageNumber: 0, pageSize: 0, resultList: [], resultListTotalCount: 0 }
 
-//   bookSearchModel.query = ''
-//   bookSearchModel.page_number = 1
+  //   bookSearchModel.query = ''
+  //   bookSearchModel.page_number = 1
 }
 
 const prevPage = async () => {
@@ -124,16 +124,15 @@ const isTree = (items: IFacetBox) => {
 }
 
 const searchinBook = async () => {
-  if(searchbooktitle.value.length>2){
+  if (searchbooktitle.value.length > 2)
     bookSearchModel.query = searchbooktitle.value
-  }
 }
 </script>
 
 <template>
   <VDialog
     :width="$vuetify.display.smAndDown ? 'auto' : 900" :model-value="props.isDialogVisible"
-    @update:model-value="onReset"
+    class="mc-dialog-bookselect" @update:model-value="onReset"
   >
     <DialogCloseBtn :disabled="loadingdata" @click="onReset" />
     <VCard flat :title="$t('book.select')" :subtitle="$t('book.selectrequiredbook')">
@@ -143,20 +142,21 @@ const searchinBook = async () => {
           <VProgressCircular size="20" width="2" indeterminate />
           </div>
         -->
-        <VRow>
+        <VRow dense>
           <VCol md="4">
             <MCFacetBox
-              v-for="item in resultbookItems?.facetList" :key="item.facetboxKey" v-model:selected-items="selectedFacetItems[item.facetboxKey]" :istree="isTree(item)"
-              :scroll-item-count="item.scrollSize" :searchable="item.hasSearchBox"
-              :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
+              v-for="item in resultbookItems?.facetList" :key="item.facetboxKey"
+              v-model:selected-items="selectedFacetItems[item.facetboxKey]" :istree="isTree(item)"
+              :scroll-item-count="item.scrollSize" :searchable="item.hasSearchBox" :dataitems="item.itemList"
+              :facettitle="item.title" class="mb-2"
             />
           </VCol>
           <VCol md="8">
             <VRow>
               <VCol md="12">
                 <VTextField
-                  v-model:model-value="searchbooktitle" :placeholder="$t('search')"
-                  clearable density="compact" @keyup.enter="searchinBook"  
+                  v-model:model-value="searchbooktitle" :placeholder="$t('search')" clearable
+                  density="compact" @keyup.enter="searchinBook"
                 >
                   <template #append-inner>
                     <VBtn icon size="small" variant="text" @click="searchinBook">
@@ -166,75 +166,71 @@ const searchinBook = async () => {
                 </VTextField>
               </VCol>
             </VRow>
-            <VRow>
+            <VRow dense>
               <VCol md="12">
                 <VDataIterator
-                  :items="resultbookItems?.resultList" :loading="loadingdata" :page="resultbookItems?.pageNumber" :items-per-page="resultbookItems?.pageSize"
-                  class="w-100"
+                  :items="resultbookItems?.resultList" :loading="loadingdata"
+                  :page="resultbookItems?.pageNumber" :items-per-page="resultbookItems?.pageSize" class="w-100"
                 >
                   <template #default="{ items }">
-                    <VRow v-for="(item, i) in items" :key="i">
-                      <VCol :md="4">
-                        <VImg
-                          :width="100"
-                          assspect-ratio="4/3"
-                          cover
-                          :src="`https://noorlib.ir${item.raw.thumbnailUrl}`"
-                        />
-                      </VCol>
-                      <VCol :md="8">
-                        <div>
+                    <VCard v-for="(item, i) in items" :key="i" class="book-item">
+                      <VRow dense>
+                        <VCol cols="auto">
+                          <VImg
+                            :width="90" assspect-ratio="4/3" cover
+                            :src="`https://noorlib.ir${item.raw.thumbnailUrl}`"
+                          />
+                        </VCol>
+                        <VCol align-self="center">
                           <div>
-                            <span>{{ item.raw.title }}</span>
                             <div>
-                              <p>نویسنده : {{ item.raw.creatorList?.map(element => element.name).join(',') }}</p> <p>ناشر : {{ item.raw.publisherList?.map(element => element.place).join(',') }}</p>
-                            </div>
-                            <div>
-                              <p>زبان : {{ item.raw.languageList?.map(element => element.name).join(',') }}</p> <p>سال نشر : {{ item.raw.publishYearList?.map(element => element.year).join(',') }}</p>
+                              <VRow no-gutters>
+                                <VCol>
+                                  <span class="book-title" v-html="item.raw.title" />
+                                </VCol>
+                                <VCol cols="auto" class="check-box">
+                                  <VCheckbox v-model="item.raw.selected" density="compact" />
+                                </VCol>
+                              </VRow>
+
+                              <div>
+                                <p>نویسنده : {{ item.raw.creatorList?.map(element => element.name).join(',') }}</p>
+                                <p>ناشر : {{ item.raw.publisherList?.map(element => element.place).join(',') }}</p>
+                              </div>
+                              <div>
+                                <p>زبان : {{ item.raw.languageList?.map(element => element.name).join(',') }}</p>
+                                <p>سال نشر : {{ item.raw.publishYearList?.map(element => element.year).join(',') }}</p>
+                              </div>
                             </div>
                           </div>
-                          <VCheckbox v-model="item.raw.selected" density="compact" />
-                        </div>
-                      </VCol>
-                    </VRow>
+                        </VCol>
+                      </VRow>
+                    </VCard>
                   </template>
                   <template #footer="">
                     <VFooter>
                       <div class="d-flex align-center justify-center pa-4">
                         <VBtn
-                          :disabled="resultbookItems?.pageNumber == 1"
-                          density="comfortable"
-                          icon="mdi-arrow-left"
-                          variant="tonal"
-                          rounded
-                          @click="prevPage"
+                          :disabled="resultbookItems?.pageNumber == 1" density="comfortable" icon="mdi-arrow-left"
+                          variant="tonal" rounded @click="prevPage"
                         />
 
                         <div class="mx-2 text-caption">
-                          {{ $t('$vuetify.pagination.ariaLabel.page') }} {{ resultbookItems?.pageNumber }} {{ $t('of') }} {{ totalPageNumber }}
+                          {{ $t('$vuetify.pagination.ariaLabel.page') }} {{ resultbookItems?.pageNumber }} {{ $t('of')
+                          }} {{ totalPageNumber }}
                         </div>
 
                         <VBtn
-                          :disabled="resultbookItems?.pageNumber >= totalPageNumber"
-                          density="comfortable"
-                          icon="mdi-arrow-right"
-                          variant="tonal"
-                          rounded
-                          @click="nextPage"
+                          :disabled="resultbookItems?.pageNumber >= totalPageNumber" density="comfortable"
+                          icon="mdi-arrow-right" variant="tonal" rounded @click="nextPage"
                         />
                       </div>
                     </VFooter>
                   </template>
                   <template #loader>
-                    <VRow
-                      v-for="(_, k) in [0, 1, 2, 3]"
-                      :key="k"
-                    >
+                    <VRow v-for="(_, k) in [0, 1, 2, 3]" :key="k">
                       <VCol cols="12">
-                        <VSkeletonLoader
-                          class="border"
-                          type="image,article"
-                        />
+                        <VSkeletonLoader class="border" type="image,article" />
                       </VCol>
                     </VRow>
                   </template>
