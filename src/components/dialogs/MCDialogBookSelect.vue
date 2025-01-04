@@ -127,6 +127,11 @@ const searchinBook = async () => {
   if (searchbooktitle.value.length > 2)
     bookSearchModel.query = searchbooktitle.value
 }
+
+const formattedField = (list, fieldName) => {
+  if (list?.length > 0)
+    return list.map(element => element[fieldName]).join(',')
+}
 </script>
 
 <template>
@@ -194,12 +199,24 @@ const searchinBook = async () => {
                               </VRow>
 
                               <div>
-                                <p>نویسنده : {{ item.raw.creatorList?.map(element => element.name).join(',') }}</p>
-                                <p>ناشر : {{ item.raw.publisherList?.map(element => element.place).join(',') }}</p>
+                                <p v-if="formattedField(item.raw.creatorList, 'name')">
+                                  نویسنده : {{
+                                    formattedField(item.raw.creatorList, 'name') }}
+                                </p>
+                                <p v-if="formattedField(item.raw.publisherList, 'place')">
+                                  ناشر : {{
+                                    formattedField(item.raw.publisherList, 'place') }}
+                                </p>
                               </div>
                               <div>
-                                <p>زبان : {{ item.raw.languageList?.map(element => element.name).join(',') }}</p>
-                                <p>سال نشر : {{ item.raw.publishYearList?.map(element => element.year).join(',') }}</p>
+                                <p v-if="formattedField(item.raw.languageList, 'name')">
+                                  زبان : {{
+                                    formattedField(item.raw.languageList, 'name') }}
+                                </p>
+                                <p v-if="formattedField(item.raw.publishYearList, 'year')">
+                                  سال نشر : {{
+                                    formattedField(item.raw.publishYearList, 'year') }}
+                                </p>
                               </div>
                             </div>
                           </div>
