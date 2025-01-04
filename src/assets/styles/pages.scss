@@ -35,9 +35,27 @@ div {
     .v-list-item {
         &:not(.v-list-group__header) {
             .v-list-item__prepend {
-                padding-inline-start: 30px;
+                padding-inline-start: 22px;
             }
         }
+
+        &.v-list-item--link {
+            cursor: default;
+        }
+
+        .v-list-item-title {
+            letter-spacing: normal;
+            font-size: 1em;
+        }
+
+        .v-list-item-action {
+            button {
+                width: auto;
+                height: auto;
+            }
+        }
+
+
     }
 }
 

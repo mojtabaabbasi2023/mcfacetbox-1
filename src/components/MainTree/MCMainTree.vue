@@ -57,8 +57,8 @@ const selectTreeNode = (item: ISimpleTree) => {
 
     <VTreeview
       v-model:selected="selectedProjects" :items="projectList" expand-icon="mdi-menu-left" item-value="id"
-      item-title="title" style="block-size: calc(100vh - 267px);cursor: default;"
-      density="compact"
+      item-title="title" style="block-size: calc(100vh - 267px);"
+      density="compact" :lines="false"
     >
       <template #title="{ item }">
         <div @dblclick="selectTreeNode(item)">
@@ -72,9 +72,3 @@ const selectTreeNode = (item: ISimpleTree) => {
     </VTreeview>
   </div>
 </template>
-
-<style lang="css" scoped>
-.v-list-item--link {
-  cursor: default !important;
-}
-</style>
