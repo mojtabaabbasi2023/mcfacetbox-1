@@ -276,6 +276,10 @@
         padding: 5px;
         box-shadow: 0 0 5px rgba(var(--v-shadow-key-umbra-color), 0.15), 0 0 transparent, 0 0 transparent !important;
         margin-block-end: 10px;
+
+        img {
+            border-radius: 6px;
+        }
     }
 
     .book-title {
