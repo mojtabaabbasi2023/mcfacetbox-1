@@ -138,7 +138,7 @@ const searchinBook = async () => {
 
 const formattedField = (list: Record<string, any>[], fieldName: string) => {
   if (list?.length > 0)
-    return list.map(element => element[fieldName]).join(',')
+    return list.filter(element => element[fieldName] !== '').map(element => element[fieldName]).join(',')
 }
 </script>
 
