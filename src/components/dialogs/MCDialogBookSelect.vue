@@ -104,6 +104,7 @@ const nextPage = async () => {
 
 watch(bookSearchModel, () => {
   resultStateMessage.value = ''
+  resultAlertVisible.value = false
   if (bookSearchModel.query.length >= 2)
     fetchData(false)
 })
