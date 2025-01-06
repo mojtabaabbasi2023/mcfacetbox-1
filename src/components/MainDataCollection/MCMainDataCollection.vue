@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { VCol } from 'vuetify/lib/components/index.mjs'
 import MCDialogBookSelect from '../dialogs/MCDialogBookSelect.vue'
 import { useSelectedNode } from '@/store/treeStore'
 import type { GridResult } from '@/types/baseModels'
@@ -36,7 +37,7 @@ const isDialogSelectBookVisible = ref(false)
 const infoSearch = ref()
 const loading = ref(false)
 const selectedFacetItems = reactive<Record<string, string[]>>({})
-const testfacetlist = ref<IFacetBox[]>([{ facetboxKey: 'book', title: 'کتاب', hasSearchBox: true, scrollSize: 5, itemList: [{ facetKey: '1', title: 'پژوهشگر', facetCount: 10 }, { facetKey: '2', title: 'مدیر کل', facetCount: 11 }, { facetKey: '3', title: 'ناظر', facetCount: 5 }, { facetKey: '4', title: 'ارزیاب یک', facetCount: 7 }, { facetKey: '5', title: 'ارزیاب دو', facetCount: 7 }] }, { facetboxKey: 'book1', title: 'قرن', isTree: true, hasSearchBox: false, scrollSize: 5, itemList: [{ facetKey: '1', title: 'پژوهشگر', facetCount: 13 }, { facetKey: '2', parent: '1', title: 'مدیر کل', facetCount: 18 }, { facetKey: '3', title: 'ناظر', facetCount: 16 }, { facetKey: '4', parent: '3', title: 'ارزیاب یک', facetCount: 13 }, { facetKey: '5', parent: '4', title: 'ارزیاب دو', facetCount: 1 }] }])
+const testfacetlist = ref<IFacetBox[]>([{ facetboxKey: 'book', title: 'کتاب', hasSearchBox: true, scrollSize: 5, itemList: [{ key: '1', title: 'پژوهشگر', count: 10 }, { key: '2', title: 'مدیر کل', count: 11 }, { key: '3', title: 'ناظر', count: 5 }, { key: '4', title: 'ارزیاب یک', count: 7 }, { key: '5', title: 'ارزیاب دو', count: 7 }] }, { facetboxKey: 'book1', title: 'قرن', isTree: true, hasSearchBox: false, scrollSize: 5, itemList: [{ key: '1', title: 'پژوهشگر', count: 13 }, { key: '2', parent: 1, title: 'مدیر کل', count: 18 }, { key: '3', title: 'ناظر', count: 16 }, { key: '4', parent: 3, title: 'ارزیاب یک', count: 13 }, { key: '5', parent: 4, title: 'ارزیاب دو', count: 1 }] }])
 
 const selectenode = useSelectedNode()
 
@@ -115,22 +116,21 @@ const dataTabValue = ref(null)
     </VRow>
     <!-- v-for="(item, i) in testfacetlist" :key="i"  -->
 
-    <VRow no-gutters dense class="align-center" justify="space-between">
-      <VTabs v-model="dataTabValue" density="compact" hide-slider class="data-collection-tabs">
-        <VTab :value="1" variant="elevated" rounded="sm">
-          {{ $t('hadith') }}
-        </VTab>
-        <VTab :value="2" variant="elevated" rounded="sm">
-          {{ $t('ayah') }}
-        </VTab>
-        <VTab :value="3" variant="elevated" rounded="sm">
-          {{ $t('word') }}
-        </VTab>
-      </VTabs>
-      <VBtn icon size="26" variant="text" @click="isDialogSelectBookVisible = true">
-        <VIcon icon="tabler-book" size="22" />
-      </VBtn>
-    </VRow>
+    <VTabs v-model="dataTabValue" density="compact" hide-slider class="data-collection-tabs">
+      <VTab :value="1" variant="elevated" rounded="sm">
+        {{ $t('hadith') }}
+      </VTab>
+      <VTab :value="2" variant="elevated" rounded="sm">
+        {{ $t('ayah') }}
+      </VTab>
+      <VTab :value="3" variant="elevated" rounded="sm">
+        {{ $t('word') }}
+      </VTab>
+    </VTabs>
+    <VBtn icon size="26" variant="text" @click="isDialogSelectBookVisible = true">
+      <VIcon icon="tabler-book" size="22" />
+    </VBtn>
+
     <VDivider />
 
     <VTabsWindow v-model="dataTabValue" class="mc-data-scroll">
