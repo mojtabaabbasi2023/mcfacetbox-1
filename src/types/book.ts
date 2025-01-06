@@ -59,7 +59,8 @@ export class selectableBookInfo implements ISelectable, IBookInfo {
     selected?: boolean | undefined = false;
 }
 
-export class BookSearchRequestModel {
+export class BookSearchRequestModel implements Record<string, any> {
+    [x: string]: any;
     language: string = 'fa';
     page_size: number = 20;
     page_number: number = 1;

@@ -79,20 +79,16 @@ function searchinfacet(e: any) {
     <VList
       v-if="!(props.istree ?? false)" v-model:selected="selectedFacetItems" item-value="facetKey" lines="one"
       select-strategy="leaf"
-      :return-object="false"
+      :return-object="false" :height="(props.scrollItemCount ?? 10) * 25"
     >
-      <!-- v-for="item in filteredItems" :key="item.facetKey" -->
-      <VVirtualScroll :items="filteredItems" :height="(props.scrollItemCount ?? 10) * 20">
-        <template #default="{ item }">
-          <VListItem :title="item.title" :value="item.facetKey">
-            <template #prepend="{ isSelected }">
-              <VListItemAction start>
-                <VCheckbox :model-value="isSelected" density="compact" />
-              </VListItemAction>
-            </template>
-          </VListItem>
+      <!-- <VVirtualScroll :items="filteredItems" :height="(props.scrollItemCount ?? 10) * 20"> -->
+      <VListItem v-for="item in filteredItems" :key="item.key" :title="item.title" :value="item.key">
+        <template #prepend="{ isSelected }">
+          <VListItemAction start>
+            <VCheckbox :model-value="isSelected" density="compact" />
+          </VListItemAction>
         </template>
-      </VVirtualScroll>
+      </VListItem>
     </VList>
 
     <VTreeview

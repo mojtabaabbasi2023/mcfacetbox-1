@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 // !SECTION این دیالوگ برای افزودن و یا ویرایش یک پروژه میباشد
+import { isUndefined } from '@sindresorhus/is'
 import { useToast } from 'vue-toastification'
 import type { IBookSearchResult } from '@/types/book'
 import { BookSearchRequestModel } from '@/types/book'
@@ -36,7 +37,7 @@ const { execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchErr
   query: bookSearchModel,
 }), {
   immediate: false,
-  refetch: true,
+
 }).get()
 
 const totalPageNumber = computed(() => {
@@ -67,7 +68,7 @@ onFetchResponse(response => {
       resultStateMessage.value = t('alert.resultNotFound')
     }
 
-    console.log('resultbookitems', resultbookItems.value)
+    // console.log('resultbookitems', resultbookItems.value)
   })
 })
 
@@ -76,8 +77,10 @@ onFetchError(() => {
   resultStateMessage.value = t('alert.dataActionFailed')
 })
 
-const onReset = () => {
-  emit('update:isDialogVisible', false)
+const onReset = (closedialog: boolean = false) => {
+  if (closedialog)
+    emit('update:isDialogVisible', false)
+  bookSearchModel.query = ''
   searchbooktitle.value = ''
   resultbookItems.value = { facetList: [], pageNumber: 0, pageSize: 0, resultList: [], resultListTotalCount: 0 }
 
@@ -101,6 +104,8 @@ const nextPage = async () => {
 
 watch(bookSearchModel, () => {
   resultStateMessage.value = ''
+  if (bookSearchModel.query.length >= 2)
+    fetchData(false)
 })
 
 const isTree = (items: IFacetBox) => {
@@ -108,14 +113,14 @@ const isTree = (items: IFacetBox) => {
 
   // ایجاد یک مپ با کلید facetKey و مقدار آیتم
   items.itemList.forEach(item => {
-    map.set(item.facetKey, item)
+    map.set(item.key, item)
   })
 
   // بررسی هر آیتم برای یافتن پدر خود
   for (const item of items.itemList) {
     if (item.parent) {
-      const parentItem = map.get(item.parent)
-      if (parentItem?.facetKey === item.facetKey)
+      const parentItem = map.get(item.parent.toString())
+      if (parentItem?.key === item.key)
         return true
 
       // اگر پدر موجود نباشد، یا parent خود item برابر با facetKey خودش باشد (نداشتن پدر حقیقی)
@@ -128,11 +133,10 @@ const isTree = (items: IFacetBox) => {
 }
 
 const searchinBook = async () => {
-  if (searchbooktitle.value.length > 2)
-    bookSearchModel.query = searchbooktitle.value
+  bookSearchModel.query = searchbooktitle.value
 }
 
-const formattedField = (list, fieldName) => {
+const formattedField = (list: Record<string, any>[], fieldName: string) => {
   if (list?.length > 0)
     return list.map(element => element[fieldName]).join(',')
 }
@@ -141,9 +145,9 @@ const formattedField = (list, fieldName) => {
 <template>
   <VDialog
     :width="$vuetify.display.smAndDown ? 'auto' : 900" :model-value="props.isDialogVisible"
-    class="mc-dialog-bookselect" @update:model-value="onReset"
+    class="mc-dialog-bookselect" @update:model-value="onReset(true)"
   >
-    <DialogCloseBtn :disabled="loadingdata" @click="onReset" />
+    <DialogCloseBtn :disabled="loadingdata" @click="onReset(true)" />
     <VCard flat :title="$t('book.select')" :subtitle="$t('book.selectrequiredbook')">
       <VCardText>
         <!--
@@ -165,7 +169,7 @@ const formattedField = (list, fieldName) => {
               <VCol md="12">
                 <VTextField
                   v-model:model-value="searchbooktitle" :placeholder="$t('search')" clearable
-                  density="compact" @keyup.enter="searchinBook"
+                  density="compact" @keyup.enter="searchinBook" @click:clear="onReset(false)"
                 >
                   <template #append-inner>
                     <VBtn icon size="small" variant="text" @click="searchinBook">
@@ -232,7 +236,7 @@ const formattedField = (list, fieldName) => {
                     <VFooter>
                       <div class="d-flex align-center justify-center pa-4">
                         <VBtn
-                          :disabled="resultbookItems?.pageNumber == 1" density="comfortable" icon="mdi-arrow-left"
+                          :disabled="isUndefined(resultbookItems?.pageNumber) || resultbookItems?.pageNumber <= 1" density="comfortable" icon="tabler-arrow-right"
                           variant="tonal" rounded @click="prevPage"
                         />
 
@@ -242,8 +246,8 @@ const formattedField = (list, fieldName) => {
                         </div>
 
                         <VBtn
-                          :disabled="resultbookItems?.pageNumber >= totalPageNumber" density="comfortable"
-                          icon="mdi-arrow-right" variant="tonal" rounded @click="nextPage"
+                          :disabled="isUndefined(resultbookItems?.pageNumber) || resultbookItems?.pageNumber >= totalPageNumber" density="comfortable"
+                          icon="tabler-arrow-left" variant="tonal" rounded @click="nextPage"
                         />
                       </div>
                     </VFooter>

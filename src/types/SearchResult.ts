@@ -2,50 +2,41 @@ import { isNull, isUndefined } from "@sindresorhus/is";
 import { ISimpleSelectableDTO } from "./baseModels";
 
 export function convertFacetItemToFacetTree(items: IFacetItem[]): IFacetTreeItem[] {
-
-    console.log('befortree', items);
     const map = new Map<string, IFacetTreeItem>();
     items.forEach(item => {
         const treeItem: IFacetTreeItem = {
             orderIndex: item.orderIndex,
-            facetCount: item.facetCount,
+            facetCount: item.count,
             isSelected: item.isSelected,
-            facetKey: item.facetKey,
+            facetKey: item.key,
             title: item.title,
         };
-        map.set(item.facetKey, treeItem);
+        map.set(item.key, treeItem);
     });
-
     const result: IFacetTreeItem[] = [];
-
     items.forEach(item => {
-        console.log('parenttrack', item);
-
         if (item.parent) {
-            const parentTreeItem = map.get(item.parent.toString());
-            console.log('parent', parentTreeItem, item.parent.toString());
+            const parentTreeItem = map.get(useToString(item.parent).value);
             if (parentTreeItem) {
                 if (isUndefined(parentTreeItem.children) || isNull(parentTreeItem.children)) {
                     parentTreeItem.children = []
                 }
-                parentTreeItem.children.push(map.get(item.facetKey)!);
+                parentTreeItem.children.push(map.get(item.key)!);
 
             }
         } else {
-            result.push(map.get(item.facetKey)!);
+            result.push(map.get(item.key)!);
         }
     });
-    console.log('tree', result);
-
     return result;
 }
 
 export interface IFacetItem {
     orderIndex?: string,
-    facetCount: number,
+    count: number,
     isSelected?: boolean,
-    facetKey: string,
-    parent?: string,
+    key: string,
+    parent?: number,
     title: string,
 }
 export interface IFacetTreeItem {
