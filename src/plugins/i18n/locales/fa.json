@@ -72,7 +72,11 @@
     "book": {
         "title": "عنوان کتاب",
         "select": "انتخاب کتاب",
-        "selectrequiredbook": "انتخاب کتب مورد نیاز"
+        "selectrequiredbook": "انتخاب کتب مورد نیاز",
+        "creator": "نویسنده",
+        "publisher": "ناشر",
+        "language": "زبان",
+        "publishYear": "سال نشر"
     },
     "createDate": "تاریخ ایجاد",
     "expireDate": "تاریخ انقضاء",

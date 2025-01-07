@@ -209,21 +209,21 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
 
                               <div>
                                 <p v-if="formattedField(item.raw.creatorList, 'name')">
-                                  نویسنده : {{
+                                  {{ $t('book.creator') }} : {{
                                     formattedField(item.raw.creatorList, 'name') }}
                                 </p>
                                 <p v-if="formattedField(item.raw.publisherList, 'place')">
-                                  ناشر : {{
+                                  {{ $t('book.publisher') }} : {{
                                     formattedField(item.raw.publisherList, 'place') }}
                                 </p>
                               </div>
                               <div>
                                 <p v-if="formattedField(item.raw.languageList, 'name')">
-                                  زبان : {{
+                                  {{ $t('book.language') }} : {{
                                     formattedField(item.raw.languageList, 'name') }}
                                 </p>
                                 <p v-if="formattedField(item.raw.publishYearList, 'year')">
-                                  سال نشر : {{
+                                  {{ $t('book.publishYear') }} : {{
                                     formattedField(item.raw.publishYearList, 'year') }}
                                 </p>
                               </div>
