@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 // !SECTION این دیالوگ برای افزودن و یا ویرایش یک پروژه میباشد
+import { isUndefined } from '@sindresorhus/is'
+import { useToast } from 'vue-toastification'
 import type { IBookSearchResult, ISelectableBookInfo } from '@/types/book'
 import { BookSearchRequestModel } from '@/types/book'
 import type { IFacetBox, IFacetItem } from '@/types/SearchResult'
-import { isUndefined } from '@sindresorhus/is'
-import { useToast } from 'vue-toastification'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
@@ -250,23 +250,21 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
 
                               <div>
                                 <p v-if="formattedField(item.raw.creatorList, 'name')">
-                                  نویسنده : {{
+                                  {{ $t('book.creator') }} : {{
                                     formattedField(item.raw.creatorList, 'name') }}
                                 </p>
-                                <p v-if="formattedField(item.raw.publisherList, 'title')">
-                                  ناشر : {{
-                                    formattedField(item.raw.publisherList, 'title') }}
+                                <p v-if="formattedField(item.raw.publisherList, 'place')">
+                                  {{ $t('book.publisher') }} : {{
+                                    formattedField(item.raw.publisherList, 'place') }}
                                 </p>
                               </div>
                               <div>
-                                <!--
-                                  <p v-if="formattedField(item.raw.languageList, 'name')">
-                                  زبان : {{
-                                  formattedField(item.raw.languageList, 'name') }}
-                                  </p>
-                                -->
+                                <p v-if="formattedField(item.raw.languageList, 'name')">
+                                  {{ $t('book.language') }} : {{
+                                    formattedField(item.raw.languageList, 'name') }}
+                                </p>
                                 <p v-if="formattedField(item.raw.publishYearList, 'year')">
-                                  سال نشر : {{
+                                  {{ $t('book.publishYear') }} : {{
                                     formattedField(item.raw.publishYearList, 'year') }}
                                 </p>
                               </div>
@@ -281,7 +279,7 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
                       <div class="d-flex align-center justify-center pa-4">
                         <div>
                           <VBtn type="" class="me-3">
-                            <span >
+                            <span>
                               {{ $t('accept') }}
                             </span>
                           </VBtn>
