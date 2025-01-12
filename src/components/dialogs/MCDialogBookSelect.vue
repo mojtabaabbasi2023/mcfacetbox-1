@@ -18,7 +18,6 @@ const resultbookItems = ref<IBookSearchResult>()
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
   (e: 'selectedBookChanged', value: number): void
-
 }
 
 const selectedFacetItems = reactive<Record<string, string[]>>({})

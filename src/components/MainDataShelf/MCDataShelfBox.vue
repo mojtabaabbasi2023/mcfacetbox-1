@@ -4,9 +4,13 @@ import { useSelectedNode } from '@/store/treeStore'
 import type { IDataShelfBox } from '@/types/dataShelf'
 
 const props = defineProps<Props>()
+const emits = defineEmits<Emits>()
 const selectenode = useSelectedNode()
 interface Props {
-  dataitems: IDataShelfBox
+  databoxitem: IDataShelfBox
+}
+interface Emits {
+  (e: 'addtag', dataBoxId: number): void
 }
 
 const onContextMenu = (e: MouseEvent) => {
@@ -44,7 +48,7 @@ const onContextMenu = (e: MouseEvent) => {
         <VCheckbox density="compact" />
         <VCol class="data-box-content">
           <p class="text">
-            {{ props.dataitems.text }}
+            {{ props.databoxitem.text }}
           </p>
           <div class="foot-note">
             این قسمت محل پاورقی
@@ -74,7 +78,7 @@ const onContextMenu = (e: MouseEvent) => {
           <VBtn icon size="25" variant="text" @click="">
             <VIcon icon="tabler-trash-x" size="22" />
           </VBtn>
-          <VBtn icon size="25" variant="text" @click="">
+          <VBtn icon size="25" variant="text" @click="$emit('addtag', databoxitem.id)">
             <VIcon icon="tabler-tag" size="22" />
           </VBtn>
           <VBtn icon size="25" variant="text" @click="">
@@ -98,9 +102,9 @@ const onContextMenu = (e: MouseEvent) => {
       </div>
       <div>
         <VRow no-gutters class="btn-box data-box-toolbar d-flex justify-content-between">
-          <VIcon icon="tabler-plug-connected-x" size="12" />
-          <VIcon icon="tabler-message" size="12" />
-          <VIcon icon="tabler-tag" size="12" />
+          <VIcon v-if="(databoxitem.connectedTreeNode?.id ?? 0) > 0" icon="tabler-plug-connected-x" size="12" />
+          <VIcon v-if="(databoxitem.comment?.length ?? 0) > 0" icon="tabler-message" size="12" />
+          <VIcon v-if="(databoxitem.tags?.length ?? 0) > 0" icon="tabler-tag" size="12" />
         </VRow>
       </div>
     </VRow>

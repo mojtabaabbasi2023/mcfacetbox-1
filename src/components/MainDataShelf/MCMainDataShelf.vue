@@ -81,7 +81,9 @@ onFetchResponse(response => {
 onFetchError(() => {
   toast.error(t('alert.dataActionFailed'))
 })
-
+function dataBoxItemAddTag(databoxId: number) {
+  console.log('addtag', databoxId)
+}
 function getInfoSearch() { }
 </script>
 
@@ -137,15 +139,17 @@ function getInfoSearch() { }
       <VCol md="3">
         <div>
           <!--
-            <MCFacetBox v-for="item in testfacetlist" :key="item.key"
+            <MCFacetBox
+            v-for="item in testfacetlist" :key="item.key"
             v-model:selected-items="selectedFacetItems[item.key]" searchable :dataitems="item.facetGroups"
-            :facettitle="$t('tree.autorizedbook')" class="mb-2" />
+            :facettitle="$t('tree.autorizedbook')" class="mb-2"
+            />
           -->
         </div>
       </VCol>
       <VCol md="9">
         <div>
-          <MCDataShelfBox v-for="(item, i) in resultdataItems" :key="i" :dataitems="item" />
+          <MCDataShelfBox v-for="(item, i) in resultdataItems" :key="i" :databoxitem="item" @addtag="dataBoxItemAddTag" />
           <div v-show="!loadingdata" ref="loadmore" />
         </div>
       </VCol>
