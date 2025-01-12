@@ -197,7 +197,8 @@
         "deleteDataSuccess": "حذف مورد نظر انجام شد",
         "deleteDataFailed": "مشکل در حذف بوجود آمد",
         "deleteSelectedItem?": "مورد انتخاب شده حذف گردد؟",
-        "resultNotFound": "نتیجه یافت نشد"
+        "resultNotFound": "نتیجه یافت نشد",
+        "probleminGetInformation": "مشکل در دریافت اطلاعات وجود دارد"
     },
     "$vuetify": {
         "badge": "نشان",

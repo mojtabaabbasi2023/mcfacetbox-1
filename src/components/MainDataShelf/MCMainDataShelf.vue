@@ -1,17 +1,22 @@
 <script setup lang="ts">
+import { useToast } from 'vue-toastification'
+import { isUndefined } from '@sindresorhus/is'
 import { useSelectedNode } from '@/store/treeStore'
 import type { GridResult } from '@/types/baseModels'
-import type { ISearchResultTabBox } from '@/types/SearchResult'
+import type { IDataShelfBox } from '@/types/dataShelf'
 
-const itemsPerPage = ref(5)
+const itemsPerPage = ref(16)
 const page = ref(1)
 const totalItems = ref(0)
 const sortBy = ref()
 const orderBy = ref()
 const searchQuery = ref('')
-const resultdataItems = ref<ISearchResultTabBox[]>([])
+const resultdataItems = ref<IDataShelfBox[]>([])
+const { t } = useI18n({ useScope: 'global' })
 
-const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse } = useApi<GridResult<ISearchResultTabBox>>(createUrl('/apps/DC', {
+const toast = useToast()
+
+const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<GridResult<IDataShelfBox>>(createUrl('/apps/dataShelf', {
   query: {
     q: searchQuery,
     itemsPerPage,
@@ -22,23 +27,21 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
 }), { immediate: false })
 
 setTimeout(async () => {
-  try {
-    await fetchData(false)
-  }
-  catch (error) {
-    console.log('fetchthrow', error)
-  }
+
 }, 1000)
 
 const loadmore = ref(null)
-const infoSearch = ref()
-const loading = ref(false)
 const selectedFacetItems = reactive<Record<string, number[]>>({})
 
 // const testfacetlist = ref<IFacetResult[]>([{ key: 'book', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }, { key: 'book1', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }])
 
 const selectenode = useSelectedNode()
 
+// function scrollTo(view: Ref<HTMLElement | null>) {
+//   if (view === undefined || view == null)
+//     return
+//   view.value?.scrollIntoView()
+// }
 const { stop } = useIntersectionObserver(
   loadmore,
   ([entry], observerElement) => {
@@ -50,17 +53,17 @@ const { stop } = useIntersectionObserver(
   },
 )
 
-// function scrollTo(view: Ref<HTMLElement | null>) {
-//   if (view === undefined || view == null)
-//     return
-//   view.value?.scrollIntoView()
-// }
-
-watch(selectedFacetItems, newval => {
-  const result = Object.keys(newval).map(key => ({
-    titleKey: key,
-    items: newval[key],
-  }))
+function resetData() {
+  resultdataItems.value.splice(0)
+}
+watch(selectenode.simpleTreeModelStored, async newval => {
+  try {
+    resetData()
+    await fetchData(false)
+  }
+  catch (error) {
+    console.log('fetchthrow', error)
+  }
 })
 
 onFetchResponse(response => {
@@ -69,13 +72,17 @@ onFetchResponse(response => {
     resultData.value?.items.forEach(element => {
       resultdataItems.value.push(element)
     })
-    loading.value = true
+    if (isUndefined(resultdataItems.value))
+      toast.error(t('probleminGetInformation'))
+    if ((resultData.value?.items.length ?? 0) <= 0)
+      toast.info(t('resultNotFound'))
   })
+})
+onFetchError(() => {
+  toast.error(t('alert.dataActionFailed'))
 })
 
 function getInfoSearch() { }
-
-const dataTabValue = ref(null)
 </script>
 
 <template>

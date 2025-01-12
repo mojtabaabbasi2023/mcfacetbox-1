@@ -64,8 +64,6 @@ watch(selectedFacetItems, newval => {
     titleKey: key,
     items: newval[key],
   }))
-
-  console.log('result', result, newval)
 })
 
 onFetchResponse(response => {
@@ -116,48 +114,53 @@ const dataTabValue = ref(null)
       </VCol>
     </VRow>
     <!-- v-for="(item, i) in testfacetlist" :key="i"  -->
+    <VRow>
+      <VCol md="12">
+        <VTabs v-model="dataTabValue" density="compact" hide-slider class="data-collection-tabs">
+          <VTab :value="1" variant="elevated" rounded="sm">
+            {{ $t('hadith') }}
+          </VTab>
+          <VTab :value="2" variant="elevated" rounded="sm">
+            {{ $t('ayah') }}
+          </VTab>
+          <VTab :value="3" variant="elevated" rounded="sm">
+            {{ $t('word') }}
+          </VTab>
+          <VBtn
+            icon size="26" variant="text" class="ms-2"
+            @click="isDialogSelectBookVisible = true"
+          >
+            <VIcon icon="tabler-book" size="22" />
+          </VBtn>
+        </VTabs>
 
-    <VTabs v-model="dataTabValue" density="compact" hide-slider class="data-collection-tabs">
-      <VTab :value="1" variant="elevated" rounded="sm">
-        {{ $t('hadith') }}
-      </VTab>
-      <VTab :value="2" variant="elevated" rounded="sm">
-        {{ $t('ayah') }}
-      </VTab>
-      <VTab :value="3" variant="elevated" rounded="sm">
-        {{ $t('word') }}
-      </VTab>
-    </VTabs>
-    <VBtn icon size="26" variant="text" @click="isDialogSelectBookVisible = true">
-      <VIcon icon="tabler-book" size="22" />
-    </VBtn>
+        <VDivider />
 
-    <VDivider />
-
-    <VTabsWindow v-model="dataTabValue" class="mc-data-scroll">
-      <VTabsWindowItem :value="1" :transition="false">
-        <VRow dense>
-          <VCol md="3">
-            <div>
-              <MCFacetBox
-                v-for="item in testfacetlist" :key="item.key" v-model:selected-items="selectedFacetItems[item.key]" :istree="item.isTree"
-                :scroll-item-count="item.scrollSize" :searchable="item.hasSearchBox"
-                :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
-              />
-            </div>
-          </VCol>
-          <VCol md="9">
-            <div>
-              <MCSearchResultTabBox v-for="(item, i) in resultdataItems" :key="i" :dataitems="item" />
-              <div v-show="!loadingdata" ref="loadmore" />
-            </div>
-          </VCol>
-        </VRow>
-      </VTabsWindowItem>
-      <VTabsWindowItem :value="2" :transition="false" />
-      <VTabsWindowItem :value="2" :transition="false" />
-    </VTabsWindow>
-
+        <VTabsWindow v-model="dataTabValue" class="mc-data-scroll">
+          <VTabsWindowItem :value="1" :transition="false">
+            <VRow dense>
+              <VCol md="3">
+                <div>
+                  <MCFacetBox
+                    v-for="item in testfacetlist" :key="item.key" v-model:selected-items="selectedFacetItems[item.key]" :istree="item.isTree"
+                    :scroll-item-count="item.scrollSize" :searchable="item.hasSearchBox"
+                    :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
+                  />
+                </div>
+              </VCol>
+              <VCol md="9">
+                <div>
+                  <MCSearchResultTabBox v-for="(item, i) in resultdataItems" :key="i" :dataitems="item" />
+                  <div v-show="!loadingdata" ref="loadmore" />
+                </div>
+              </VCol>
+            </VRow>
+          </VTabsWindowItem>
+          <VTabsWindowItem :value="2" :transition="false" />
+          <VTabsWindowItem :value="2" :transition="false" />
+        </VTabsWindow>
+      </VCol>
+    </VRow>
     <VRow dense>
       <div v-show="loadingdata" class="loading-container">
         <VProgressCircular size="20" width="2" indeterminate />

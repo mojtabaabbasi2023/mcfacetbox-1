@@ -18,6 +18,7 @@ import { handlerPagesFaq } from '@db/pages/faq/index'
 import { handlerPagesHelpCenter } from '@db/pages/help-center/index'
 import { handlerPagesProfile } from '@db/pages/profile/index'
 import { handlerAppsCollectingData } from './handlers/apps/collectingData'
+import { handlerDataShelf } from './handlers/apps/dataShelf'
 import { handlerAppsgates } from './handlers/apps/gates'
 import { handlerAppsProjects } from './handlers/apps/projects'
 import { handlerAppsTrees } from './handlers/apps/trees'
@@ -47,8 +48,8 @@ const worker = setupWorker(
     ...handlerAppsRoles,
     ...handlerAppsProjects,
     ...handlerAppsTrees,
-    ...handlerAppsCollectingData
-
+    ...handlerAppsCollectingData,
+    ...handlerDataShelf
 )
 
 export default function () {

@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import ContextMenu from '@imengyu/vue3-context-menu'
 import { useSelectedNode } from '@/store/treeStore'
+import type { IDataShelfBox } from '@/types/dataShelf'
 
+const props = defineProps<Props>()
 const selectenode = useSelectedNode()
+interface Props {
+  dataitems: IDataShelfBox
+}
 
 const onContextMenu = (e: MouseEvent) => {
   // prevent the browser's default menu
@@ -39,16 +44,7 @@ const onContextMenu = (e: MouseEvent) => {
         <VCheckbox density="compact" />
         <VCol class="data-box-content">
           <p class="text">
-            2 عَلِيُّ بْنُ مُحَمَّدٍ عَنْ سَهْلِ بْنِ زِيَادٍ عَنْ عَمْرِو بْنِ عُثْمَانَ عَنْ مُفَضَّلِ بْنِ صَالِحٍ
-            عَنْ
-            سَعْدِ بْنِ طَرِيفٍ عَنِ اَلْأَصْبَغِ بْنِ نُبَاتَةَ عَنْ عَلِيٍّ عَلَيْهِ اَلسَّلاَمُ قَالَ: هَبَطَ
-            جَبْرَئِيلُ عَلَى آدَمَ عَلَيْهِ اَلسَّلاَمُ فَقَالَ يَا آدَمُ إِنِّي أُمِرْتُ أَنْ أُخَيِّرَكَ وَاحِدَةً
-            مِنْ
-            ثَلاَثٍ فَاخْتَرْهَا وَ دَعِ اِثْنَتَيْنِ فَقَالَ لَهُ آدَمُ يَا جَبْرَئِيلُ وَ مَا اَلثَّلاَثُ فَقَالَ
-            اَلْعَقْلُ وَ اَلْحَيَاءُ وَ اَلدِّينُ فَقَالَ آدَمُ إِنِّي قَدِ اِخْتَرْتُ اَلْعَقْلَ فَقَالَ جَبْرَئِيلُ
-            لِلْحَيَاءِ وَ اَلدِّينِ اِنْصَرِفَا وَ دَعَاهُ - فَقَالاَ يَا جَبْرَئِيلُ إِنَّا أُمِرْنَا أَنْ نَكُونَ
-            مَعَ
-            اَلْعَقْلِ حَيْثُ كَانَ قَالَ فَشَأْنَكُمَا وَ عَرَجَ .
+            {{ props.dataitems.text }}
           </p>
           <div class="foot-note">
             این قسمت محل پاورقی

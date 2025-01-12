@@ -136,6 +136,7 @@ declare global {
   const resolveActiveTitle: typeof import('./src/utils/dataResolver')['resolveActiveTitle']
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
+  const resolveServiceResponseMessage: typeof import('./src/composables/useApi')['resolveServiceResponseMessage']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
   const resolveVuetifyTheme: typeof import('./src/@core/utils/vuetify')['resolveVuetifyTheme']
   const searchItems: typeof import('./src/composables/objectUtils')['searchItems']
