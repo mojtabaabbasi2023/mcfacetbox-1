@@ -73,8 +73,8 @@
         }
     }
 
-    .family-tree {
-        .family-tree-toolbar {
+    .mc-main-tree {
+        .toolbar {
             border-radius: 6px;
             background-color: rgba(var(--v-theme-primary), 0.1);
             margin-block-start: 10px !important;
@@ -100,15 +100,12 @@
             //         }
             //     }
             // }
-
-
         }
 
         .tree-title {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-
         }
 
         .tree-node {
@@ -117,8 +114,6 @@
             min-width: 34.89px;
             text-align: center;
             position: relative;
-
-
         }
 
         .selected {

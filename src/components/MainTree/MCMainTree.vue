@@ -57,8 +57,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <VRow no-gutters class="btn-box family-tree-toolbar">
+  <div class="mc-main-tree">
+    <VRow no-gutters class="btn-box toolbar">
       <IconBtn size="small" @click="">
         <VIcon icon="tabler-search" size="22" />
       </IconBtn>
