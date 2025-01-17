@@ -85,7 +85,7 @@ onMounted(() => {
     <VRow dense class="header">
       <VCol />
       <VCol cols="auto">
-        نودها
+        {{ $t('tree.nodes') }}
       </VCol>
     </VRow>
 
