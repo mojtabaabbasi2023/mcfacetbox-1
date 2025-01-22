@@ -101,32 +101,78 @@ function getInfoSearch() { }
         <VRow no-gutters class="btn-box data-shelf-toolbar d-flex">
           <div>
             <VBtn icon size="small" variant="tonal" @click="">
-              <VIcon icon="tabler-box-multiple" size="22" />
+              <VIcon icon="tabler-select-all" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.selectall') }}
+              </VTooltip>
             </VBtn>
             <VBtn icon size="small" variant="tonal" @click="">
               <VIcon icon="tabler-search" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.search') }}
+              </VTooltip>
             </VBtn>
             <VBtn icon size="small" variant="tonal" @click="">
               <VIcon icon="tabler-filter" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.filter') }}
+              </VTooltip>
             </VBtn>
             <VBtn icon size="small" variant="tonal" @click="">
               <VIcon icon="tabler-list-tree" size="22" />
-            </VBtn>
-            <VBtn icon size="small" variant="tonal" @click="">
-              <VIcon icon="tabler-separator-vertical" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.treemode') }}
+              </VTooltip>
             </VBtn>
             <VBtn icon size="small" variant="tonal" @click="">
               <VIcon icon="tabler-trash-x" size="22" />
-            </VBtn>
-            <VBtn icon size="small" variant="tonal" @click="">
-              <VIcon icon="tabler-plug-connected-x" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.deleteselecteditem') }}
+              </VTooltip>
             </VBtn>
 
             <VBtn icon size="small" variant="tonal" @click="">
-              <VIcon icon="tabler-square-plus" size="22" />
+              <VIcon icon="tabler-filters" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.allnode') }}
+              </VTooltip>
+            </VBtn>
+
+            <VBtn icon size="small" variant="tonal" @click="">
+              <VIcon icon="tabler-pencil-plus" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.add') }}
+              </VTooltip>
             </VBtn>
             <VBtn icon size="small" variant="tonal" @click="">
-              <VIcon icon="tabler-eye-plus" size="22" />
+              <VIcon icon="tabler-list-details" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('datashelfbox.listdetail') }}
+              </VTooltip>
             </VBtn>
           </div>
           <div class="ms-auto">
