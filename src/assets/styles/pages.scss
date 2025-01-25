@@ -31,7 +31,22 @@ div {
     font-weight: bold;
 }
 
+.tree-view-scroll {
+    overflow: auto;
+    block-size: calc(100vh - 184px);
+
+    &::-webkit-scrollbar {
+        height: 8px;
+    }
+}
+
 .v-treeview {
+    border-radius: 0 !important;
+    // block-size: calc(100vh - 184px);
+    width: fit-content;
+    min-width: 100%;
+    overflow: unset !important;
+
     .v-list-item {
         &:not(.v-list-group__header) {
             .v-list-item__prepend {
@@ -43,15 +58,19 @@ div {
             cursor: default;
         }
 
+        .v-list-item__content {
+            overflow: unset;
+        }
+
         .v-list-item-title {
             letter-spacing: normal;
             font-size: 1em;
 
-            &>div {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
+            // &>div {
+            //     white-space: nowrap;
+            //     overflow: hidden;
+            //     text-overflow: ellipsis;
+            // }
         }
 
         .v-list-item-action {
