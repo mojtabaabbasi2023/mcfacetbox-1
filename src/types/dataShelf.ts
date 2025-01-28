@@ -15,6 +15,7 @@ export interface IDataShelfBox {
     pinnedItem?: number,
     createdDate: string
     creator?: ISimpleDTO,
+    selected?: boolean,
     tags?: ISimpleDTO[],
     comment?: string,
     //NOTE - شناسه سایتی که محتوا از آن دریافت شده مثلا شناسه حدیث، آیه یا لغت
@@ -32,6 +33,7 @@ export class DataShelfBoxModel implements IDataShelfBox {
     createdDate: string = '';
     creator?: ISimpleDTO | undefined;
     tags?: ISimpleDTO[] | undefined;
+    selected?: boolean = false;
     comment?: string | undefined;
     refrenceId: number = 0;
 

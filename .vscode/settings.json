@@ -1,31 +1,31 @@
 {
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
-    "javascript.updateImportsOnFileMove.enabled": "always",
+    "javascript.updateImportsOnFileMove.enabled": 'always',
     "[javascript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+        "editor.defaultFormatter": 'dbaeumer.vscode-eslint'
     },
     "[typescript]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features",
-        "editor.autoClosingBrackets": "always"
+        "editor.defaultFormatter": 'dbaeumer.vscode-eslint',
+        "editor.autoClosingBrackets": 'always'
     },
     "[markdown]": {
-        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+        "editor.defaultFormatter": 'DavidAnson.vscode-markdownlint'
     },
     // SCSS
     "[scss]": {
-        "editor.defaultFormatter": "vscode.css-language-features"
+        "editor.defaultFormatter": 'vscode.css-language-features'
     },
     // JSON
     "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
+        "editor.defaultFormatter": 'vscode.json-language-features'
     },
     "[jsonc]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
+        "editor.defaultFormatter": 'vscode.json-language-features'
     },
     // Vue
     "[vue]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.defaultFormatter": 'dbaeumer.vscode-eslint',
     },
     // Extension: ESLint
     // "eslint.options": {
@@ -34,15 +34,15 @@
     //     ]
     // },
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit",
-        "source.fixAll.stylelint": "explicit",
-        "source.organizeImports": "explicit"
+        "source.fixAll.eslint": 'explicit',
+        "source.fixAll.stylelint": 'explicit',
+        "source.organizeImports": 'explicit'
     },
     "eslint.alwaysShowStatus": true,
     "eslint.format.enable": true,
-    "eslint.packageManager": "pnpm",
+    "eslint.packageManager": 'pnpm',
     // Extension: Stylelint
-    "stylelint.packageManager": "pnpm",
+    "stylelint.packageManager": 'pnpm',
     "stylelint.validate": [
         "css",
         "scss",
@@ -67,48 +67,48 @@
     // Extension: Comment Anchors
     "commentAnchors.tags.anchors": {
         "ℹ️": {
-            "scope": "hidden",
+            "scope": 'hidden',
             // This color is taken from "Better Comments" Extension (?)
-            "highlightColor": "#3498DB",
+            "highlightColor": '#3498DB',
             "styleComment": true,
             "isItalic": false,
         },
         "👉": {
-            "scope": "file",
+            "scope": 'file',
             // This color is taken from "Better Comments" Extension (*)
-            "highlightColor": "#98C379",
+            "highlightColor": '#98C379',
             "styleComment": true,
             "isItalic": false,
         },
         "❗": {
-            "scope": "hidden",
+            "scope": 'hidden',
             // This color is taken from "Better Comments" Extension (*)
-            "highlightColor": "#FF2D00",
+            "highlightColor": '#FF2D00',
             "styleComment": true,
             "isItalic": false,
         },
     },
     // Extension: fabiospampinato.vscode-highlight
-    "highlight.regexFlags": "gi",
+    "highlight.regexFlags": 'gi',
     "highlight.regexes": {
         // We flaged this for enforcing logical CSS properties
         "(100vh|translate|margin:|padding:|margin-left|margin-right|rotate|text-align|border-top|border-right|border-bottom|border-left|float|background-position|transform|width|height|top|left|bottom|right|float|clear|(p|m)(l|r)-|border-(start|end)-(start|end)-radius)": [
             {
                 // "rangeBehavior": 1,
-                "borderWidth": "1px",
-                "borderColor": "tomato",
-                "borderStyle": "solid"
+                "borderWidth": '1px',
+                "borderColor": 'tomato',
+                "borderStyle": 'solid'
             }
         ],
         "(overflow-x:|overflow-y:)": [
             {
                 // "rangeBehavior": 1,
-                "borderWidth": "1px",
-                "borderColor": "green",
-                "borderStyle": "solid"
+                "borderWidth": '1px',
+                "borderColor": 'green',
+                "borderStyle": 'solid'
             }
         ]
     },
     "editor.tabSize": 2,
-    "editor.wordWrap": "on"
+    "editor.wordWrap": 'on'
 }

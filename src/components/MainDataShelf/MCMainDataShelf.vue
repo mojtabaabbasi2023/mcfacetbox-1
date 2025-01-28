@@ -2,7 +2,7 @@
 import { useToast } from 'vue-toastification'
 import { isUndefined } from '@sindresorhus/is'
 import { useSelectedNode } from '@/store/treeStore'
-import type { GridResult } from '@/types/baseModels'
+import { type GridResult, SelectAllState } from '@/types/baseModels'
 import type { IDataShelfBox } from '@/types/dataShelf'
 
 const itemsPerPage = ref(16)
@@ -11,6 +11,7 @@ const totalItems = ref(0)
 const sortBy = ref()
 const orderBy = ref()
 const searchQuery = ref('')
+const selectAll = ref<SelectAllState>(SelectAllState.Deselect)
 const resultdataItems = ref<IDataShelfBox[]>([])
 const { t } = useI18n({ useScope: 'global' })
 
@@ -81,6 +82,42 @@ onFetchResponse(response => {
 onFetchError(() => {
   toast.error(t('alert.dataActionFailed'))
 })
+
+watch(selectAll, () => {
+  switch (selectAll.value) {
+    case SelectAllState.Select:
+    case SelectAllState.Deselect:
+    resultdataItems.value.forEach(dataItem => {
+        dataItem.selected = selectAll.value === SelectAllState.Select
+      })
+      break;
+    default:
+      break;
+  }
+})
+
+// این تابع برای بررسی این است که آیا هر کدام از موارد انتخاب شده از انتخاب خارج شده اند یا نه؟
+function checkSelectAllState(itemselected: boolean) {
+  if (itemselected && !resultdataItems.value.find(item => item.selected === false))
+    selectAll.value = SelectAllState.Select
+  else if (!itemselected && !resultdataItems.value.find(item => item.selected === true))
+    selectAll.value = SelectAllState.Deselect
+  else
+    selectAll.value = SelectAllState.Combine
+}
+function changeselectAllState() {
+  switch (selectAll.value) {
+    case SelectAllState.Select:
+      selectAll.value = SelectAllState.Deselect
+      break;
+    case SelectAllState.Deselect:
+      selectAll.value = SelectAllState.Select
+      break;
+    default:
+      selectAll.value = SelectAllState.Select
+      break;
+  }
+}
 function dataBoxItemAddTag(databoxId: number) {
   console.log('addtag', databoxId)
 }
@@ -100,8 +137,8 @@ function getInfoSearch() { }
         -->
         <VRow no-gutters class="btn-box data-shelf-toolbar d-flex">
           <div>
-            <VBtn icon size="small" variant="tonal" @click="">
-              <VIcon icon="tabler-select-all" size="22" />
+            <VBtn icon size="small" :variant="selectAll === SelectAllState.Select ? 'elevated' : 'text'" @click="changeselectAllState">
+              <VIcon :icon="selectAll === SelectAllState.Combine ? 'tabler-squares-selected' : 'tabler-select-all'" size="22" />
               <VTooltip
                 activator="parent"
                 location="top center"
@@ -109,7 +146,7 @@ function getInfoSearch() { }
                 {{ $t('datashelfbox.selectall') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="tonal" @click="">
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-search" size="22" />
               <VTooltip
                 activator="parent"
@@ -118,7 +155,7 @@ function getInfoSearch() { }
                 {{ $t('datashelfbox.search') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="tonal" @click="">
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-filter" size="22" />
               <VTooltip
                 activator="parent"
@@ -127,7 +164,7 @@ function getInfoSearch() { }
                 {{ $t('datashelfbox.filter') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="tonal" @click="">
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-list-tree" size="22" />
               <VTooltip
                 activator="parent"
@@ -136,7 +173,7 @@ function getInfoSearch() { }
                 {{ $t('datashelfbox.treemode') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="tonal" @click="">
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-trash-x" size="22" />
               <VTooltip
                 activator="parent"
@@ -146,7 +183,7 @@ function getInfoSearch() { }
               </VTooltip>
             </VBtn>
 
-            <VBtn icon size="small" variant="tonal" @click="">
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-filters" size="22" />
               <VTooltip
                 activator="parent"
@@ -156,7 +193,7 @@ function getInfoSearch() { }
               </VTooltip>
             </VBtn>
 
-            <VBtn icon size="small" variant="tonal" @click="">
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-pencil-plus" size="22" />
               <VTooltip
                 activator="parent"
@@ -165,7 +202,7 @@ function getInfoSearch() { }
                 {{ $t('datashelfbox.add') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="tonal" @click="">
+            <VBtn icon size="small" variant="text" @click="">
               <VIcon icon="tabler-list-details" size="22" />
               <VTooltip
                 activator="parent"
@@ -196,7 +233,10 @@ function getInfoSearch() { }
       </VCol>
       <VCol md="9">
         <div>
-          <MCDataShelfBox v-for="(item, i) in resultdataItems" :key="item.id" v-model="resultdataItems[i]" @addtag="dataBoxItemAddTag" />
+          <MCDataShelfBox
+            v-for="(item, i) in resultdataItems" :key="item.id" v-model="resultdataItems[i]" @addtag="dataBoxItemAddTag"
+            @selectedchanged="checkSelectAllState"
+          />
           <div v-show="!loadingdata" ref="loadmore" />
         </div>
       </VCol>

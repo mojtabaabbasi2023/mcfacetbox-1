@@ -16,6 +16,7 @@ const selectenode = useSelectedNode()
 interface Emits {
   (e: 'addtag', dataBoxId: number): void
   (e: 'editdataboxcontent', dataBoxId: IDataShelfBox): void
+  (e: 'selectedchanged', isSelected: boolean)
 
 }
 
@@ -45,13 +46,25 @@ const onContextMenu = (e: MouseEvent) => {
     ],
   })
 }
+
+const isSelected = computed({
+  get(): boolean {
+    return databoxItem.value?.selected ?? false
+  },
+  set(newval: boolean) {
+    if (databoxItem.value)
+      databoxItem.value.selected = newval
+    emits('selectedchanged', newval)
+  },
+
+})
 </script>
 
 <template>
   <VCard class="mc-data-shelf-box">
     <VCardText class="h-auto">
       <VRow no-gutters class="justify-start align-start box" @contextmenu="onContextMenu($event)">
-        <VCheckbox density="compact" />
+        <VCheckbox v-model="isSelected" density="compact" />
         <VCol>
           <div class="text pb-1" v-html="databoxItem?.text" />
           <VDivider v-if="databoxItem?.footnotes.length ?? 0 > 0" />
