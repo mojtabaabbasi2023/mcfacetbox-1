@@ -49,43 +49,43 @@ const onContextMenu = (e: MouseEvent) => {
 }
 
 const addcomment = () => {
-  Swal.fire({
-    input: 'textarea',
-    inputLabel: t('datashelfbox.addcomment'),
-    inputPlaceholder: 'Type your message here...',
-    confirmButtonText: t('$vuetify.confirmEdit.ok'),
-    cancelButtonText: t('$vuetify.confirmEdit.cancel'),
-    showConfirmButton: true,
-    showCancelButton: true,
-    showLoaderOnConfirm: true,
-    showCloseButton: true,
-    preConfirm: async () => {
-      const { serviceData, serviceError } = await serviceDelete(item.id, props.apiUrl)
+//   Swal.fire({
+//     input: 'textarea',
+//     inputLabel: t('datashelfbox.addcomment'),
+//     inputPlaceholder: 'Type your message here...',
+//     confirmButtonText: t('$vuetify.confirmEdit.ok'),
+//     cancelButtonText: t('$vuetify.confirmEdit.cancel'),
+//     showConfirmButton: true,
+//     showCancelButton: true,
+//     showLoaderOnConfirm: true,
+//     showCloseButton: true,
+//     preConfirm: async () => {
+//       const { serviceData, serviceError } = await serviceDelete(item.id, props.apiUrl)
 
-      console.log('insidemethod', serviceData.value, serviceError.value)
+  //       console.log('insidemethod', serviceData.value, serviceError.value)
 
-      return { serviceData, serviceError }
-    },
-    allowOutsideClick: false,
-  }).then(value => {
-    if (value.isConfirmed) {
-      console.log('deletevalue', value)
+  //       return { serviceData, serviceError }
+  //     },
+  //     allowOutsideClick: false,
+  //   }).then(value => {
+  //     if (value.isConfirmed) {
+  //       console.log('deletevalue', value)
 
-      if (value.value?.serviceError.value) {
-        toast.error(t('alert.deleteDataFailed'))
-        emit('deletedItem', false)
-      }
-      if (value.value?.serviceData.value) {
-        refreshData()
-        toast.success(t('alert.deleteDataSuccess'))
-        emit('deletedItem', true)
-      }
-      selectedItem.value.splice(index, 1)
-    }
-    else {
-      selectedItem.value.splice(index, 1)
-    }
-  })
+//       if (value.value?.serviceError.value) {
+//         toast.error(t('alert.deleteDataFailed'))
+//         emit('deletedItem', false)
+//       }
+//       if (value.value?.serviceData.value) {
+//         refreshData()
+//         toast.success(t('alert.deleteDataSuccess'))
+//         emit('deletedItem', true)
+//       }
+//       selectedItem.value.splice(index, 1)
+//     }
+//     else {
+//       selectedItem.value.splice(index, 1)
+//     }
+//   })
 }
 
 const isSelected = computed({
