@@ -14,7 +14,14 @@ const props = defineProps({
 
 const emit = defineEmits<Emit>()
 const items = [{ title: 'Option 1', value: 'Option 1' }, { title: 'Option 2', value: 'Option 2' }, { title: 'Option 3', value: 'Option 3' }]
-const projectList = reactive<ISimpleTree[]>([{ id: 1, title: 'موسوعه یک', children: [{ id: 2, title: 'درخت یک' }, { id: 3, title: 'درخت دو' }] }, { id: 4, title: 'موسوعه دو', children: [{ id: 5, title: 'درخت سه' }, { id: 6, title: 'درخت چهار', children: [{ id: 7, title: 'درخت پنج' }, { id: 8, title: 'درخت ثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثشش', children: [{ id: 51, title: 'درخت 9', children: [{ id: 65, title: 'درخت 9', children: [{ id: 21, title: 'درخت 9', children: [{ id: 54, title: 'درخت 9', children: [{ id: 80, title: 'درخت 9', children: [{ id: 90, title: 'درخت 9', children: [{ id: 19, title: 'درخت 9', children: [{ id: 91, title: 'درخت 9' }] }] }] }] }] }] }] }] }] }] }])
+const projectList = reactive<ISimpleTree[]>([{ id: 1, title: 'موسوعه یک', children: [{ id: 2, title: 'درخت یک' }, { id: 3, title: 'درخت دو' }] }, {
+  id: 4, title: 'موسوعه دو', children: [{ id: 5, title: 'درخت سه' }, {
+    id: 6, title: 'درخت چهار', children: [{ id: 7, title: 'درخت پنج' }, {
+      id: 8,
+      title: 'عَلِيُّ بْنُ مُحَمَّدٍ عَنْ سَهْلِ بْنِ زِيَادٍ عَنْ عَمْرِو بْنِ عُثْمَانَ عَنْ مُفَضَّلِ بْنِ صَالِحٍ عَنْ سَعْدِ بْنِ طَرِيفٍ عَنِ اَلْأَصْبَغِ بْنِ نُبَاتَةَ عَنْ عَلِيٍّ عَلَيْهِ اَلسَّلاَمُ قَالَ: هَبَطَ جَبْرَئِيلُ عَلَى آدَمَ عَلَيْهِ اَلسَّلاَمُ فَقَالَ يَا آدَمُ إِنِّي أُمِرْتُ أَنْ أُخَيِّرَكَ وَاحِدَةً مِنْ ثَلاَثٍ فَاخْتَرْهَا وَ دَعِ اِثْنَتَيْنِ فَقَالَ لَهُ آدَمُ يَا جَبْرَئِيلُ وَ مَا اَلثَّلاَثُ فَقَالَ اَلْعَقْلُ وَ اَلْحَيَاءُ وَ اَلدِّينُ فَقَالَ آدَمُ إِنِّي قَدِ اِخْتَرْتُ اَلْعَقْلَ فَقَالَ جَبْرَئِيلُ لِلْحَيَاءِ وَ اَلدِّينِ اِنْصَرِفَا وَ دَعَاهُ - فَقَالاَ يَا جَبْرَئِيلُ إِنَّا أُمِرْنَا أَنْ نَكُونَ مَعَ اَلْعَقْلِ حَيْثُ كَانَ قَالَ فَشَأْنَكُمَا وَ عَرَجَ .', children: [{ id: 51, title: 'درخت 9', children: [{ id: 65, title: 'درخت 9', children: [{ id: 21, title: 'درخت 9', children: [{ id: 54, title: 'درخت 9', children: [{ id: 80, title: 'درخت 9', children: [{ id: 90, title: 'درخت 9', children: [{ id: 19, title: 'درخت 9', children: [{ id: 91, title: 'درخت 9' }] }] }] }] }] }] }] }]
+    }]
+  }]
+}])
 const selectedProjects = ref<number[]>([])
 const treeIndex = reactive<Record<number, ISimpleTree>>({})
 
@@ -89,29 +96,29 @@ onMounted(() => {
       </VCol>
     </VRow>
 
-    <VTreeview
-      v-model:selected="selectedProjects" :items="projectList" expand-icon="mdi-menu-left" item-value="id"
-      item-title="title" style="block-size: calc(100vh - 267px);"
-      density="compact" :lines="false"
-    >
-      <template #title="{ item }">
-        <div :class="`no-select ${item.selected ? 'selected' : ''}`" :style="item.selected ? 'color:red' : ''" @dblclick="selectTreeNode(item)">
-          <VTooltip :text="item.title">
-            <template #activator="{ props }">
-              <VRow v-bind="props" dense>
-                <VCol class="tree-title">
-                  {{ item.title }}
-                </VCol>
-                <VCol cols="auto" class="tree-node">
-                  <template v-if="item.children && item.children.length > 0">
-                    {{ item.children.length }}
-                  </template>
-                </VCol>
-              </VRow>
-            </template>
-          </VTooltip>
-        </div>
-      </template>
-    </VTreeview>
+    <div class="tree-view-scroll">
+      <VTreeview v-model:selected="selectedProjects" :items="projectList" expand-icon="mdi-menu-left" item-value="id"
+        item-title="title" density="compact" :lines="false">
+        <template #title="{ item }">
+          <div :class="`no-select ${item.selected ? 'selected' : ''}`" :style="item.selected ? 'color:red' : ''"
+            @dblclick="selectTreeNode(item)">
+            <VTooltip :text="item.title">
+              <template #activator="{ props }">
+                <VRow v-bind="props" dense class="mx-0">
+                  <VCol class="tree-title">
+                    {{ item.title }}
+                  </VCol>
+                  <VCol cols="auto" class="tree-node">
+                    <template v-if="item.children && item.children.length > 0">
+                      {{ item.children.length }}
+                    </template>
+                  </VCol>
+                </VRow>
+              </template>
+            </VTooltip>
+          </div>
+        </template>
+      </VTreeview>
+    </div>
   </div>
 </template>
