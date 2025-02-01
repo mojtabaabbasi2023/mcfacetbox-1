@@ -100,7 +100,8 @@
         "deleteselecteditem": "حذف موارد انتخاب شده",
         "add": "افزودن فیش",
         "listdetail": "نمایش با جزییات",
-        "allnode": "مشاهده تمام فیش ها"
+        "allnode": "مشاهده تمام فیش ها",
+        "enteryourcomment":"توضیحات مورد نظر خود را وارد کنید..."
     },
     "createDate": "تاریخ ایجاد",
     "expireDate": "تاریخ انقضاء",

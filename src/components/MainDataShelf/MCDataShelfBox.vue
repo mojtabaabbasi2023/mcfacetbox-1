@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ContextMenu from '@imengyu/vue3-context-menu'
 import Swal from 'sweetalert2'
+import { useToast } from 'vue-toastification'
 import { useSelectedNode } from '@/store/treeStore'
 import { type IDataShelfBox } from '@/types/dataShelf'
 
@@ -9,6 +10,7 @@ const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
 const databoxItem = defineModel<IDataShelfBox>()
 const { t } = useI18n({ useScope: 'global' })
+const toast = useToast()
 const selectenode = useSelectedNode()
 
 // interface Props {
@@ -49,43 +51,48 @@ const onContextMenu = (e: MouseEvent) => {
 }
 
 const addcomment = () => {
-//   Swal.fire({
-//     input: 'textarea',
-//     inputLabel: t('datashelfbox.addcomment'),
-//     inputPlaceholder: 'Type your message here...',
-//     confirmButtonText: t('$vuetify.confirmEdit.ok'),
-//     cancelButtonText: t('$vuetify.confirmEdit.cancel'),
-//     showConfirmButton: true,
-//     showCancelButton: true,
-//     showLoaderOnConfirm: true,
-//     showCloseButton: true,
-//     preConfirm: async () => {
-//       const { serviceData, serviceError } = await serviceDelete(item.id, props.apiUrl)
+  Swal.fire({
+    input: 'textarea',
+    inputLabel: t('datashelfbox.addcomment'),
+    inputValue: databoxItem.value?.comment ?? '',
+    inputPlaceholder: t('datashelfbox.enteryourcomment'),
+    confirmButtonText: t('$vuetify.confirmEdit.ok'),
+    cancelButtonText: t('$vuetify.confirmEdit.cancel'),
+    showConfirmButton: true,
+    showCancelButton: true,
+    showLoaderOnConfirm: true,
+    showCloseButton: true,
+    preConfirm: async value => {
+      console.log('text', value)
 
-  //       console.log('insidemethod', serviceData.value, serviceError.value)
+      //   const { serviceData, serviceError } = await serviceDelete(item.id, props.apiUrl)
 
-  //       return { serviceData, serviceError }
-  //     },
-  //     allowOutsideClick: false,
-  //   }).then(value => {
-  //     if (value.isConfirmed) {
-  //       console.log('deletevalue', value)
+      //   console.log('insidemethod', serviceData.value, serviceError.value)
+      const serviceData = ref(value)
+      const serviceError = ref()
 
-//       if (value.value?.serviceError.value) {
-//         toast.error(t('alert.deleteDataFailed'))
-//         emit('deletedItem', false)
-//       }
-//       if (value.value?.serviceData.value) {
-//         refreshData()
-//         toast.success(t('alert.deleteDataSuccess'))
-//         emit('deletedItem', true)
-//       }
-//       selectedItem.value.splice(index, 1)
-//     }
-//     else {
-//       selectedItem.value.splice(index, 1)
-//     }
-//   })
+      return { serviceData, serviceError }
+    },
+    allowOutsideClick: false,
+  }).then(value => {
+    if (value.isConfirmed) {
+      console.log('deletevalue', value)
+
+      if (value.value?.serviceError.value)
+        toast.error(t('alert.dataActionFailed'))
+
+      if (value.value?.serviceData.value) {
+        toast.success(t('alert.dataActionSuccess'))
+        if (databoxItem.value)
+          databoxItem.value.comment = value.value?.serviceData.value
+      }
+
+      // emit('deletedItem', true)
+    }
+    else {
+      toast.warning(t('alert.dataActionFailed'))
+    }
+  })
 }
 
 const isSelected = computed({
