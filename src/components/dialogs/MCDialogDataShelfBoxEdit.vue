@@ -46,12 +46,13 @@ const onReset = () => {
 }
 
 const acceptchanged = () => {
-  console.log('htmlbefore', editor.value?.innerHTML)
+//   console.log('htmlbefore', editor.value?.innerHTML)
 
   tempdataItem.text = editor.value?.innerHTML ?? ''
   tempdataItem.footnotes.splice(0)
   tempdataItem.footnotes.push(...footnotes)
-  console.log('htmlafter', tempdataItem.text)
+
+  //   console.log('htmlafter', tempdataItem.text)
 
   emit('update:databoxItem', tempdataItem)
   onReset()
@@ -97,9 +98,6 @@ const addFootnote = () => {
 }
 
 const footnoteSort = computed(() => {
-//   if (isUndefined(footnotes))
-//     return footnotes
-
   return footnotes.sort((a, b) => a.index - b.index)
 })
 

@@ -1,21 +1,33 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
 import { isUndefined } from '@sindresorhus/is'
+import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useSelectedNode } from '@/store/treeStore'
 import { type GridResult, SelectAllState } from '@/types/baseModels'
 import type { IDataShelfBox } from '@/types/dataShelf'
 
+interface ISelectAllState {
+  state: SelectAllState
+  count: number
+}
+interface IMCDataShelfBoxREF {
+  element: any
+  dataBoxId: number
+}
 const itemsPerPage = ref(16)
 const page = ref(1)
 const totalItems = ref(0)
 const sortBy = ref()
 const orderBy = ref()
 const searchQuery = ref('')
-const selectAll = ref<SelectAllState>(SelectAllState.Deselect)
+const selectAll = ref<ISelectAllState>({ state: SelectAllState.Deselect, count: 0 })
 const resultdataItems = ref<IDataShelfBox[]>([])
+const databoxrefs = ref<IMCDataShelfBoxREF[]>([])
 const { t } = useI18n({ useScope: 'global' })
-
+const loadmore = ref(null)
+const selectedFacetItems = reactive<Record<string, number[]>>({})
 const toast = useToast()
+const selectenode = useSelectedNode()
 
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<GridResult<IDataShelfBox>>(createUrl('/apps/dataShelf', {
   query: {
@@ -31,12 +43,7 @@ setTimeout(async () => {
 
 }, 1000)
 
-const loadmore = ref(null)
-const selectedFacetItems = reactive<Record<string, number[]>>({})
-
 // const testfacetlist = ref<IFacetResult[]>([{ key: 'book', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }, { key: 'book1', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }])
-
-const selectenode = useSelectedNode()
 
 // function scrollTo(view: Ref<HTMLElement | null>) {
 //   if (view === undefined || view == null)
@@ -54,10 +61,14 @@ const { stop } = useIntersectionObserver(
   },
 )
 
+const resultdataItemsSort = computed(() => {
+  return resultdataItems.value.sort((a, b) => a.order - b.order)
+})
+
 function resetData() {
   resultdataItems.value.splice(0)
 }
-watch(selectenode.simpleTreeModelStored, async newval => {
+watch(selectenode.simpleTreeModelStored, async () => {
   try {
     resetData()
     await fetchData(false)
@@ -83,46 +94,75 @@ onFetchError(() => {
   toast.error(t('alert.dataActionFailed'))
 })
 
-watch(selectAll, () => {
-  switch (selectAll.value) {
+watch(selectAll.value, () => {
+  switch (selectAll.value.state) {
     case SelectAllState.Select:
     case SelectAllState.Deselect:
     resultdataItems.value.forEach(dataItem => {
-        dataItem.selected = selectAll.value === SelectAllState.Select
+        dataItem.selected = selectAll.value.state === SelectAllState.Select
       })
       break;
     default:
       break;
   }
+  selectAll.value.count = resultdataItems.value.filter(item => item.selected).length
 })
 
 // این تابع برای بررسی این است که آیا هر کدام از موارد انتخاب شده از انتخاب خارج شده اند یا نه؟
 function checkSelectAllState(itemselected: boolean) {
-  if (itemselected && !resultdataItems.value.find(item => item.selected === false))
-    selectAll.value = SelectAllState.Select
+  if (itemselected && !resultdataItems.value.find(item => item.selected === false || item.selected === undefined))
+    selectAll.value.state = SelectAllState.Select
   else if (!itemselected && !resultdataItems.value.find(item => item.selected === true))
-    selectAll.value = SelectAllState.Deselect
-  else
-    selectAll.value = SelectAllState.Combine
+    selectAll.value.state = SelectAllState.Deselect
+  else selectAll.value.state = SelectAllState.Combine
+  selectAll.value.count = resultdataItems.value.filter(item => item.selected).length
 }
 function changeselectAllState() {
-  switch (selectAll.value) {
-    case SelectAllState.Select:
-      selectAll.value = SelectAllState.Deselect
-      break;
-    case SelectAllState.Deselect:
-      selectAll.value = SelectAllState.Select
-      break;
-    default:
-      selectAll.value = SelectAllState.Select
-      break;
+  if (selectAll.value.state === SelectAllState.Select)
+    selectAll.value.state = SelectAllState.Deselect
+  else if (selectAll.value.state === SelectAllState.Deselect)
+    selectAll.value.state = SelectAllState.Select
+  else
+    selectAll.value.state = SelectAllState.Select
+}
+
+// برای کار کردن با متدهای داخلی حعبه های داده انتخاب شده آنها را در یک لیست ذخیره می کنیم
+const setdataboxref = (elementParam: any, item: IDataShelfBox) => {
+  const elementIndex = databoxrefs.value.findIndex(elementItem => elementItem.dataBoxId === item.id)
+  if (item.selected && elementIndex < 0) {
+    databoxrefs.value.push({ element: elementParam, dataBoxId: item.id })
+    console.log('refpush', item)
+  }
+  else if (!item.selected && elementIndex > -1) {
+    console.log('refindex', elementIndex)
+    if (elementIndex > -1)
+      databoxrefs.value.splice(elementIndex, 1)
   }
 }
+
+// تابع داخلی جعبه داده برای تغییر اولویت را صدا میزنذ، ابتدا جعبه داده انتخاب شده را پیدا میکند و بعد ارجاع مرتبط با آن را استفاده میکند
+const increaseOrder = () => {
+// با توجه به اینکه تغییر اولویت فقط در حالت انتخاب یک جعبه داده فعال میشود
+  const dataItemResult = resultdataItems.value.find(dataItem => dataItem.selected === true)
+  if (dataItemResult) {
+    const databoxrefResult = databoxrefs.value.find(refItem => refItem.dataBoxId === dataItemResult.id)
+    if (databoxrefResult)
+      databoxrefResult.element.increaseOrder()
+  }
+}
+
+const decreaseOrder = () => {
+  const dataItemResult = resultdataItems.value.find(dataItem => dataItem.selected === true)
+  if (dataItemResult) {
+    const databoxrefResult = databoxrefs.value.find(refItem => refItem.dataBoxId === dataItemResult.id)
+    if (databoxrefResult)
+      databoxrefResult.element.decreaseOrder()
+  }
+}
+
 function dataBoxItemAddTag(databoxId: number) {
   console.log('addtag', databoxId)
 }
-
-function getInfoSearch() { }
 </script>
 
 <template>
@@ -136,9 +176,9 @@ function getInfoSearch() { }
           >
         -->
         <VRow no-gutters class="btn-box data-shelf-toolbar d-flex">
-          <div>
-            <VBtn icon size="small" :variant="selectAll === SelectAllState.Select ? 'elevated' : 'text'" @click="changeselectAllState">
-              <VIcon :icon="selectAll === SelectAllState.Combine ? 'tabler-squares-selected' : 'tabler-select-all'" size="22" />
+          <div class="d-flex">
+            <VBtn icon size="small" :variant="selectAll.state === SelectAllState.Select ? 'elevated' : 'text'" @click="changeselectAllState">
+              <VIcon :icon="selectAll.state === SelectAllState.Combine ? 'tabler-squares-selected' : 'tabler-select-all'" size="22" />
               <VTooltip
                 activator="parent"
                 location="top center"
@@ -211,6 +251,27 @@ function getInfoSearch() { }
                 {{ $t('datashelfbox.listdetail') }}
               </VTooltip>
             </VBtn>
+            <div v-if="selectAll.count === 1" class="border-thin rounded d-flex align-center">
+              <VBtn icon size="25" variant="text" @click="decreaseOrder">
+                <VIcon icon="tabler-arrow-up" size="22" />
+                <VTooltip
+                  activator="parent"
+                  location="top center"
+                >
+                  {{ $t('datashelfbox.refreshtobase') }}
+                </VTooltip>
+              </VBtn>
+
+              <VBtn icon size="25" variant="text" @click="increaseOrder">
+                <VIcon icon="tabler-arrow-down" size="22" />
+                <VTooltip
+                  activator="parent"
+                  location="top center"
+                >
+                  {{ $t('datashelfbox.showhistory') }}
+                </VTooltip>
+              </VBtn>
+            </div>
           </div>
           <div class="ms-auto">
             <span class="ma-2">{{ selectenode.simpleTreeModelStored.title }}</span>
@@ -234,7 +295,9 @@ function getInfoSearch() { }
       <VCol md="9">
         <div>
           <MCDataShelfBox
-            v-for="(item, i) in resultdataItems" :key="item.id" v-model="resultdataItems[i]" @addtag="dataBoxItemAddTag"
+            v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
+            :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : 0"
+            :next-item-order="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].order : 0" @addtag="dataBoxItemAddTag"
             @selectedchanged="checkSelectAllState"
           />
           <div v-show="!loadingdata" ref="loadmore" />

@@ -5,13 +5,16 @@ import { useToast } from 'vue-toastification'
 import { useSelectedNode } from '@/store/treeStore'
 import { type IDataShelfBox } from '@/types/dataShelf'
 
-// const props = defineProps<Props>()
+const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number }>()
 const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
 const databoxItem = defineModel<IDataShelfBox>()
 const { t } = useI18n({ useScope: 'global' })
 const toast = useToast()
 const selectenode = useSelectedNode()
+const databox = ref()
+const highlightClass = ref(['mc-data-shelf-box'])
+const lastPointerPos = ref({ x: 0, y: 0 })
 
 // interface Props {
 //   databoxitem: IDataShelfBox
@@ -95,6 +98,33 @@ const addcomment = () => {
   })
 }
 
+const focuToElementAfterMove = () => {
+  databox.value.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  databox.value.$el.focus()
+  highlightClass.value.push('fade-highlight')
+  setTimeout(() => {
+    highlightClass.value.splice(1, 1)
+  }, 500) // زمان هم‌زمان با مدت انیمیشن
+}
+
+const decreaseOrder = () => {
+  if (databoxItem.value)
+    databoxItem.value.order = props.prevItemOrder - 0.1
+
+  //   console.log('prevorder', props.prevItemOrder, databoxItem.value?.order, lastPointerPos.value, x.value, y.value)
+
+  focuToElementAfterMove()
+}
+
+const increaseOrder = () => {
+  if (databoxItem.value)
+    databoxItem.value.order = props.nextItemOrder + 0.1
+
+  //   console.log('nextorder', props.nextItemOrder, databoxItem.value?.order, lastPointerPos.value, x.value, y.value)s
+
+  focuToElementAfterMove()
+}
+
 const isSelected = computed({
   get(): boolean {
     return databoxItem.value?.selected ?? false
@@ -106,10 +136,14 @@ const isSelected = computed({
   },
 
 })
+
+defineExpose({ increaseOrder, decreaseOrder })
+
+// mc-data-shelf-box
 </script>
 
 <template>
-  <VCard class="mc-data-shelf-box">
+  <VCard ref="databox" :class="[highlightClass]">
     <VCardText class="h-auto">
       <VRow no-gutters class="justify-start align-start box" @contextmenu="onContextMenu($event)">
         <VCheckbox v-model="isSelected" density="compact" />
@@ -236,6 +270,10 @@ const isSelected = computed({
               {{ $t('datashelfbox.showhistory') }}
             </VTooltip>
           </VBtn>
+
+          <span>
+            {{ databoxItem?.order }} -----
+          </span>
         </VRow>
       </div>
       <div>
@@ -250,7 +288,32 @@ const isSelected = computed({
   </VCard>
 </template>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
+.highlight {
+  animation: highlight-animation 0.5s ease;
+}
+.fade-highlight {
+  animation: fade-animation 1s ease forwards;
+}
+@keyframes highlight-animation {
+  0% {
+    background-color: #f7f7f5;
+  }
+  50% {
+    background-color: transparent;
+  }
+  100% {
+    background-color: yellow;
+  }
+}
+@keyframes fade-animation {
+  0% {
+    background-color: rgba(255, 255, 0, 0.5);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
 .v-btn--disabled {
   opacity: 0.25;
 }

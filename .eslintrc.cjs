@@ -51,10 +51,10 @@ module.exports = {
   rules: {
     'vue/max-attributes-per-line': ['error', {
       singleline: {
-        max: 4,
+        max: 6,
       },
       multiline: {
-        max: 4,
+        max: 6,
       },
     }],
     'no-unused-imports': 'off',
