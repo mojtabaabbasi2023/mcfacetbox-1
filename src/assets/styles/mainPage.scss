@@ -341,6 +341,21 @@
     }
 }
 
+.fade-highlight {
+    animation: fade-animation 2s ease forwards;
+}
+
+@keyframes fade-animation {
+    0% {
+        background-color: rgba(var(--v-theme-primary), 0.3);
+
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
 .mc-dialog-bookselect {
     .v-card-item {
         padding-block: 12px 0 !important;

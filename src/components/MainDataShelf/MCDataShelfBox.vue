@@ -23,6 +23,7 @@ interface Emits {
   (e: 'addtag', dataBoxId: number): void
   (e: 'editdataboxcontent', dataBoxId: IDataShelfBox): void
   (e: 'selectedchanged', isSelected: boolean): void
+  (e: 'orderchanged', itemId: number): void
 
 }
 
@@ -99,17 +100,21 @@ const addcomment = () => {
 }
 
 const focuToElementAfterMove = () => {
-  databox.value.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   databox.value.$el.focus()
   highlightClass.value.push('fade-highlight')
   setTimeout(() => {
     highlightClass.value.splice(1, 1)
   }, 500) // زمان هم‌زمان با مدت انیمیشن
+  emits('orderchanged', databoxItem.value?.id ?? 0)
 }
 
 const decreaseOrder = () => {
+  if (props.prevItemOrder === -100)
+    return
+
   if (databoxItem.value)
-    databoxItem.value.order = props.prevItemOrder - 0.1
+    databoxItem.value.order = props.prevItemOrder - 0.0000001
+  databox.value.$el.scrollIntoView({ behavior: 'smooth', block: 'end' })
 
   //   console.log('prevorder', props.prevItemOrder, databoxItem.value?.order, lastPointerPos.value, x.value, y.value)
 
@@ -117,8 +122,11 @@ const decreaseOrder = () => {
 }
 
 const increaseOrder = () => {
+  if (props.nextItemOrder === -100)
+    return
   if (databoxItem.value)
-    databoxItem.value.order = props.nextItemOrder + 0.1
+    databoxItem.value.order = props.nextItemOrder + 0.0000001
+  databox.value.$el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   //   console.log('nextorder', props.nextItemOrder, databoxItem.value?.order, lastPointerPos.value, x.value, y.value)s
 
@@ -272,7 +280,7 @@ defineExpose({ increaseOrder, decreaseOrder })
           </VBtn>
 
           <span>
-            {{ databoxItem?.order }} -----
+            {{ databoxItem?.order }}
           </span>
         </VRow>
       </div>
@@ -289,31 +297,6 @@ defineExpose({ increaseOrder, decreaseOrder })
 </template>
 
 <style lang="scss" scoped>
-.highlight {
-  animation: highlight-animation 0.5s ease;
-}
-.fade-highlight {
-  animation: fade-animation 1s ease forwards;
-}
-@keyframes highlight-animation {
-  0% {
-    background-color: #f7f7f5;
-  }
-  50% {
-    background-color: transparent;
-  }
-  100% {
-    background-color: yellow;
-  }
-}
-@keyframes fade-animation {
-  0% {
-    background-color: rgba(255, 255, 0, 0.5);
-  }
-  100% {
-    background-color: transparent;
-  }
-}
 .v-btn--disabled {
   opacity: 0.25;
 }

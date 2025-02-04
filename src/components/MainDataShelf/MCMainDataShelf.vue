@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
 import { isUndefined } from '@sindresorhus/is'
+import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useSelectedNode } from '@/store/treeStore'
 import { type GridResult, SelectAllState } from '@/types/baseModels'
@@ -23,6 +24,8 @@ const searchQuery = ref('')
 const selectAll = ref<ISelectAllState>({ state: SelectAllState.Deselect, count: 0 })
 const resultdataItems = ref<IDataShelfBox[]>([])
 const databoxrefs = ref<IMCDataShelfBoxREF[]>([])
+const increasebtn = ref<VBtn>()
+const decreasebtn = ref<VBtn>()
 const { t } = useI18n({ useScope: 'global' })
 const loadmore = ref(null)
 const selectedFacetItems = reactive<Record<string, number[]>>({})
@@ -66,6 +69,8 @@ const resultdataItemsSort = computed(() => {
 })
 
 function resetData() {
+  selectAll.value.state = SelectAllState.Deselect
+  selectAll.value.count = 0
   resultdataItems.value.splice(0)
 }
 watch(selectenode.simpleTreeModelStored, async () => {
@@ -98,24 +103,24 @@ watch(selectAll.value, () => {
   switch (selectAll.value.state) {
     case SelectAllState.Select:
     case SelectAllState.Deselect:
-    resultdataItems.value.forEach(dataItem => {
+    resultdataItemsSort.value.forEach(dataItem => {
         dataItem.selected = selectAll.value.state === SelectAllState.Select
       })
       break;
     default:
       break;
   }
-  selectAll.value.count = resultdataItems.value.filter(item => item.selected).length
+  selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
 })
 
 // این تابع برای بررسی این است که آیا هر کدام از موارد انتخاب شده از انتخاب خارج شده اند یا نه؟
 function checkSelectAllState(itemselected: boolean) {
-  if (itemselected && !resultdataItems.value.find(item => item.selected === false || item.selected === undefined))
+  if (itemselected && !resultdataItemsSort.value.find(item => item.selected === false || item.selected === undefined))
     selectAll.value.state = SelectAllState.Select
-  else if (!itemselected && !resultdataItems.value.find(item => item.selected === true))
+  else if (!itemselected && !resultdataItemsSort.value.find(item => item.selected === true))
     selectAll.value.state = SelectAllState.Deselect
   else selectAll.value.state = SelectAllState.Combine
-  selectAll.value.count = resultdataItems.value.filter(item => item.selected).length
+  selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
 }
 function changeselectAllState() {
   if (selectAll.value.state === SelectAllState.Select)
@@ -131,10 +136,8 @@ const setdataboxref = (elementParam: any, item: IDataShelfBox) => {
   const elementIndex = databoxrefs.value.findIndex(elementItem => elementItem.dataBoxId === item.id)
   if (item.selected && elementIndex < 0) {
     databoxrefs.value.push({ element: elementParam, dataBoxId: item.id })
-    console.log('refpush', item)
   }
   else if (!item.selected && elementIndex > -1) {
-    console.log('refindex', elementIndex)
     if (elementIndex > -1)
       databoxrefs.value.splice(elementIndex, 1)
   }
@@ -143,7 +146,7 @@ const setdataboxref = (elementParam: any, item: IDataShelfBox) => {
 // تابع داخلی جعبه داده برای تغییر اولویت را صدا میزنذ، ابتدا جعبه داده انتخاب شده را پیدا میکند و بعد ارجاع مرتبط با آن را استفاده میکند
 const increaseOrder = () => {
 // با توجه به اینکه تغییر اولویت فقط در حالت انتخاب یک جعبه داده فعال میشود
-  const dataItemResult = resultdataItems.value.find(dataItem => dataItem.selected === true)
+  const dataItemResult = resultdataItemsSort.value.find(dataItem => dataItem.selected === true)
   if (dataItemResult) {
     const databoxrefResult = databoxrefs.value.find(refItem => refItem.dataBoxId === dataItemResult.id)
     if (databoxrefResult)
@@ -152,7 +155,7 @@ const increaseOrder = () => {
 }
 
 const decreaseOrder = () => {
-  const dataItemResult = resultdataItems.value.find(dataItem => dataItem.selected === true)
+  const dataItemResult = resultdataItemsSort.value.find(dataItem => dataItem.selected === true)
   if (dataItemResult) {
     const databoxrefResult = databoxrefs.value.find(refItem => refItem.dataBoxId === dataItemResult.id)
     if (databoxrefResult)
@@ -160,6 +163,18 @@ const decreaseOrder = () => {
   }
 }
 
+function databoxOrderChanged(databoxItemId: number) {
+  const itemIndex = resultdataItemsSort.value.findIndex(item => item.id === databoxItemId)
+  if (decreasebtn.value && increasebtn.value) {
+    decreasebtn.value.$el.classList.remove('orderdisable')
+    increasebtn.value.$el.classList.remove('orderdisable')
+  }
+
+  if (itemIndex === 0 && decreasebtn.value)
+    decreasebtn.value.$el.classList.add('orderdisable')
+  if (itemIndex === resultdataItemsSort.value.length - 1 && increasebtn.value)
+    increasebtn.value.$el.classList.add('orderdisable')
+}
 function dataBoxItemAddTag(databoxId: number) {
   console.log('addtag', databoxId)
 }
@@ -252,7 +267,7 @@ function dataBoxItemAddTag(databoxId: number) {
               </VTooltip>
             </VBtn>
             <div v-if="selectAll.count === 1" class="border-thin rounded d-flex align-center">
-              <VBtn icon size="25" variant="text" @click="decreaseOrder">
+              <VBtn ref="decreasebtn" icon size="25" variant="text" @click="decreaseOrder">
                 <VIcon icon="tabler-arrow-up" size="22" />
                 <VTooltip
                   activator="parent"
@@ -262,7 +277,7 @@ function dataBoxItemAddTag(databoxId: number) {
                 </VTooltip>
               </VBtn>
 
-              <VBtn icon size="25" variant="text" @click="increaseOrder">
+              <VBtn ref="increasebtn" icon size="25" variant="text" @click="increaseOrder">
                 <VIcon icon="tabler-arrow-down" size="22" />
                 <VTooltip
                   activator="parent"
@@ -296,9 +311,9 @@ function dataBoxItemAddTag(databoxId: number) {
         <div>
           <MCDataShelfBox
             v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
-            :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : 0"
-            :next-item-order="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].order : 0" @addtag="dataBoxItemAddTag"
-            @selectedchanged="checkSelectAllState"
+            :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : -100"
+            :next-item-order="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].order : -100" @addtag="dataBoxItemAddTag"
+            @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged"
           />
           <div v-show="!loadingdata" ref="loadmore" />
         </div>
@@ -320,5 +335,10 @@ function dataBoxItemAddTag(databoxId: number) {
 
 .v-list-item-action--start {
   margin-inline: 0 0;
+}
+.orderdisable{
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 </style>
