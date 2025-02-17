@@ -1,6 +1,12 @@
 import { setupWorker } from 'msw/browser'
 
 // Handlers
+import { handlerAppsCollectingData } from './handlers/apps/collectingData'
+import { handlerDataShelf } from './handlers/apps/dataShelf'
+import { handlerAppsgates } from './handlers/apps/gates'
+import { handlerAppsProjects } from './handlers/apps/projects'
+import { handlerAppsTrees } from './handlers/apps/maintrees'
+import { handlerAppsRoles } from './handlers/apps/roles'
 import { handlerAppBarSearch } from '@db/app-bar-search/index'
 import { handlerAppsAcademy } from '@db/apps/academy/index'
 import { handlerAppsCalendar } from '@db/apps/calendar/index'
@@ -17,49 +23,42 @@ import { handlerPagesDatatable } from '@db/pages/datatable/index'
 import { handlerPagesFaq } from '@db/pages/faq/index'
 import { handlerPagesHelpCenter } from '@db/pages/help-center/index'
 import { handlerPagesProfile } from '@db/pages/profile/index'
-import { handlerAppsCollectingData } from './handlers/apps/collectingData'
-import { handlerDataShelf } from './handlers/apps/dataShelf'
-import { handlerAppsgates } from './handlers/apps/gates'
-import { handlerAppsProjects } from './handlers/apps/projects'
-import { handlerAppsTrees } from './handlers/apps/trees'
-
-import { handlerAppsRoles } from './handlers/apps/roles'
-
-
+import { handlerAppsSimpleSearch } from '@db/apps/searchSimple/index'
 
 const worker = setupWorker(
-    ...handlerAppsEcommerce,
-    ...handlerAppsAcademy,
-    ...handlerAppsInvoice,
-    ...handlerAppsUsers,
-    ...handlerAppsEmail,
-    ...handlerAppsCalendar,
-    ...handlerAppsChat,
-    ...handlerAppsPermission,
-    ...handlerPagesHelpCenter,
-    ...handlerPagesProfile,
-    ...handlerPagesFaq,
-    ...handlerPagesDatatable,
-    ...handlerAppBarSearch,
-    ...handlerAppLogistics,
-    ...handlerAuth,
-    ...handlerDashboard,
-    ...handlerAppsgates,
-    ...handlerAppsRoles,
-    ...handlerAppsProjects,
-    ...handlerAppsTrees,
-    ...handlerAppsCollectingData,
-    ...handlerDataShelf
+  ...handlerAppsEcommerce,
+  ...handlerAppsAcademy,
+  ...handlerAppsInvoice,
+  ...handlerAppsUsers,
+  ...handlerAppsEmail,
+  ...handlerAppsCalendar,
+  ...handlerAppsChat,
+  ...handlerAppsPermission,
+  ...handlerPagesHelpCenter,
+  ...handlerPagesProfile,
+  ...handlerPagesFaq,
+  ...handlerPagesDatatable,
+  ...handlerAppBarSearch,
+  ...handlerAppLogistics,
+  ...handlerAuth,
+  ...handlerDashboard,
+  ...handlerAppsgates,
+  ...handlerAppsRoles,
+  ...handlerAppsProjects,
+  ...handlerAppsTrees,
+  ...handlerAppsCollectingData,
+  ...handlerDataShelf,
+  ...handlerAppsSimpleSearch,
 )
 
 export default function () {
-    const workerUrl = `${import.meta.env.BASE_URL ?? '/'}mockServiceWorker.js`
+  const workerUrl = `${import.meta.env.BASE_URL ?? '/'}mockServiceWorker.js`
 
-    worker.start({
-        quiet: true,
-        serviceWorker: {
-            url: workerUrl,
-        },
-        onUnhandledRequest: 'bypass',
-    })
+  worker.start({
+    quiet: true,
+    serviceWorker: {
+      url: workerUrl,
+    },
+    onUnhandledRequest: 'bypass',
+  })
 }

@@ -4,9 +4,10 @@ import { themeConfig } from '@themeConfig'
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
-import NavBarNotifications from '@/layouts/components/NavBarNotifications.vue'
-import NavSearchBar from '@/layouts/components/NavSearchBar.vue'
-import NavbarShortcuts from '@/layouts/components/NavbarShortcuts.vue'
+
+// import NavBarNotifications from '@/layouts/components/NavBarNotifications.vue'
+// import NavSearchBar from '@/layouts/components/NavSearchBar.vue'
+// import NavbarShortcuts from '@/layouts/components/NavbarShortcuts.vue'
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 
@@ -44,7 +45,7 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
           />
         </IconBtn>
 
-        <NavSearchBar class="ms-lg-n3" />
+        <!-- <NavSearchBar class="ms-lg-n3" /> -->
 
         <VSpacer />
 
@@ -53,8 +54,10 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
           :languages="themeConfig.app.i18n.langConfig"
         />
         <NavbarThemeSwitcher />
-        <NavbarShortcuts />
-        <NavBarNotifications class="me-1" />
+        <!--
+          <NavbarShortcuts />
+          <NavBarNotifications class="me-1" />
+        -->
         <UserProfile />
       </div>
     </template>

@@ -275,7 +275,7 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
                   </template>
                   <template #footer="">
                     <VFooter>
-                      <div class="d-flex align-center justify-center pa-4">
+                      <div class="d-flex align-center justify-center pa-4 w-100">
                         <div>
                           <VBtn type="" class="me-3">
                             <span>
@@ -283,7 +283,7 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
                             </span>
                           </VBtn>
                         </div>
-                        <div>
+                        <div class="d-flex align-center">
                           <VBtn
                             :disabled="isUndefined(resultbookItems?.pageNumber) || resultbookItems?.pageNumber <= 1" density="comfortable" icon="tabler-arrow-right"
                             variant="tonal" rounded @click="prevPage"

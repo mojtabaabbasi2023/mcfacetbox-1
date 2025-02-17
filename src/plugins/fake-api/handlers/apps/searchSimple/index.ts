@@ -1,39 +1,33 @@
 import is from '@sindresorhus/is'
-import destr from 'destr'
 import { HttpResponse, http } from 'msw'
+import destr from 'destr'
 import { paginateArray } from '@api-utils/paginateArray'
-import { db } from '@/plugins/fake-api/handlers/apps/dataShelf/db'
+import { db } from '@/plugins/fake-api/handlers/apps/searchSimple/db'
 
-export const handlerDataShelf = [
+export const handlerAppsSimpleSearch = [
   // Get Users Details
-  http.get(('/api/apps/dataShelf'), ({ request }) => {
+  http.get(('/api/apps/searchsimple'), ({ request }) => {
     const url = new URL(request.url)
 
+    const q = url.searchParams.get('phrase')
     const itemsPerPage = url.searchParams.get('itemsPerPage')
     const page = url.searchParams.get('page')
-    const nodeId = useToNumber(url.searchParams.get('nodeId') ?? '0').value
-
-    // const nodeId = useToNumber(url.searchParams.get('nodeId') ?? '0').value
-    const parsedNodeId = destr(nodeId)
     const parsedItemsPerPage = destr(itemsPerPage)
     const parsedPage = destr(page)
-
     const itemsPerPageLocal = is.number(parsedItemsPerPage) ? parsedItemsPerPage : 10
     const pageLocal = is.number(parsedPage) ? parsedPage : 1
+    const searchQuery = is.string(q) ? q : undefined
+    const queryLower = (searchQuery ?? '').toString().toLowerCase()
 
-    // filter index
-    const filteredIndexes = db.dataShelfBox.filter(item => {
-      return (item.connectedTreeNode?.id ?? 0) === (is.number(parsedNodeId) ? parsedNodeId : 0)
-    })
-
-    const totalItems = filteredIndexes.length
+    const filtereditems = db.items.filter(items => ((items.text.toLowerCase().includes(queryLower)))).reverse()
+    const totalItems = filtereditems.length
 
     // total pages
     const totalPages = Math.ceil(totalItems / itemsPerPageLocal)
 
     return HttpResponse.json(
       {
-        items: paginateArray(filteredIndexes, itemsPerPageLocal, pageLocal),
+        items: paginateArray(filtereditems, itemsPerPageLocal, pageLocal),
         totalPages,
         totalItems,
         page: pageLocal > Math.ceil(totalItems / itemsPerPageLocal) ? 1 : page,

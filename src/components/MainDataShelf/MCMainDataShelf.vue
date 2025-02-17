@@ -20,6 +20,7 @@ const page = ref(1)
 const totalItems = ref(0)
 const sortBy = ref()
 const orderBy = ref()
+const currentNodeId = ref(0)
 const searchQuery = ref('')
 const selectAll = ref<ISelectAllState>({ state: SelectAllState.Deselect, count: 0 })
 const resultdataItems = ref<IDataShelfBox[]>([])
@@ -39,6 +40,7 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
     page,
     sortBy,
     orderBy,
+    nodeId: currentNodeId,
   },
 }), { immediate: false })
 
@@ -72,6 +74,7 @@ function resetData() {
   selectAll.value.state = SelectAllState.Deselect
   selectAll.value.count = 0
   resultdataItems.value.splice(0)
+  currentNodeId.value = selectenode.simpleTreeModelStored.id
 }
 watch(selectenode.simpleTreeModelStored, async () => {
   try {
@@ -90,12 +93,12 @@ onFetchResponse(response => {
       resultdataItems.value.push(element)
     })
     if (isUndefined(resultdataItems.value))
-      toast.error(t('probleminGetInformation'))
+      toast.error(t('alert.probleminGetInformation'))
     if ((resultData.value?.items.length ?? 0) <= 0)
-      toast.info(t('resultNotFound'))
+      toast.info(t('alert.resultNotFound'))
   })
 })
-onFetchError(() => {
+onFetchError(response => {
   toast.error(t('alert.dataActionFailed'))
 })
 
@@ -273,7 +276,7 @@ function dataBoxItemAddTag(databoxId: number) {
                   activator="parent"
                   location="top center"
                 >
-                  {{ $t('datashelfbox.refreshtobase') }}
+                  {{ $t('datashelfbox.movedown') }}
                 </VTooltip>
               </VBtn>
 
@@ -283,7 +286,7 @@ function dataBoxItemAddTag(databoxId: number) {
                   activator="parent"
                   location="top center"
                 >
-                  {{ $t('datashelfbox.showhistory') }}
+                  {{ $t('datashelfbox.moveup') }}
                 </VTooltip>
               </VBtn>
             </div>

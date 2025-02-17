@@ -2,12 +2,16 @@
 import ContextMenu from '@imengyu/vue3-context-menu'
 import { isUndefined } from '@sindresorhus/is'
 import type { ISearchResultTabBox } from '@/types/SearchResult'
+import { useSelectedNode } from '@/store/treeStore'
+import { SelectionType } from '@/types/baseModels'
 
+const props = defineProps<Props>()
+const { t } = useI18n({ useScope: 'global' })
+const selectenode = useSelectedNode()
+const dialogSelectNodeVisible = ref(false)
 interface Props {
   dataitems: ISearchResultTabBox
 }
-
-const props = defineProps<Props>()
 
 // const props = defineProps<>({
 //   dataitems: {
@@ -37,25 +41,44 @@ const onContextMenu = (e: MouseEvent) => {
   // prevent the browser's default menu
   e.preventDefault()
 
-  // show your menu
   ContextMenu.showContextMenu({
     x: e.x,
     y: e.y,
     items: [
       {
-        label: 'A menu item',
+        disabled: selectenode.simpleTreeModelStored.id <= 0,
+        label: t('datagathering.connecttoselectednode'),
         onClick: () => {
           alert('You click a menu item')
         },
       },
       {
-        label: 'A submenu',
-        children: [
-          { label: 'Item1' },
-          { label: 'Item2' },
-          { label: 'Item3' },
-        ],
+        label: t('datagathering.connecttocustomnode'),
+        onClick: () => {
+          dialogSelectNodeVisible.value = true
+        },
       },
+      {
+        label: t('datagathering.connecttoreserve'),
+        onClick: () => {
+          alert('You click a menu item')
+        },
+      },
+      {
+        label: t('datagathering.copy'),
+        onClick: () => {
+          alert('You click a menu item')
+        },
+      },
+
+    //   {
+    //     label: 'A submenu',
+    //     children: [
+    //       { label: 'Item1' },
+    //       { label: 'Item2' },
+    //       { label: 'Item3' },
+    //     ],
+    //   },
     ],
   })
 }
@@ -67,6 +90,8 @@ const onContextMenu = (e: MouseEvent) => {
       <VTabsWindowItem v-for="item in props.dataitems.content" :key="item.id" :value="item.id">
         <VCard variant="text">
           <VCardText>
+            <MCDialogSelectNode v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" />
+
             <VDataIterator :items="item.content" :items-per-page="1">
               <template #default="{ items }">
                 <VRow

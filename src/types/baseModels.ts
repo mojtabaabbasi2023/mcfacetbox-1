@@ -59,3 +59,8 @@ export enum SelectAllState {
   Deselect = 1,
   Combine = 2,
 }
+
+export enum SelectionType {
+  Single = 0,
+  Multiple = 1,
+}

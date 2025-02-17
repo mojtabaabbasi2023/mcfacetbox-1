@@ -37,19 +37,38 @@ const onContextMenu = (e: MouseEvent) => {
     y: e.y,
     items: [
       {
-        label: 'A menu item',
+        label: t('datagathering.connecttoselectednode'),
         onClick: () => {
           alert('You click a menu item')
         },
       },
       {
-        label: 'A submenu',
-        children: [
-          { label: 'Item1' },
-          { label: 'Item2' },
-          { label: 'Item3' },
-        ],
+        label: t('datagathering.connecttonewnode'),
+        onClick: () => {
+          alert('You click a menu item')
+        },
       },
+      {
+        label: t('datagathering.connecttoreserve'),
+        onClick: () => {
+          alert('You click a menu item')
+        },
+      },
+      {
+        label: t('datagathering.copy'),
+        onClick: () => {
+          alert('You click a menu item')
+        },
+      },
+
+    //   {
+    //     label: 'A submenu',
+    //     children: [
+    //       { label: 'Item1' },
+    //       { label: 'Item2' },
+    //       { label: 'Item3' },
+    //     ],
+    //   },
     ],
   })
 }
