@@ -25,6 +25,11 @@ export const setupGuards = (router: Router) => {
       else allow visiting the page
       (WARN: Don't allow executing further by return statement because next code will check for permissions)
      */
+    // console.log('env', import.meta.env.VITE_APP_TYPE)
+
+    if (!to.path.toUpperCase().includes(import.meta.env.VITE_APP_TYPE))
+      return '404'
+
     if (to.meta.unauthenticatedOnly) {
       if (isLoggedIn)
         return '/'

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { researchSoftwareItems } from '@/navigation/vertical'
+import { researchSoftwareItems, userManagementItems } from '@/navigation/vertical'
 import { themeConfig } from '@themeConfig'
 
 // Components
@@ -13,10 +13,18 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 
 // @layouts plugin
 import { VerticalNavLayout } from '@layouts'
+import type { VerticalNavItems } from '@/@layouts/types'
 
 // SECTION: Loading Indicator
 const isFallbackStateActive = ref(false)
 const refLoadingIndicator = ref<any>(null)
+
+const navItems = computed<VerticalNavItems>(() => {
+  if (import.meta.env.VITE_APP_TYPE === 'UM')
+    return userManagementItems
+  else
+    return researchSoftwareItems
+})
 
 // watching if the fallback state is active and the refLoadingIndicator component is available
 watch([isFallbackStateActive, refLoadingIndicator], () => {
@@ -30,7 +38,7 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
 </script>
 
 <template>
-  <VerticalNavLayout :nav-items="researchSoftwareItems">
+  <VerticalNavLayout :nav-items="[...navItems]">
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">

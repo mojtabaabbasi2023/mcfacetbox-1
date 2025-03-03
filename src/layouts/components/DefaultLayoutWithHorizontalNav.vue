@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { researchSoftwareItems } from '@/navigation/horizontal'
+import { researchSoftwareItems, userManagementItems } from '@/navigation/horizontal'
 
 import { themeConfig } from '@themeConfig'
 
@@ -13,10 +13,18 @@ import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 import { HorizontalNavLayout } from '@layouts'
+import type { HorizontalNavItems } from '@/@layouts/types'
 
 // SECTION: Loading Indicator
 const isFallbackStateActive = ref(false)
 const refLoadingIndicator = ref<any>(null)
+
+const navItems = computed<HorizontalNavItems>(() => {
+  if (import.meta.env.VITE_APP_TYPE === 'UM')
+    return userManagementItems
+  else
+    return researchSoftwareItems
+})
 
 // watching if the fallback state is active and the refLoadingIndicator component is available
 watch([isFallbackStateActive, refLoadingIndicator], () => {
@@ -30,7 +38,7 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
 </script>
 
 <template>
-  <HorizontalNavLayout :nav-items="researchSoftwareItems" :app-logo="themeConfig.app.logo" :app-title="themeConfig.app.title">
+  <HorizontalNavLayout :nav-items="[...navItems]" :app-logo="themeConfig.app.logo" :app-title="themeConfig.app.title">
     <!-- 👉 navbar -->
     <template #navbar>
       <RouterLink to="/" class="app-logo d-flex align-center gap-x-3">

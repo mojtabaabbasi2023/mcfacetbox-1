@@ -16,8 +16,15 @@ export const redirects: RouteRecordRaw[] = [
 
       //   const userRole = userData.value?.role
 
-      if (userData.value)
-        return { name: 'um-gate-management' }
+      if (userData.value) {
+        if (import.meta.env.VITE_APP_TYPE === 'UM')
+          return { name: 'um-gate-management' }
+
+        else
+          return { name: 'rs-main' }
+      }
+
+      // return { name: 'um-gate-managenment' }
 
       //   if (userRole === 'client')
       //   return { name: 'access-control' }
