@@ -128,16 +128,16 @@ const login = async () => {
     </RouterLink>
   -->
 
-  <div v-if="!loginfailed" class="validation-container">
-    <h2>در حال اعتبارسنجی ...</h2>
-    <p>لطفاً صبر کنید، در حال بررسی اطلاعات شما هستیم.</p>
+  <div v-if="!loginfailed" class="welcome-msg-container">
+    <h2>{{ $t('authenticating') }}</h2>
+    <p>{{ $t('authenticatingplzwait') }}</p>
     <div class="loader" />
     <img class="auth-footer-mask" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100">
   </div>
 
-  <div v-else class="validation-container">
-    <h2>ورود با مشکل مواجه شد</h2>
-    <p>چند دقیقه دیگر صفحه را بروزرسانی کنید</p>
+  <div v-else class="welcome-msg-container">
+    <h2>$t{{ $t('authenticateerror') }}</h2>
+    <p>{{ $t('plzretryafewmin') }}</p>
     <VIcon icon="tabler-alert-octagon" size="44" color="error" />
     <img class="auth-footer-mask" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100">
   </div>
@@ -156,14 +156,6 @@ const login = async () => {
 
 <style lang="scss" scoped>
 @use "@core/scss/template/pages/page-auth.scss";
-.validation-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  text-align: center;
-}
 
 .loader {
   border: 8px solid #f3f3f3; /* Light grey */
