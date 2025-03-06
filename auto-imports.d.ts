@@ -71,6 +71,7 @@ declare global {
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const h: typeof import('vue')['h']
   const handleFetchError: typeof import('./src/utils/api')['handleFetchError']
+  const handleUnauthorized: typeof import('./src/utils/api')['handleUnauthorized']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
@@ -456,6 +457,7 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly handleFetchError: UnwrapRef<typeof import('./src/utils/api')['handleFetchError']>
+    readonly handleUnauthorized: UnwrapRef<typeof import('./src/utils/api')['handleUnauthorized']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>

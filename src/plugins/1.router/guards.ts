@@ -27,7 +27,8 @@ export const setupGuards = (router: Router) => {
      */
     // console.log('env', import.meta.env.VITE_APP_TYPE)
 
-    if (!to.path.toUpperCase().includes(import.meta.env.VITE_APP_TYPE))
+    // بررسی اینکه صفحه مورد نظر کاربر باید در محدوده اپلیکیشن مورد استفاده باشد
+    if (!to.path.toUpperCase().includes(import.meta.env.VITE_APP_TYPE) && !to.meta.unauthenticatedOnly)
       return '404'
 
     if (to.meta.unauthenticatedOnly) {

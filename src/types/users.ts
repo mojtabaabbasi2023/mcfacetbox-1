@@ -30,7 +30,7 @@ export interface IToken {
 }
 
 export interface ITokenProfile extends IToken {
-  profile: IProfile
+  profile: IProfile | null
 }
 
 export class UserModel implements IUser {

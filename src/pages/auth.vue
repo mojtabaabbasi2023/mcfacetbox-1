@@ -47,6 +47,8 @@ async function sendTokenRequest(systemKey: string) {
     })
 
     if (result.token) {
+      console.log('result', result)
+
       useCookie<ITokenProfile>('userData').value = result
       useCookie('accessToken').value = result.token
       useCookie('userAbilityRules').value = JSON.stringify([{ action: 'manage', subject: 'all' }])
@@ -69,15 +71,18 @@ async function sendTokenRequest(systemKey: string) {
     loginfailed.value = true
   }
 }
+async function tryLogin() {
+  await nextTick(() => {
+    window.location.href = `${ServerApiAddress}signin?returnUrl=http://localhost:5173/auth?key={0}`
+  })
+}
 onMounted(async () => {
   if ((route.query.key?.length ?? 0) > 0) {
     // route.query.key?.toString() ?? ''
     sendTokenRequest(route.query.key?.toString() ?? '')
   }
   else {
-    await nextTick(() => {
-      window.location.href = `${ServerApiAddress}account/Login?returnUrl=http://localhost:5173/auth?key={0}`
-    })
+    await tryLogin()
   }
 })
 
@@ -136,9 +141,15 @@ const login = async () => {
   </div>
 
   <div v-else class="welcome-msg-container">
-    <h2>$t{{ $t('authenticateerror') }}</h2>
+    <h2>{{ $t('authenticateerror') }}</h2>
     <p>{{ $t('plzretryafewmin') }}</p>
-    <VIcon icon="tabler-alert-octagon" size="44" color="error" />
+    <VIcon icon="tabler-alert-octagon" size="44" class="mb-3" color="error" />
+    <VBtn
+      class="mb-11"
+      @click="tryLogin"
+    >
+      {{ $t('retry') }}
+    </VBtn>
     <img class="auth-footer-mask" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100">
   </div>
   <!--

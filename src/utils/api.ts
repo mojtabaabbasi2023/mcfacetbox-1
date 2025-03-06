@@ -1,4 +1,5 @@
 import { ofetch } from 'ofetch'
+import { useRouter } from 'vue-router'
 
 export class CustomFetchError extends Error {
   public code: number
@@ -11,11 +12,16 @@ export class CustomFetchError extends Error {
   }
 }
 
+export const handleUnauthorized = () => {
+  const router = useRouter()
+
+  router.push('/login')
+}
+
 export const handleFetchError = (response: Response) => {
-//   const router = useRouter()
   if (HttpStatusCodesWasHandled.includes(response.status, 0)) {
-    // if (response.status === 401)
-    //   router.push('/auth')
+    if (response.status === 403)
+      handleUnauthorized()
     throw new CustomFetchError(response.status, 'Error Was Handled', response)
   }
   else { throw new CustomFetchError(0, 'Error Not Handled', response) }
@@ -26,6 +32,7 @@ export const $api = ofetch.create({
   timeout: 10000,
   async onRequest({ options }) {
     const accessToken = useCookie('accessToken').value
+
     if (accessToken) {
       options.headers = {
         ...options.headers,

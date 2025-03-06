@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import { isNull } from '@sindresorhus/is'
+import type { ITokenProfile } from '@/types/users'
 
 const router = useRouter()
 const ability = useAbility()
 
 // TODO: Get type from backend
-const userData = useCookie<any>('userData')
+const userData = useCookie<ITokenProfile>('userData')
 
 const logout = async () => {
   // Remove "accessToken" from cookie
   useCookie('accessToken').value = null
 
   // Remove "userData" from cookie
-  userData.value = null
+  userData.value.profile = null
 
   // Redirect to login page
   await router.push('/login')
@@ -25,20 +27,25 @@ const logout = async () => {
   ability.update([])
 }
 
+// const userProfileList = [
+//   { type: 'divider' },
+//   { type: 'navItem', icon: 'tabler-user', title: 'Profile', to: { name: 'apps-user-view-id', params: { id: 21 } } },
+//   { type: 'navItem', icon: 'tabler-settings', title: 'Settings', to: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
+//   { type: 'navItem', icon: 'tabler-file-dollar', title: 'Billing Plan', to: { name: 'pages-account-settings-tab', params: { tab: 'billing-plans' } }, badgeProps: { color: 'error', content: '4' } },
+//   { type: 'divider' },
+//   { type: 'navItem', icon: 'tabler-currency-dollar', title: 'Pricing', to: { name: 'pages-pricing' } },
+//   { type: 'navItem', icon: 'tabler-question-mark', title: 'FAQ', to: { name: 'pages-faq' } },
+// ]
 const userProfileList = [
   { type: 'divider' },
-  { type: 'navItem', icon: 'tabler-user', title: 'Profile', to: { name: 'apps-user-view-id', params: { id: 21 } } },
+  { type: 'navItem', icon: 'tabler-user', title: 'profile', to: { name: 'apps-user-view-id', params: { id: 21 } } },
   { type: 'navItem', icon: 'tabler-settings', title: 'Settings', to: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
-  { type: 'navItem', icon: 'tabler-file-dollar', title: 'Billing Plan', to: { name: 'pages-account-settings-tab', params: { tab: 'billing-plans' } }, badgeProps: { color: 'error', content: '4' } },
-  { type: 'divider' },
-  { type: 'navItem', icon: 'tabler-currency-dollar', title: 'Pricing', to: { name: 'pages-pricing' } },
-  { type: 'navItem', icon: 'tabler-question-mark', title: 'FAQ', to: { name: 'pages-faq' } },
 ]
 </script>
 
 <template>
   <VBadge
-    v-if="userData"
+    v-if="userData.profile != null"
     dot
     bordered
     location="bottom right"
@@ -49,12 +56,12 @@ const userProfileList = [
     <VAvatar
       size="38"
       class="cursor-pointer"
-      :color="!(userData && userData.avatar) ? 'primary' : undefined"
-      :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
+      :color="!(!isNull(userData.profile) && userData.profile.avatarUrl) ? 'primary' : undefined"
+      :variant="!(!isNull(userData.profile) && userData.profile.avatarUrl) ? 'tonal' : undefined"
     >
       <VImg
-        v-if="userData && userData.avatar"
-        :src="userData.avatar"
+        v-if="!isNull(userData.profile) && userData.profile.avatarUrl"
+        :src="userData.profile.avatarUrl"
       />
       <VIcon
         v-else
@@ -81,12 +88,12 @@ const userProfileList = [
                   bordered
                 >
                   <VAvatar
-                    :color="!(userData && userData.avatar) ? 'primary' : undefined"
-                    :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
+                    :color="!(!isNull(userData.profile) && userData.profile.avatarUrl) ? 'primary' : undefined"
+                    :variant="!(!isNull(userData.profile) && userData.profile.avatarUrl) ? 'tonal' : undefined"
                   >
                     <VImg
-                      v-if="userData && userData.avatar"
-                      :src="userData.avatar"
+                      v-if="!isNull(userData.profile) && userData.profile.avatarUrl"
+                      :src="userData.profile.avatarUrl"
                     />
                     <VIcon
                       v-else
@@ -98,9 +105,9 @@ const userProfileList = [
             </template>
 
             <VListItemTitle class="font-weight-medium">
-              {{ userData.fullName || userData.username }}
+              {{ userData.profile.fullName || userData.profile.email }}
             </VListItemTitle>
-            <VListItemSubtitle>{{ userData.role }}</VListItemSubtitle>
+            <!-- <VListItemSubtitle>{{ userData.role }}</VListItemSubtitle> -->
           </VListItem>
 
           <PerfectScrollbar :options="{ wheelPropagation: false }">
@@ -119,18 +126,20 @@ const userProfileList = [
                   />
                 </template>
 
-                <VListItemTitle>{{ item.title }}</VListItemTitle>
+                <VListItemTitle>{{ $t(item.title ?? '') }}</VListItemTitle>
 
-                <template
+                <!--
+                  <template
                   v-if="item.badgeProps"
                   #append
-                >
+                  >
                   <VBadge
-                    rounded="sm"
-                    class="me-3"
-                    v-bind="item.badgeProps"
+                  rounded="sm"
+                  class="me-3"
+                  v-bind="item.badgeProps"
                   />
-                </template>
+                  </template>
+                -->
               </VListItem>
 
               <VDivider
@@ -147,7 +156,7 @@ const userProfileList = [
                 append-icon="tabler-logout"
                 @click="logout"
               >
-                Logout
+                {{ $t('logout') }}
               </VBtn>
             </div>
           </PerfectScrollbar>
