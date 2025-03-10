@@ -2,14 +2,14 @@ import type { FetchError } from 'ofetch'
 
 export async function serviceAdd<T extends BodyInit | Record<string, any>>(dataModel: T, serviceUrl: string) {
   const serviceData = ref(0)
-  const serviceError = ref('')
+  const serviceError = ref()
   try {
     await $api(serviceUrl, {
       method: 'POST',
       body: JSON.parse(JSON.stringify(dataModel)),
       ignoreResponseError: false,
     }).then(response => {
-      serviceData.value = response.body
+      serviceData.value = response
     }, error => {
       const temp = (error as FetchError)
 
@@ -19,7 +19,7 @@ export async function serviceAdd<T extends BodyInit | Record<string, any>>(dataM
     })
   }
   catch (error) {
-    serviceError.value = 'error'
+    serviceError.value = error
   }
 
   return { serviceData, serviceError }
@@ -54,20 +54,12 @@ export async function serviceDelete(id: number, serviceUrl: string) {
   const serviceData = ref()
   const serviceError = ref()
 
-  await $api((`${serviceUrl}/`).replace('//', '/') + id, {
+  serviceData.value = await $api((`${serviceUrl}/`).replace('//', '/') + id, {
     method: 'DELETE',
     parseResponse: JSON.parse,
-    onResponse({ request, response, options }) {
-      serviceData.value = response
-
-      // console.log("[fetch response]", request, response.status, response._data.body);
-    },
-    onResponseError({ response }) {
-      serviceError.value = response._data.errors
-    },
   },
   ).catch(error => {
-    serviceError.value = error.data
+    serviceError.value = error
   })
 
   return { serviceData, serviceError }

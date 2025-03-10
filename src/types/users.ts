@@ -12,7 +12,19 @@ export interface IUser extends baseDataTableModel {
   expireDate: string
   description: string
 }
-export interface IProfile {
+export interface IUserBase {
+  id: string
+  fullName: string
+  phoneNumber: string
+  email: string
+}
+export class UserBaseModel implements IUserBase {
+  id: string = ''
+  fullName: string = ''
+  phoneNumber: string = ''
+  email: string = ''
+}
+export interface IProfile extends IUserBase {
   userName: string
   email: string
   name: string

@@ -17,7 +17,7 @@ const logout = async () => {
   userData.value.profile = null
 
   // Redirect to login page
-  await router.push('/login')
+  //   await router.push('/login')
 
   // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
   // Remove "userAbilities" from cookie
@@ -25,6 +25,15 @@ const logout = async () => {
 
   // Reset ability to initial ability
   ability.update([])
+  await nextTick(() => {
+    window.location.href = `${ServerApiAddress}signout?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}login`
+  })
+}
+
+function avatarUrl(): string {
+  console.log('avatar', userData.value.profile?.avatarUrl.replace('xxx', 'small'))
+
+  return userData.value.profile?.avatarUrl.replace('xxx', 'small') ?? ''
 }
 
 // const userProfileList = [
@@ -61,7 +70,7 @@ const userProfileList = [
     >
       <VImg
         v-if="!isNull(userData.profile) && userData.profile.avatarUrl"
-        :src="userData.profile.avatarUrl"
+        :src="userData.profile?.avatarUrl.replace('xxx', 'small') ?? ''"
       />
       <VIcon
         v-else
@@ -93,7 +102,7 @@ const userProfileList = [
                   >
                     <VImg
                       v-if="!isNull(userData.profile) && userData.profile.avatarUrl"
-                      :src="userData.profile.avatarUrl"
+                      :src="userData.profile?.avatarUrl.replace('xxx', 'small') ?? ''"
                     />
                     <VIcon
                       v-else

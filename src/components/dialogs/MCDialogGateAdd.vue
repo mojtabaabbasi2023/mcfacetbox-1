@@ -5,8 +5,8 @@ import { useToast } from 'vue-toastification'
 import { VForm } from 'vuetify/components/VForm'
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
 import { serviceAdd, serviceUpdate } from '@/services/genericServices'
-import type { GateProperties } from '@/types/gate'
-import { GateModel } from '@/types/gate'
+import type { GateProperties, IGateNewItem } from '@/types/gate'
+import { GateNewItemModel, GatePropMappedToNewItem } from '@/types/gate'
 
 const props = defineProps({
   isDialogVisible: Boolean,
@@ -26,14 +26,21 @@ interface Emit {
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const isactive = ref(true)
 const isloading = ref(false)
-const gateData = reactive<GateProperties>(new GateModel())
+const gateData = reactive<IGateNewItem>(new GateNewItemModel())
+
+const onReset = () => {
+  isloading.value = false
+  gateData.id = 0
+  emit('update:isDialogVisible', false)
+  refForm.value?.reset()
+  refForm.value?.resetValidation()
+}
 
 async function gateAdd() {
-  const { serviceData, serviceError } = await serviceAdd<GateProperties>(gateData.value, props.gateApiUrl == undefined ? '' : props.gateApiUrl)
+  const { serviceData, serviceError } = await serviceAdd<IGateNewItem>(gateData, props.gateApiUrl === undefined ? '' : props.gateApiUrl)
   if (serviceData.value) {
-    toast.success(t('dataActionSuccess'))
+    toast.success(t('alert.dataActionSuccess'))
     emit('gateDataAdded', serviceData.value)
     emit('update:isDialogVisible', false)
     nextTick(() => {
@@ -41,12 +48,15 @@ async function gateAdd() {
     })
   }
   else if (serviceError.value) {
-    toast.error(t('dataActionFailed'))
+    if (serviceError.value instanceof CustomFetchError)
+      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+    else toast.error(t('httpstatuscodes.0'))
   }
+  isloading.value = false
 }
 
 async function gateEdit() {
-  const { serviceData, serviceError } = await serviceUpdate<GateProperties>(gateData.value, gateData.value.id, props.gateApiUrl == undefined ? '' : props.gateApiUrl)
+  const { serviceData, serviceError } = await serviceUpdate<IGateNewItem>(gateData, gateData.id, props.gateApiUrl === undefined ? '' : props.gateApiUrl)
 
   console.log('gateedit', serviceData.value, serviceError.value)
 
@@ -61,34 +71,24 @@ async function gateEdit() {
   else if (serviceError.value) {
     toast.error(t('alert.dataActionFailed'))
   }
+  isloading.value = false
 }
 
 const onSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
       isloading.value = true
-      setTimeout(() => {
-        isloading.value = false
-        if (gateData.value.id > 0)
-          gateEdit()
-
-        else
-          gateAdd()
-      }, 3000)
+      if (gateData.id > 0)
+        gateEdit()
+      else
+        gateAdd()
     }
   })
 }
 
-const onReset = () => {
-  isloading.value = false
-  gateData.value.id = 0
-  emit('update:isDialogVisible', false)
-  refForm.value?.reset()
-  refForm.value?.resetValidation()
-}
-
 const updateGate = (gateDataItem: GateProperties) => {
-  objectMap(gateData, useCloned(gateDataItem))
+//   gateData = GatePropMappedToNewItem(gateDataItem)
+  Object.assign(gateData, GatePropMappedToNewItem(gateDataItem))
 }
 
 defineExpose({ updateGate })
@@ -110,8 +110,8 @@ defineExpose({ updateGate })
             <!-- 👉 Gate Title -->
             <VCol cols="12">
               <AppTextField
-                v-model="gateData.gateTitle"
-                :rules="[requiredValidator(gateData.gateTitle, $t('validatorrequired'))]"
+                v-model="gateData.title"
+                :rules="[requiredValidator(gateData.title, $t('validatorrequired'))]"
                 :label="$t('gate.title')" placeholder=""
               />
             </VCol>
@@ -121,8 +121,8 @@ defineExpose({ updateGate })
                 <!-- 👉 Contact -->
                 <VCol cols="12" sm="6">
                   <AppTextField
-                    v-model="gateData.contact" type="number"
-                    :rules="[requiredValidator(gateData.contact, $t('validatorrequired'))]"
+                    v-model="gateData.phoneNumber" type="number"
+                    :rules="[requiredValidator(gateData.phoneNumber, $t('validatorrequired'))]"
                     :label="$t('mobilenumber')" placeholder="09xx-xxx-xx-xx"
                   />
                 </VCol>
@@ -139,31 +139,33 @@ defineExpose({ updateGate })
             <VCol cols="12">
               <VRow>
                 <!-- 👉 Name -->
-                <VCol sm="6" cols="12">
+                <!--
+                  <VCol sm="6" cols="12">
                   <AppTextField
-                    v-model="gateData.nameFamily"
-                    :rules="[requiredValidator(gateData.nameFamily, $t('validatorrequired'))]"
-                    :label="$t('nameandfamily')" placeholder=""
+                  v-model="gateData.fullname"
+                  :label="$t('nameandfamily')" placeholder=""
                   />
-                </VCol>
+                  </VCol>
+                -->
+                <!-- :rules="[requiredValidator(gateData.nameFamily, $t('validatorrequired'))]" -->
                 <!-- 👉 UserType -->
-                <VCol sm="4" cols="12">
+                <VCol sm="12" cols="12">
                   <AppSelect
-                    v-model="gateData.userType" :label="$t('usertype')"
+                    v-model="gateData.gateTypeId" :label="$t('usertype')"
                     placeholder="Select Role"
-                    :rules="[requiredValidator(gateData.userType, $t('validatorrequired'))]"
-                    :items="['Admin', 'Author', 'Editor', 'Maintainer', 'Subscriber']"
+                    :rules="[requiredValidator(gateData.gateTypeId, $t('validatorrequired'))]"
+                    :items="[{ value: 1, title: 'حقیقی' }, { value: 2, title: 'حقوقی' }]"
                   />
                 </VCol>
                 <VCol sm="2" cols="12" align-self="end">
-                  <VSwitch v-model="gateData.active" :label="$t('active')" />
+                  <VSwitch v-model="gateData.isActive" :label="$t('active')" />
                 </VCol>
               </VRow>
             </VCol>
             <VCol cols="12">
               <AppTextarea
                 v-model="gateData.description" :label="$t('description')"
-                placeholder="Write note here..." :rows="4"
+                :placeholder="$t('writenotehere')" :rows="4"
               />
             </VCol>
 

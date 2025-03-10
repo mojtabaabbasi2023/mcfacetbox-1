@@ -32,14 +32,16 @@ const selectedStatus = ref()
 const highlightedItemIndex = ref(0)
 const datatableItems = ref<Array<baseDataTableModel>>([])
 
-const itemsPerPage = ref(10)
-const page = ref(1)
-const sortBy = ref()
+const pageSize = ref(10)
+const pageNumber = ref(1)
+const sorting = ref()
 const orderBy = ref()
 
 const updateOptions = (options: any) => {
-  sortBy.value = options.sortBy[0]?.key
-  orderBy.value = options.sortBy[0]?.order
+  console.log('options', options)
+
+//   sorting.value = options.sorting[0]?.key
+//   orderBy.value = options.sorting[0]?.order
 }
 
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse } = useApi<GridResult<baseDataTableModel>>(createUrl(props.apiUrl, {
@@ -47,9 +49,9 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
     q: searchQuery,
     status: selectedStatus,
     plan: selectedPlan,
-    itemsPerPage,
-    page,
-    sortBy,
+    pageSize,
+    pageNumber,
+    sorting,
     orderBy,
   },
 }), { immediate: false })
@@ -169,7 +171,7 @@ defineExpose({ refreshData })
             {{ $t('Show') }}
           </p>
           <AppSelect
-            :model-value="itemsPerPage"
+            :model-value="pageSize"
             :items="[
               { value: 10, title: '10' },
               { value: 25, title: '25' },
@@ -178,7 +180,7 @@ defineExpose({ refreshData })
               { value: -1, title: 'All' },
             ]"
             style="inline-size: 5.5rem;"
-            @update:model-value="itemsPerPage = parseInt($event, 10)"
+            @update:model-value="pageSize = parseInt($event, 10)"
           />
         </div>
       </VCardTitle>
@@ -189,8 +191,8 @@ defineExpose({ refreshData })
       <VDataTableServer
         ref="datatable"
         v-model="selectedItem"
-        v-model:items-per-page="itemsPerPage"
-        v-model:page="page"
+        v-model:items-per-page="pageSize"
+        v-model:page="pageNumber"
         item-selectable="selectable"
         :items-per-page-options="[
           { value: 10, title: '10' },
@@ -200,12 +202,12 @@ defineExpose({ refreshData })
         ]"
         :items="datatableItems"
         item-value="id"
-        :items-length="resultData?.totalItems == undefined ? 0 : resultData.totalItems"
+        :items-length="resultData?.totalCount === undefined ? 0 : resultData.totalCount"
         :headers="props.headers"
         class="text-no-wrap"
         height="300"
         density="compact"
-        :fixed-header="true"
+        fixed-header
         show-select
         :loading="loadingdata"
         select-strategy="single"
@@ -218,7 +220,7 @@ defineExpose({ refreshData })
         -->
         <template
           v-for="header in props.headers"
-          #[`item.${header.key}`]="{ item, index }"
+          #[`item.${header.key}`]="{ item, index } "
         >
           <slot
             :name="`item.${header.key}`"
@@ -256,9 +258,9 @@ defineExpose({ refreshData })
         </template>
         <template #bottom>
           <TablePagination
-            v-model:page="page"
-            :items-per-page="itemsPerPage"
-            :total-items="resultData?.totalItems == undefined ? 0 : resultData?.totalItems"
+            v-model:page="pageNumber"
+            :items-per-page="pageSize"
+            :total-items="resultData?.totalCount === undefined ? 0 : resultData?.totalCount"
           />
         </template>
       </VDataTableServer>

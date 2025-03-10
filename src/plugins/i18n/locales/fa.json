@@ -10,6 +10,7 @@
   'settings': 'تنظیمات',
   'deactive': 'غیرفعال',
   'description': 'توضیحات',
+  'writenotehere':"توضیحات مورد نظر را اینجا بنویسید",
   'usertype': 'نوع کاربری',
   'nameandfamily': 'نام و نام خانوادگی',
   'email': 'پست الکترونیک',
@@ -18,6 +19,7 @@
   'hadith': 'حدیث',
   'ayah': 'آیه',
   'word': 'لغت',
+  'projectcount':"تعداد پروژه ها",
   'gate': {
     'pageTitle': 'درگاه ها',
     'title': 'عنوان درگاه',

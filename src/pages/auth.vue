@@ -73,7 +73,7 @@ async function sendTokenRequest(systemKey: string) {
 }
 async function tryLogin() {
   await nextTick(() => {
-    window.location.href = `${ServerApiAddress}signin?returnUrl=http://localhost:5173/auth?key={0}`
+    window.location.href = `${ServerApiAddress}signin?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}auth?key={0}`
   })
 }
 onMounted(async () => {
