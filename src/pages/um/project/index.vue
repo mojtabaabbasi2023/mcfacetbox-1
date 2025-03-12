@@ -15,12 +15,12 @@ const isAddNewProjectDialogVisible = ref(false)
 const isAddNewTreeDialogVisible = ref(false)
 const projectApiUrl = 'app/project'
 const treeApiUrl = 'app/tree'
-const treeDataItems = ref<ITreeTitle[]>([])
 
 const toast = useToast()
 
 // GateHeaders
 const projectHeaders = [
+  { text: '0', value: 'num', sortable: false },
   { title: t('project.title'), key: 'title' },
   { title: t('role.trees'), key: 'trees', sortable: false },
   { title: t('createDate'), key: 'creationTime' },
@@ -30,6 +30,7 @@ const projectHeaders = [
 ]
 
 const treeHeaders = [
+  { text: '0', value: 'num', sortable: false },
   { title: t('tree.title'), key: 'title' },
   { title: t('tree.autorizedbook'), key: 'book' },
   { title: t('description'), key: 'description', sortable: false },
@@ -41,28 +42,20 @@ const treeHeaders = [
 
 const projectEdit = (dataItem: Record<string, any>) => {
   isAddNewProjectDialogVisible.value = true
-  dialogProject.value.updateProject({ ...dataItem })
+  dialogProject.value.updateProject(dataItem.id)
 }
 
 const treeEdit = (dataItem: Record<string, any>) => {
   isAddNewTreeDialogVisible.value = true
-  dialogTree.value.updateTreeTitle({ ...dataItem })
+  dialogTree.value.updateTreeTitle(dataItem.id)
 }
 
-const projectDataAdded = (projectDataId: number) => {
+const projectDataAdded = () => {
   mcdatatableProject.value.refreshData()
 }
 
-const treeTitleDataAdded = (treeDataId: number) => {
+const treeTitleDataAdded = () => {
   mcdatatableTree.value.refreshData()
-}
-
-const treeLoadCompleted = (dataItems: ITreeTitle[]) => {
-  console.log('treedatabefor', dataItems)
-
-  treeDataItems.value.splice(0)
-  treeDataItems.value.push(...dataItems)
-  console.log('treedataafter', treeDataItems)
 }
 
 const selectBook = (treeid: number) => {
@@ -121,7 +114,7 @@ const selectBook = (treeid: number) => {
         <VCard>
           <MCDataTable
             ref="mcdatatableTree" :headers="treeHeaders" :api-url="treeApiUrl"
-            @edit-item="treeEdit" @load-completed="treeLoadCompleted"
+            @edit-item="treeEdit"
           >
             <template #item.book="{ value }">
               <div class="d-flex align-center gap-x-4">
@@ -148,12 +141,12 @@ const selectBook = (treeid: number) => {
     </VRow>
     <!-- 👉 Add New User -->
     <MCDialogProjectAdd
-      ref="dialogProject" v-model:is-dialog-visible="isAddNewProjectDialogVisible"
-      :api-url="projectApiUrl" :tree-list="treeDataItems" @project-data-added="projectDataAdded"
+      v-if="isAddNewProjectDialogVisible" ref="dialogProject" v-model:is-dialog-visible="isAddNewProjectDialogVisible"
+      :api-url="projectApiUrl" @project-data-added="projectDataAdded" @project-data-updated="projectDataAdded"
     />
     <MCDialogTreeAdd
-      ref="dialogTree" v-model:is-dialog-visible="isAddNewTreeDialogVisible"
-      :api-url="treeApiUrl" @tree-title-data-added="treeTitleDataAdded"
+      v-if="isAddNewTreeDialogVisible" ref="dialogTree" v-model:is-dialog-visible="isAddNewTreeDialogVisible"
+      :api-url="treeApiUrl" @tree-title-data-added="treeTitleDataAdded" @tree-data-updated="treeTitleDataAdded"
     />
   </section>
 </template>

@@ -18,13 +18,16 @@ export function createTreeIndex(tree: ISimpleTree[]): Record<number, ISimpleTree
 export interface ITreeTitle extends Record<string, any>, baseItemState {
   id: number
   title: string
-  book: ISimpleDTO[]
+
+  //   book: ISimpleDTO[]
   createDate: string
   isActive: boolean
+  projectsCount: number
   description: string
 }
 
 export class TreeTitleModel implements ITreeTitle {
+  projectsCount: number = 0
   editing?: boolean | undefined = false
   loading?: boolean | undefined = false
   selected?: boolean | undefined = false
@@ -32,7 +35,8 @@ export class TreeTitleModel implements ITreeTitle {
   [x: string]: any;
   id: number = 0
   title: string = ''
-  book: ISimpleDTO[] = []
+
+  //   book: ISimpleDTO[] = []
   createDate: string = ''
   isActive: boolean = false
   description: string = ''

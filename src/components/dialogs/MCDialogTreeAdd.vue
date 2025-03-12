@@ -18,14 +18,16 @@ const toast = useToast()
 
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
-  (e: 'treeTitleDataAdded', value: number): void
-  (e: 'treeTitleDataUpdated', value: number): void
+  (e: 'treeTitleDataAdded'): void
+  (e: 'treeTitleDataUpdated'): void
 
 }
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const isloading = ref(false)
+const opening = ref(false)
+const router = useRouter()
 const treeTitleData = reactive<ITreeTitle>(new TreeTitleModel())
 
 const onReset = () => {
@@ -39,17 +41,19 @@ const onReset = () => {
 async function projectAdd() {
   treeTitleData.gateId = 3
 
-  const { serviceData, serviceError } = await serviceAdd<ITreeTitle>(treeTitleData, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (serviceData.value) {
+  const { serviceError } = await serviceAdd<ITreeTitle>(treeTitleData, props.apiUrl === undefined ? '' : props.apiUrl)
+  if (!serviceError.value) {
     toast.success(t('alert.dataActionSuccess'))
-    emit('treeTitleDataAdded', serviceData.value)
+    emit('treeTitleDataAdded')
     emit('update:isDialogVisible', false)
     nextTick(() => {
       onReset()
     })
   }
-  else if (serviceError.value) {
-    toast.error(t('alert.dataActionFailed'))
+  else {
+    if (serviceError.value instanceof CustomFetchError)
+      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+    else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
 }
@@ -57,17 +61,19 @@ async function projectAdd() {
 async function projectEdit() {
   treeTitleData.gateId = 3
 
-  const { serviceData, serviceError } = await serviceUpdate<ITreeTitle>(treeTitleData, treeTitleData.id, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (serviceData.value) {
+  const { serviceError } = await serviceUpdate<ITreeTitle>(treeTitleData, treeTitleData.id, props.apiUrl === undefined ? '' : props.apiUrl)
+  if (!serviceError.value) {
     toast.success(t('alert.dataActionSuccess'))
-    emit('treeTitleDataUpdated', serviceData.value)
+    emit('treeTitleDataUpdated')
     emit('update:isDialogVisible', false)
     nextTick(() => {
       onReset()
     })
   }
-  else if (serviceError.value) {
-    toast.error(t('alert.dataActionFailed'))
+  else {
+    if (serviceError.value instanceof CustomFetchError)
+      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+    else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
 }
@@ -85,8 +91,23 @@ const onSubmit = () => {
   })
 }
 
-const updateTreeTitle = (treeTitleDataItem: ITreeTitle) => {
-  objectMap(treeTitleData, useCloned(treeTitleDataItem))
+const updateTreeTitle = async (treeId: number) => {
+  try {
+    opening.value = true
+
+    const treeDataItem = await $api(router)<ITreeTitle>(`app/tree/${treeId}`)
+
+    Object.assign(treeTitleData, treeDataItem)
+
+    opening.value = false
+  }
+  catch (error) {
+    opening.value = false
+    if (error instanceof CustomFetchError)
+      toast.error(t(`httpstatuscodes.${error.code}`))
+    else toast.error(t('httpstatuscodes.0'))
+    emit('update:isDialogVisible', false)
+  }
 }
 
 defineExpose({ updateTreeTitle })
@@ -98,10 +119,10 @@ defineExpose({ updateTreeTitle })
     persistent @update:model-value="onReset"
   >
     <DialogCloseBtn :disabled="isloading" @click="onReset" />
-    <VCard flat :title="$t('tree.addedit')" :subtitle="$t('tree.addeditsubtitle')">
+    <VCard flat :title="$t('tree.addedit')" :subtitle="$t('tree.addeditsubtitle')" :loading="opening">
       <VCardText>
         <!-- 👉 Form -->
-        <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
+        <VForm ref="refForm" v-model="isFormValid" :disabled="opening" @submit.prevent="onSubmit">
           <VRow>
             <VCol cols="12">
               <AppTextField
@@ -120,7 +141,7 @@ defineExpose({ updateTreeTitle })
             <VCol cols="12">
               <AppTextarea
                 v-model="treeTitleData.description" :label="$t('description')"
-                placeholder="Write note here..." :rows="4"
+                :placeholder="$t('writenotehere')" :rows="4"
               />
             </VCol>
             <VCol cols="12">

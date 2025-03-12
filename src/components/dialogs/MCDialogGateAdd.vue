@@ -103,9 +103,6 @@ const updateGate = async (gateId: number) => {
     else toast.error(t('httpstatuscodes.0'))
     emit('update:isDialogVisible', false)
   }
-
-  //   gateData = GatePropMappedToNewItem(gateDataItem)
-//   Object.assign(gateData, GatePropMappedToNewItem(gateDataItem))
 }
 
 defineExpose({ updateGate })

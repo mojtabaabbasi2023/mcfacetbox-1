@@ -7,11 +7,11 @@ import { serviceAdd, serviceUpdate } from '@/services/genericServices'
 import type { IProject } from '@/types/project'
 import { ProjectModel } from '@/types/project'
 import type { ITreeTitle } from '@/types/tree'
+import type { GridResult, ISimpleDTO } from '@/types/baseModels'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
   apiUrl: String,
-  treeList: { type: Array<ITreeTitle> },
 })
 
 const emit = defineEmits<Emit>()
@@ -20,23 +20,24 @@ const toast = useToast()
 
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
-  (e: 'projectDataAdded', value: number): void
-  (e: 'projectDataUpdated', value: number): void
+  (e: 'projectDataAdded'): void
+  (e: 'projectDataUpdated'): void
 
 }
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const isloading = ref(false)
+const opening = ref(false)
 const projectData = reactive<IProject>(new ProjectModel())
-
-// const treeList = reactive([{ id: 1, title: 'پژوهشگر' }, { id: 2, title: 'مدیر کل' }, { id: 3, title: 'ناظر' }, { id: 4, title: 'ارزیاب یک' }, { id: 5, title: 'ارزیاب دو' }, { id: 6, title: 'مدیر نظارت' }, { id: 7, title: 'خواندنی' }])
+const router = useRouter()
 const selectedTrees = ref<number[]>([])
+const treeList = ref<ISimpleDTO[]>([])
 
 // const selectedRoles = ref([5, 1])
 
-watch(selectedTrees, (newvalue, oldvalue) => {
-  projectData.trees = props.treeList?.filter(item => selectedTrees.value.includes(item.id)).map(item => item.id) ?? []
+watch(selectedTrees, () => {
+  projectData.trees = treeList.value.filter(item => selectedTrees.value.includes(item.id)).map(item => item.id) ?? []
 })
 
 const onReset = () => {
@@ -49,29 +50,53 @@ const onReset = () => {
 
 async function projectAdd() {
   projectData.gateId = 3
+  projectData.isActive = isNullOrUndefined(projectData.isActive) ? false : projectData.isActive
 
-  const { serviceData, serviceError } = await serviceAdd<IProject>(projectData, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (serviceData.value) {
+  const { serviceError } = await serviceAdd<IProject>(projectData, props.apiUrl === undefined ? '' : props.apiUrl)
+  if (!serviceError.value) {
     toast.success(t('alert.dataActionSuccess'))
-    emit('projectDataAdded', serviceData.value)
+    emit('projectDataAdded')
     emit('update:isDialogVisible', false)
     nextTick(() => {
       onReset()
     })
   }
-  else if (serviceError.value) {
+  else {
     toast.error(t('alert.dataActionFailed'))
   }
   isloading.value = false
 }
 
+const loadTreeTitles = async () => {
+  const treeDataResult = await $api(router)<GridResult<ITreeTitle>>('app/tree?GateId=3')
+
+  treeList.value.splice(0)
+  treeList.value.push(...treeDataResult.items.map<ISimpleDTO>(item => ({ id: item.id, title: item.title })))
+}
+
+onMounted(async () => {
+  try {
+    opening.value = true
+    await loadTreeTitles()
+    opening.value = false
+  }
+  catch (error) {
+    console.log('treedataerror', error)
+
+    opening.value = false
+    if (error instanceof CustomFetchError)
+      toast.error(t(`httpstatuscodes.${error.code}`))
+    else toast.error(t('httpstatuscodes.0'))
+    emit('update:isDialogVisible', false)
+  }
+})
 async function projectEdit() {
   projectData.gateId = 3
 
-  const { serviceData, serviceError } = await serviceUpdate<IProject>(projectData, projectData.id, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (serviceData.value) {
+  const { serviceError } = await serviceUpdate<IProject>(projectData, projectData.id, props.apiUrl === undefined ? '' : props.apiUrl)
+  if (!serviceError.value) {
     toast.success(t('alert.dataActionSuccess'))
-    emit('projectDataUpdated', serviceData.value)
+    emit('projectDataUpdated')
     emit('update:isDialogVisible', false)
     nextTick(() => {
       onReset()
@@ -100,9 +125,27 @@ const onSubmit = () => {
 //     console.log('watchuserdata', newdata, olddata);
 // })
 
-const updateProject = (projectDataItem: IProject) => {
-  objectMap(projectData, useCloned(projectDataItem))
-  selectedTrees.value = projectData.trees.map(item => item.id)
+const updateProject = async (projectId: number) => {
+  try {
+    opening.value = true
+
+    const projectDataResult = await $api(router)<IProject>(`app/project/${projectId}`)
+
+    await loadTreeTitles()
+    selectedTrees.value.push(...projectDataResult.trees)
+    Object.assign(projectData, projectDataResult)
+
+    opening.value = false
+  }
+  catch (error) {
+    console.log('treedataerror', error)
+
+    opening.value = false
+    if (error instanceof CustomFetchError)
+      toast.error(t(`httpstatuscodes.${error.code}`))
+    else toast.error(t('httpstatuscodes.0'))
+    emit('update:isDialogVisible', false)
+  }
 }
 
 defineExpose({ updateProject })
@@ -114,10 +157,10 @@ defineExpose({ updateProject })
     persistent @update:model-value="onReset"
   >
     <DialogCloseBtn :disabled="isloading" @click="onReset" />
-    <VCard flat :title="$t('project.addedit')" :subtitle="$t('project.addeditsubtitle')">
+    <VCard flat :title="$t('project.addedit')" :subtitle="$t('project.addeditsubtitle')" :loading="opening">
       <VCardText>
         <!-- 👉 Form -->
-        <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
+        <VForm ref="refForm" v-model="isFormValid" :disabled="opening" @submit.prevent="onSubmit">
           <VRow>
             <VCol cols="12">
               <AppTextField
@@ -131,7 +174,7 @@ defineExpose({ updateProject })
                 <!-- 👉 Name -->
                 <VCol sm="10" cols="12">
                   <AppAutocomplete
-                    v-model="selectedTrees" :items="props.treeList" item-title="title"
+                    v-model="selectedTrees" :items="treeList" item-title="title"
                     item-value="id" :label="$t('role.treeselect')"
                     :rules="[requiredValidator(projectData.trees, $t('validatorrequired'))]" chips
                     closable-chips multiple
@@ -147,7 +190,7 @@ defineExpose({ updateProject })
             <VCol cols="12">
               <AppTextarea
                 v-model="projectData.description" :label="$t('description')"
-                placeholder="Write note here..." :rows="4"
+                :placeholder="$t('writenotehere')" :rows="4"
               />
             </VCol>
             <VCol cols="12">
