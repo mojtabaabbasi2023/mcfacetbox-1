@@ -12,6 +12,7 @@ import type { GridResult, ISimpleDTO } from '@/types/baseModels'
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
   apiUrl: String,
+  gateId: Number,
 })
 
 const emit = defineEmits<Emit>()
@@ -49,7 +50,7 @@ const onReset = () => {
 }
 
 async function projectAdd() {
-  projectData.gateId = 3
+  projectData.gateId = props.gateId ?? 0
   projectData.isActive = isNullOrUndefined(projectData.isActive) ? false : projectData.isActive
 
   const { serviceError } = await serviceAdd<IProject>(projectData, props.apiUrl === undefined ? '' : props.apiUrl)
@@ -70,7 +71,7 @@ async function projectAdd() {
 }
 
 const loadTreeTitles = async () => {
-  const treeDataResult = await $api(router)<GridResult<ITreeTitle>>('app/tree?GateId=3')
+  const treeDataResult = await $api(router)<GridResult<ISimpleDTO>>(`app/tree/simple?GateId=${props.gateId}`)
 
   treeList.value.splice(0)
   treeList.value.push(...treeDataResult.items.map<ISimpleDTO>(item => ({ id: item.id, title: item.title })))
@@ -91,7 +92,7 @@ onMounted(async () => {
   }
 })
 async function projectEdit() {
-  projectData.gateId = 3
+  projectData.gateId = props.gateId ?? 0
 
   const { serviceError } = await serviceUpdate<IProject>(projectData, projectData.id, props.apiUrl === undefined ? '' : props.apiUrl)
   if (!serviceError.value) {

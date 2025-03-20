@@ -14,6 +14,11 @@ const isAddNewProjectDialogVisible = ref(false)
 const isAddNewTreeDialogVisible = ref(false)
 const projectApiUrl = 'app/project'
 const treeApiUrl = 'app/tree'
+const router = useRoute('um-gate-id-project')
+
+const currentGateId = computed((): number => {
+  return useToNumber(router.params.id).value
+})
 
 const toast = useToast()
 
@@ -78,7 +83,7 @@ const selectBook = (treeid: number) => {
         <VCard>
           <VDivider />
           <MCDataTable
-            ref="mcdatatableProject" :headers="projectHeaders" :api-url="projectApiUrl"
+            ref="mcdatatableProject" :headers="projectHeaders" :api-url="projectApiUrl" :gateid="currentGateId"
             @edit-item="projectEdit"
           >
             <template #item.trees="{ value }">
@@ -112,7 +117,7 @@ const selectBook = (treeid: number) => {
       <VCol cols="12">
         <VCard>
           <MCDataTable
-            ref="mcdatatableTree" :headers="treeHeaders" :api-url="treeApiUrl"
+            ref="mcdatatableTree" :headers="treeHeaders" :api-url="treeApiUrl" :gateid="currentGateId"
             @edit-item="treeEdit"
           >
             <template #item.book="{ value }">
@@ -138,14 +143,13 @@ const selectBook = (treeid: number) => {
         </VCard>
       </VCol>
     </VRow>
-    <!-- 👉 Add New User -->
     <MCDialogProjectAdd
       v-if="isAddNewProjectDialogVisible" ref="dialogProject" v-model:is-dialog-visible="isAddNewProjectDialogVisible"
-      :api-url="projectApiUrl" @project-data-added="projectDataAdded" @project-data-updated="projectDataAdded"
+      :api-url="projectApiUrl" :gate-id="currentGateId" @project-data-added="projectDataAdded" @project-data-updated="projectDataAdded"
     />
     <MCDialogTreeAdd
       v-if="isAddNewTreeDialogVisible" ref="dialogTree" v-model:is-dialog-visible="isAddNewTreeDialogVisible"
-      :api-url="treeApiUrl" @tree-title-data-added="treeTitleDataAdded" @tree-data-updated="treeTitleDataAdded"
+      :api-url="treeApiUrl" :gate-id="currentGateId" @tree-title-data-added="treeTitleDataAdded" @tree-data-updated="treeTitleDataAdded"
     />
   </section>
 </template>

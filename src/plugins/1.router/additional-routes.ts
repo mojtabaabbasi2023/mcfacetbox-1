@@ -18,7 +18,7 @@ export const redirects: RouteRecordRaw[] = [
 
       if (userData.value) {
         if (import.meta.env.VITE_APP_TYPE === 'UM')
-          return { name: 'um' }
+          return { name: 'um-gate' }
 
         else
           return { name: 'rs' }

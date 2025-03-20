@@ -4,3 +4,7 @@ import type { ISimpleSelectableDTO } from '@/types/baseModels'
 export const useGateList = createGlobalState(
   () => useStorage<ISimpleSelectableDTO[]>('gl', []),
 )
+
+export const useSelectedGateId = createGlobalState(() => {
+  useStorage<number>('sgi', 0)
+})

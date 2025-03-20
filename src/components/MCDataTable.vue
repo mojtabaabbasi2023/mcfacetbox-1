@@ -13,6 +13,7 @@ const props = defineProps({
   searchLabel: { type: String, default: '' },
   activeDeleteAction: { type: Boolean, default: true },
   activeEditAction: { type: Boolean, default: true },
+  gateid: { type: Number, default: 0 },
 })
 
 const emit = defineEmits<Emit>()
@@ -52,13 +53,13 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
     pageSize,
     pageNumber,
     sorting,
-    GateId: 3,
+    GateId: props.gateid,
   },
-}), { immediate: false })
+}), { immediate: true })
 
-setTimeout(async () => {
-  await fetchData(false)
-}, 1000)
+// setTimeout(async () => {
+//   await fetchData(false)
+// }, 1000)
 
 const datatable = ref(VDataTableServer)
 
@@ -260,7 +261,7 @@ defineExpose({ refreshData })
         </template>
         <template #no-data>
           <div class="pt-5">
-            <span>{{ $t('loadagain') }}</span>
+            <span class="ml-3">{{ $t('$vuetify.noDataText') }}</span>
             <IconBtn size="medium" @click="refreshData">
               <VIcon icon="tabler-refresh" size="32" />
             </IconBtn>

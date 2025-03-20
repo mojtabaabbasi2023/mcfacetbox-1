@@ -12,8 +12,14 @@ const dialogUser = ref(VDialog)
 const dialogUserRole = ref(VDialog)
 const isAddNewUserDialogVisible = ref(false)
 const isAddNewRoleDialogVisible = ref(false)
-const userApiUrl = 'app/gate/3/user'
 const userRoleApiUrl = '/apps/roles'
+const router = useRoute('um-gate-id-user')
+
+const currentGateId = computed((): number => {
+  return useToNumber(router.params.id).value
+})
+
+const userApiUrl = `app/gate/${currentGateId.value}/user`
 
 const toast = useToast()
 
@@ -42,8 +48,6 @@ const roleHeaders = [
 
 const userEdit = (dataItem: Record<string, any>) => {
   isAddNewUserDialogVisible.value = true
-
-  // gateUpdateActive.value = true
   dialogUser.value.updateUser({ ...dataItem })
 
   // gateEditDataItem.value = { ...dataItem } ass GateModel
@@ -52,8 +56,6 @@ const userEdit = (dataItem: Record<string, any>) => {
 
 const roleEdit = (dataItem: Record<string, any>) => {
   isAddNewRoleDialogVisible.value = true
-
-  // gateUpdateActive.value = true
   dialogUserRole.value.updateRole({ ...dataItem })
 
   // gateEditDataItem.value = { ...dataItem } ass GateModel
@@ -85,16 +87,8 @@ const roleDataAdded = () => {
         <VCard variant="outlined">
           <MCDataTable
             ref="mcdatatableUser" :headers="userHeaders" :api-url="userApiUrl"
-            @edit-item="userEdit"
+            :gateid="currentGateId" @edit-item="userEdit"
           >
-            <!--
-              <template #item.role="{ value }">
-              <div class="d-flex align-center gap-x-4">
-
-              {{ value.permissions.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
-              </div>
-              </template>
-            -->
             <template #item.role="{ value }">
               <div class="d-flex align-center gap-x-4">
                 {{ value.role && value.role.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
@@ -131,7 +125,7 @@ const roleDataAdded = () => {
       <VCol cols="12">
         <VCard variant="outlined">
           <MCDataTable
-            ref="mcdatatableUserRole" :headers="roleHeaders" :api-url="userRoleApiUrl"
+            ref="mcdatatableUserRole" :headers="roleHeaders" :api-url="userRoleApiUrl" :gateid="currentGateId"
             @edit-item="roleEdit"
           >
             <template #item.permissions="{ value }">
@@ -139,13 +133,11 @@ const roleDataAdded = () => {
                 {{ value.permissions && value.permissions.map((item: ISimpleDTO) =>
                   `${item.title}`).join(' ,') }}
               </div>
-              <!-- {{ value + "asdasdasd" }} -->
             </template>
             <template #item.projects="{ value }">
               <div class="d-flex align-center gap-x-4">
                 {{ value.projects.map((item: ISimpleDTO) => `${item.title}`).join(' ,') }}
               </div>
-              <!-- {{ value + "asdasdasd" }} -->
             </template>
             <template #item.isActive="{ value }">
               <VChip
@@ -165,7 +157,6 @@ const roleDataAdded = () => {
         </VCard>
       </VCol>
     </VRow>
-    <!-- 👉 Add New User -->
     <MCDialogUserAdd
       ref="dialogUser" v-model:is-dialog-visible="isAddNewUserDialogVisible"
       :api-url="userApiUrl" @user-data-added="userDataAdded"

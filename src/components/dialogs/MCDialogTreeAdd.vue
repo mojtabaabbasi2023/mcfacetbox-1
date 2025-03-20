@@ -10,6 +10,7 @@ import { TreeTitleModel } from '@/types/tree'
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
   apiUrl: String,
+  gateId: Number,
 })
 
 const emit = defineEmits<Emit>()
@@ -39,7 +40,7 @@ const onReset = () => {
 }
 
 async function projectAdd() {
-  treeTitleData.gateId = 3
+  treeTitleData.gateId = props.gateId ?? 0
 
   const { serviceError } = await serviceAdd<ITreeTitle>(treeTitleData, props.apiUrl === undefined ? '' : props.apiUrl)
   if (!serviceError.value) {
@@ -59,7 +60,7 @@ async function projectAdd() {
 }
 
 async function projectEdit() {
-  treeTitleData.gateId = 3
+  treeTitleData.gateId = props.gateId ?? 0
 
   const { serviceError } = await serviceUpdate<ITreeTitle>(treeTitleData, treeTitleData.id, props.apiUrl === undefined ? '' : props.apiUrl)
   if (!serviceError.value) {

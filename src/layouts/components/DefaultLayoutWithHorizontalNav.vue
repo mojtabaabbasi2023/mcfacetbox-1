@@ -15,13 +15,14 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 import { HorizontalNavLayout } from '@layouts'
 import type { HorizontalNavItems } from '@/@layouts/types'
-import { useGateList } from '@/store/gateStore'
-import type { ISimpleDTO } from '@/types/baseModels'
+
+// import { useGateList } from '@/store/gateStore'
 
 // SECTION: Loading Indicator
 const isFallbackStateActive = ref(false)
 const refLoadingIndicator = ref<any>(null)
-const gateList = useGateList()
+
+// const gateList = useGateList()
 const selectedGate = ref<number>(0)
 
 const navItems = computed<HorizontalNavItems>(() => {
@@ -31,39 +32,34 @@ const navItems = computed<HorizontalNavItems>(() => {
     return researchSoftwareItems
 })
 
-onMounted(() => {
-  const result = gateList.value.find(item => item.selected)
-  if (result) {
-    selectedGate.value = result.id
-  }
-  else
-    if (gateList.value.length > 0) {
-      selectedGate.value = gateList.value[0].id
-      gateList.value[0].selected = true
-    }
-})
-watch(gateList, () => {
-  console.log('gatelistchanged', gateList)
-  if (gateList.value.length > 0)
-    selectedGate.value = gateList.value[0].id
-}, { deep: true })
-watch(() => selectedGate.value, () => {
-  if (!isNumber(selectedGate.value))
-    return
+// onMounted(() => {
+//   const result = gateList.value.find(item => item.selected)
+//   if (result) {
+//     selectedGate.value = result.id
+//   }
+//   else
+//     if (gateList.value.length > 0) {
+//       selectedGate.value = gateList.value[0].id
+//       gateList.value[0].selected = true
+//     }
+// })
 
-  if (gateList.value.length > 0) {
-    const result = gateList.value.find(item => item.id === selectedGate.value)
-    if (result) {
-      gateList.value.forEach(item => item.selected = false)
-      result.selected = true
-    }
-  }
-  console.log('selectgate', selectedGate.value, gateList)
-})
+// watch(gateList, () => {
+//   if (gateList.value.length > 0)
+//     selectedGate.value = gateList.value[0].id
+// }, { deep: true })
+// watch(() => selectedGate.value, () => {
+//   if (!isNumber(selectedGate.value))
+//     return
 
-const selectGate = (gateid: number) => {
-
-}
+//   if (gateList.value.length > 0) {
+//     const result = gateList.value.find(item => item.id === selectedGate.value)
+//     if (result) {
+//       gateList.value.forEach(item => item.selected = false)
+//       result.selected = true
+//     }
+//   }
+// })
 
 // watching if the fallback state is active and the refLoadingIndicator component is available
 watch([isFallbackStateActive, refLoadingIndicator], () => {
@@ -90,11 +86,13 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
       <VSpacer />
 
       <!-- <NavSearchBar trigger-btn-class="ms-lg-n3" /> -->
-      <VCombobox
+      <!--
+        <VCombobox
         v-model:model-value="selectedGate" max-width="300px" :return-object="false" auto-select-first="exact"
         class="ml-2" :items="gateList" item-title="title"
         item-value="id" :label="$t('gate.gateselect')"
-      />
+        />
+      -->
       <NavBarI18n
         v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
         :languages="themeConfig.app.i18n.langConfig"

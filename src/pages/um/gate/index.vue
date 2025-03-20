@@ -3,6 +3,8 @@
 import { VDialog } from 'vuetify/lib/components/index.mjs'
 import MCDataTable from '@/components/MCDataTable.vue'
 import { GateModel } from '@/types/gate'
+import { router } from '@/plugins/1.router'
+
 import ApexChartAreaChart from '@/views/charts/apex-chart/ApexChartAreaChart.vue'
 import ApexChartStatistics from '@/views/charts/apex-chart/ApexChartStatistics.vue'
 
@@ -11,6 +13,9 @@ const mcdatatable = ref(MCDataTable)
 const gateEditDataItem = ref<Record<string, any>>(new GateModel())
 const dialogGate = ref(VDialog)
 const isAddNewGateDialogVisible = ref(false)
+const currentgateId = ref(0)
+
+// const route = useRoute('ums-id')
 
 // GateHeaders
 const gateHeaders = [
@@ -30,6 +35,9 @@ const gateHeaders = [
 
 const gateApiUrl = 'app/gate'
 
+// watch(() => route.params.id, () => {
+//   console.log('routelog', route.params)
+// })
 function gateAdd() {
   isAddNewGateDialogVisible.value = true
 }
@@ -41,6 +49,10 @@ const gateEdit = (dataItem: Record<string, any>) => {
 
 const gateDataAdded = () => {
   mcdatatable.value.refreshData()
+}
+
+const updateCharts = (gateid: number) => {
+
 }
 
 const gateDataUpdated = () => {
@@ -70,7 +82,6 @@ const gateDataUpdated = () => {
           </VCardText>
         </VCard>
       </VCol>
-      <!-- 👉  Area chart -->
       <VCol cols="12" md="8">
         <VCard variant="flat">
           <VCardItem class="d-flex flex-wrap justify-space-between gap-4">
@@ -102,12 +113,9 @@ const gateDataUpdated = () => {
           <MCDataTable ref="mcdatatable" :headers="gateHeaders" :api-url="gateApiUrl" @edit-item="gateEdit">
             <template #item.gateTitle="{ value }">
               <div class="d-flex align-center gap-x-4">
-                <VAvatar
-                  size="34" :variant="!value.usersavatar ? 'tonal' : undefined"
-                  :color="!value.usersavatar ? resolveUserRoleVariant(value.userType).color : undefined"
-                >
+                <VAvatar size="34" :variant="!value.usersavatar ? 'tonal' : undefined">
                   <VImg v-if="value.usersavatar" :src="value.usersavatar" />
-                  <span v-else>{{ avatarText(value.gateTitle) }}</span>
+                  <!-- <span v-else>{{ avatarText(value.gateTitle) }}</span> -->
                 </VAvatar>
                 {{ value.gateTitle }}
               </div>
@@ -122,11 +130,18 @@ const gateDataUpdated = () => {
                 {{ $t(resolveActiveTitle(value.isActive)) }}
               </VChip>
             </template>
-            <!--
-              <template #action="{ item }">
-              <span>{{ item.gateTitle }} </span>
-              </template>
-            -->
+
+            <template #action="{ value }">
+              <IconBtn @click="router.push(`gate/${value.id}/user`)">
+                <VIcon icon="mdi-account-outline" />
+              </IconBtn>
+              <IconBtn @click="router.push(`gate/${value.id}/project`)">
+                <VIcon icon="mdi-file-tree-outline" />
+              </IconBtn>
+              <IconBtn @click="updateCharts(value.id)">
+                <VIcon icon="tabler-chart-bar" />
+              </IconBtn>
+            </template>
           </MCDataTable>
         </VCard>
       </VCol>
