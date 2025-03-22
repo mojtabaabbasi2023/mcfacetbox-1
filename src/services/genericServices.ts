@@ -4,19 +4,25 @@ export async function serviceAdd<T extends BodyInit | Record<string, any>>(dataM
   const serviceData = ref(0)
   const serviceError = ref()
   try {
-    await $api()(serviceUrl, {
+    serviceData.value = await $api(serviceUrl, {
       method: 'POST',
       body: JSON.parse(JSON.stringify(dataModel)),
       ignoreResponseError: false,
-    }).then(response => {
-      serviceData.value = response
-    }, error => {
-      const temp = (error as FetchError)
-
-      serviceError.value = temp.message
-    }).catch(error => {
-      serviceError.value = error.data
     })
+
+    // await $api(serviceUrl, {
+    //   method: 'POST',
+    //   body: JSON.parse(JSON.stringify(dataModel)),
+    //   ignoreResponseError: false,
+    // }).then(response => {
+    //   serviceData.value = response
+    // }, error => {
+    //   const temp = (error as FetchError)
+
+    //   serviceError.value = temp.message
+    // }).catch(error => {
+    //   serviceError.value = error.data
+    // })
   }
   catch (error) {
     serviceError.value = error
@@ -29,7 +35,7 @@ export async function serviceUpdate<T extends BodyInit | Record<string, any>>(da
   const serviceData = ref(0)
   const serviceError = ref()
   try {
-    await $api()((`${serviceUrl}/`).replace('//', '/') + entityId, {
+    await $api((`${serviceUrl}/`).replace('//', '/') + entityId, {
       method: 'PUT',
       body: JSON.parse(JSON.stringify(dataModel)),
       ignoreResponseError: false,
@@ -54,7 +60,7 @@ export async function serviceDelete(id: number, serviceUrl: string) {
   const serviceData = ref()
   const serviceError = ref()
 
-  serviceData.value = await $api()((`${serviceUrl}/`).replace('//', '/') + id, {
+  serviceData.value = await $api((`${serviceUrl}/`).replace('//', '/') + id, {
     method: 'DELETE',
     parseResponse: JSON.parse,
   },

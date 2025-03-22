@@ -4,13 +4,13 @@
 import { useToast } from 'vue-toastification'
 import { VForm } from 'vuetify/components/VForm'
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
-import { serviceAdd, serviceUpdate } from '@/services/genericServices'
 import type { IUser } from '@/types/users'
 import { UserModel } from '@/types/users'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
   apiUrl: String,
+  gateId: Number,
 })
 
 const emit = defineEmits<Emit>()
@@ -31,7 +31,6 @@ const opening = ref(false)
 const userData = reactive<IUser>(new UserModel())
 const rolesList = reactive([{ id: 1, title: 'پژوهشگر' }, { id: 2, title: 'مدیر کل' }, { id: 3, title: 'ناظر' }, { id: 4, title: 'ارزیاب یک' }, { id: 5, title: 'ارزیاب دو' }, { id: 6, title: 'مدیر نظارت' }, { id: 7, title: 'خواندنی' }])
 const selectedRoles = ref<number[]>([])
-const router = useRouter()
 
 watch(selectedRoles, () => {
   userData.role = rolesList.filter(item => selectedRoles.value.includes(item.id))
@@ -46,8 +45,13 @@ const onReset = () => {
 }
 
 async function userAdd() {
-  const { serviceError } = await serviceAdd<IUser>(userData, props.apiUrl == undefined ? '' : props.apiUrl)
-  if (!serviceError.value) {
+  userData.gateId = props.gateId ?? 0
+  try {
+    await $api(props.apiUrl === undefined ? '' : props.apiUrl, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(userData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('userDataAdded')
     emit('update:isDialogVisible', false)
@@ -55,16 +59,22 @@ async function userAdd() {
       onReset()
     })
   }
-  else {
-    if (serviceError.value instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
+  isloading.value = false
 }
 
 async function userEdit() {
-  const { serviceError } = await serviceUpdate<IUser>(userData, userData.id, props.apiUrl == undefined ? '' : props.apiUrl)
-  if (!serviceError.value) {
+  userData.gateId = props.gateId ?? 0
+  try {
+    await $api((`${props.apiUrl}/`).replace('//', '/') + userData.id, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(userData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('userDataUpdated')
     emit('update:isDialogVisible', false)
@@ -72,11 +82,12 @@ async function userEdit() {
       onReset()
     })
   }
-  else {
-    if (serviceError.value instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
+  isloading.value = false
 }
 
 const onSubmit = () => {
@@ -104,7 +115,7 @@ const updateUser = async (userId: number) => {
   try {
     opening.value = true
 
-    const userDataResult = await $api(router)<IUser>(`app/gate/3/user/${userId}`)
+    const userDataResult = await $api<IUser>(`app/gate/3/user/${userId}`)
 
     await loadRoles()
 
@@ -115,8 +126,8 @@ const updateUser = async (userId: number) => {
   }
   catch (error) {
     opening.value = false
-    if (error instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${error.code}`))
+    if (error instanceof CustomFetchError && error.code > 1)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
     emit('update:isDialogVisible', false)
   }

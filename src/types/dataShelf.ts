@@ -1,4 +1,4 @@
-import type { ISimpleDTO } from './baseModels'
+import type { ISimpleDTO, baseItemState } from './baseModels'
 
 // NOTE - بازای هر تغییری در محتوای جعبه داده باید یک نسخه ثبت گردد و قابلیت آندو داشته باشد
 export interface IDataShelfBox {
@@ -43,6 +43,6 @@ export class DataShelfBoxModel implements IDataShelfBox {
   refrenceId: number = 0
 }
 
-export interface IFootNote extends ISimpleDTO {
+export interface IFootNote extends ISimpleDTO, baseItemState {
   index: number
 }

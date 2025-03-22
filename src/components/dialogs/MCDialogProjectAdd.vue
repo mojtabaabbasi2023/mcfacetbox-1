@@ -3,10 +3,8 @@
 import { useToast } from 'vue-toastification'
 import { VForm } from 'vuetify/components/VForm'
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
-import { serviceAdd, serviceUpdate } from '@/services/genericServices'
 import type { IProject } from '@/types/project'
 import { ProjectModel } from '@/types/project'
-import type { ITreeTitle } from '@/types/tree'
 import type { GridResult, ISimpleDTO } from '@/types/baseModels'
 
 const props = defineProps({
@@ -31,7 +29,6 @@ const refForm = ref<VForm>()
 const isloading = ref(false)
 const opening = ref(false)
 const projectData = reactive<IProject>(new ProjectModel())
-const router = useRouter()
 const selectedTrees = ref<number[]>([])
 const treeList = ref<ISimpleDTO[]>([])
 
@@ -52,9 +49,12 @@ const onReset = () => {
 async function projectAdd() {
   projectData.gateId = props.gateId ?? 0
   projectData.isActive = isNullOrUndefined(projectData.isActive) ? false : projectData.isActive
-
-  const { serviceError } = await serviceAdd<IProject>(projectData, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (!serviceError.value) {
+  try {
+    await $api(props.apiUrl === undefined ? '' : props.apiUrl, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(projectData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('projectDataAdded')
     emit('update:isDialogVisible', false)
@@ -62,16 +62,16 @@ async function projectAdd() {
       onReset()
     })
   }
-  else {
-    if (serviceError.value instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
 }
 
 const loadTreeTitles = async () => {
-  const treeDataResult = await $api(router)<GridResult<ISimpleDTO>>(`app/tree/simple?GateId=${props.gateId}`)
+  const treeDataResult = await $api<GridResult<ISimpleDTO>>(`app/tree/simple?GateId=${props.gateId}`)
 
   treeList.value.splice(0)
   treeList.value.push(...treeDataResult.items.map<ISimpleDTO>(item => ({ id: item.id, title: item.title })))
@@ -85,17 +85,20 @@ onMounted(async () => {
   }
   catch (error) {
     opening.value = false
-    if (error instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${error.code}`))
+    if (error instanceof CustomFetchError && error.code > 1)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
     emit('update:isDialogVisible', false)
   }
 })
 async function projectEdit() {
   projectData.gateId = props.gateId ?? 0
-
-  const { serviceError } = await serviceUpdate<IProject>(projectData, projectData.id, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (!serviceError.value) {
+  try {
+    await $api((`${props.apiUrl}/`).replace('//', '/') + projectData.id, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(projectData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('projectDataUpdated')
     emit('update:isDialogVisible', false)
@@ -103,9 +106,9 @@ async function projectEdit() {
       onReset()
     })
   }
-  else {
-    if (serviceError.value instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
@@ -132,7 +135,7 @@ const updateProject = async (projectId: number) => {
   try {
     opening.value = true
 
-    const projectDataResult = await $api(router)<IProject>(`app/project/${projectId}`)
+    const projectDataResult = await $api<IProject>(`app/project/${projectId}`)
 
     await loadTreeTitles()
     selectedTrees.value.push(...projectDataResult.trees)
@@ -144,8 +147,8 @@ const updateProject = async (projectId: number) => {
     console.log('treedataerror', error)
 
     opening.value = false
-    if (error instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${error.code}`))
+    if (error instanceof CustomFetchError && error.code > 1)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
     emit('update:isDialogVisible', false)
   }

@@ -31,8 +31,6 @@ const logout = async () => {
 }
 
 function avatarUrl(): string {
-  console.log('avatar', userData.value.profile?.avatarUrl.replace('xxx', 'small'))
-
   return userData.value.profile?.avatarUrl.replace('xxx', 'small') ?? ''
 }
 

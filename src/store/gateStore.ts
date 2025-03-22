@@ -1,10 +1,11 @@
 import { createGlobalState, useStorage } from '@vueuse/core'
-import type { ISimpleSelectableDTO } from '@/types/baseModels'
+import type { ISimpleDTO, ISimpleSelectableDTO } from '@/types/baseModels'
+import { SimpleDTOModel } from '@/types/baseModels'
 
 export const useGateList = createGlobalState(
   () => useStorage<ISimpleSelectableDTO[]>('gl', []),
 )
 
-export const useSelectedGateId = createGlobalState(() => {
-  useStorage<number>('sgi', 0)
+export const useSelectedGate = createGlobalState(() => {
+  return useStorage<ISimpleDTO>('sgi', new SimpleDTOModel())
 })

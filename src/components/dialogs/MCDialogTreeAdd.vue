@@ -3,7 +3,6 @@
 import { useToast } from 'vue-toastification'
 import { VForm } from 'vuetify/components/VForm'
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
-import { serviceAdd, serviceUpdate } from '@/services/genericServices'
 import type { ITreeTitle } from '@/types/tree'
 import { TreeTitleModel } from '@/types/tree'
 
@@ -28,7 +27,6 @@ const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const isloading = ref(false)
 const opening = ref(false)
-const router = useRouter()
 const treeTitleData = reactive<ITreeTitle>(new TreeTitleModel())
 
 const onReset = () => {
@@ -41,9 +39,12 @@ const onReset = () => {
 
 async function projectAdd() {
   treeTitleData.gateId = props.gateId ?? 0
-
-  const { serviceError } = await serviceAdd<ITreeTitle>(treeTitleData, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (!serviceError.value) {
+  try {
+    await $api(props.apiUrl === undefined ? '' : props.apiUrl, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(treeTitleData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('treeTitleDataAdded')
     emit('update:isDialogVisible', false)
@@ -51,9 +52,9 @@ async function projectAdd() {
       onReset()
     })
   }
-  else {
-    if (serviceError.value instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
@@ -61,9 +62,12 @@ async function projectAdd() {
 
 async function projectEdit() {
   treeTitleData.gateId = props.gateId ?? 0
-
-  const { serviceError } = await serviceUpdate<ITreeTitle>(treeTitleData, treeTitleData.id, props.apiUrl === undefined ? '' : props.apiUrl)
-  if (!serviceError.value) {
+  try {
+    await $api((`${props.apiUrl}/`).replace('//', '/') + treeTitleData.id, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(treeTitleData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('treeTitleDataUpdated')
     emit('update:isDialogVisible', false)
@@ -71,9 +75,9 @@ async function projectEdit() {
       onReset()
     })
   }
-  else {
-    if (serviceError.value instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
@@ -96,7 +100,7 @@ const updateTreeTitle = async (treeId: number) => {
   try {
     opening.value = true
 
-    const treeDataItem = await $api(router)<ITreeTitle>(`app/tree/${treeId}`)
+    const treeDataItem = await $api<ITreeTitle>(`app/tree/${treeId}`)
 
     Object.assign(treeTitleData, treeDataItem)
 
@@ -104,8 +108,8 @@ const updateTreeTitle = async (treeId: number) => {
   }
   catch (error) {
     opening.value = false
-    if (error instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${error.code}`))
+    if (error instanceof CustomFetchError && error.code > 1)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
     emit('update:isDialogVisible', false)
   }

@@ -1,5 +1,14 @@
 import type { ISimpleDTO, baseDataTableModel } from './baseModels'
 
+export const clearUserCookies = () => {
+  useCookie('userData').value = null
+  useCookie('accessToken').value = null
+  useCookie('userAbilityRules').value = null
+
+  // Reset ability to initial ability
+//   ability.update([])
+}
+
 export interface IUser extends baseDataTableModel {
   id: number
   fullName: string

@@ -1,6 +1,9 @@
 import { createFetch } from '@vueuse/core'
+import type { RouterTyped } from 'vue-router/auto'
 
 import { destr } from 'destr'
+import { useLoginState } from '@/store/baseStore'
+import { LoginState } from '@/types/baseModels'
 
 export const useApi = createFetch({
   baseUrl: import.meta.env.VITE_API_URL || '/api',
@@ -39,6 +42,29 @@ export const useApi = createFetch({
       }
 
       return { data: parsedData, response }
+    },
+    onFetchError(ctx) {
+      const { response, data } = ctx
+
+      const parsedData = null
+      try {
+        // parsedData = destr(data)
+
+        // const res = response?.json()
+
+        // console.log('parsedres', res)
+        // console.log('parseddata', parsedData)
+      }
+      catch (error) {
+      }
+
+      if (response && (response.status === 401)) {
+        const loginState = useLoginState()
+
+        loginState.Loginstate.value = LoginState.MustLogout
+      }
+
+      return { data, response }
     },
   },
 })

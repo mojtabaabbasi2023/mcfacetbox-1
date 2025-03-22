@@ -5,7 +5,7 @@ export const avatarText = (value: string) => {
     return ''
   const nameArray = value.split(' ')
 
-  return nameArray.map(word => word.charAt(0).toUpperCase()).join('')
+  return nameArray.slice(0, 2).map(word => word.charAt(0).toUpperCase()).join('')
 }
 
 // TODO: Try to implement this: https://twitter.com/fireship_dev/status/1565424801216311297

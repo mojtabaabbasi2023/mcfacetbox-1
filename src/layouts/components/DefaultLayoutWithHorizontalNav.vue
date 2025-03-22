@@ -15,21 +15,39 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 import { HorizontalNavLayout } from '@layouts'
 import type { HorizontalNavItems } from '@/@layouts/types'
+import { useSelectedGate } from '@/store/gateStore'
+import { useLoginState } from '@/store/baseStore'
+import { LoginState } from '@/types/baseModels'
+import { clearUserCookies } from '@/types/users'
 
 // import { useGateList } from '@/store/gateStore'
 
 // SECTION: Loading Indicator
 const isFallbackStateActive = ref(false)
 const refLoadingIndicator = ref<any>(null)
+const router = useRouter()
 
 // const gateList = useGateList()
-const selectedGate = ref<number>(0)
+const selectedGate = useSelectedGate()
 
 const navItems = computed<HorizontalNavItems>(() => {
   if (import.meta.env.VITE_APP_TYPE === 'UM')
     return userManagementItems
   else
     return researchSoftwareItems
+})
+
+const loginState = useLoginState()
+
+watch(loginState.Loginstate, async newval => {
+  if (newval === LoginState.MustLogout) {
+    clearUserCookies()
+    await nextTick(() => {
+      window.location.href = `${ServerApiAddress}signout?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}login`
+    })
+  }
+  if (newval === LoginState.MustLogin)
+    router.push('/login')
 })
 
 // onMounted(() => {
@@ -78,11 +96,12 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
     <template #navbar>
       <RouterLink to="/" class="app-logo d-flex align-center gap-x-3">
         <VNodeRenderer :nodes="themeConfig.app.logo" />
-
-        <h1 class="app-title font-weight-bold leading-normal text-xl text-capitalize">
-          {{ themeConfig.app.title }}
-        </h1>
+        <h2 v-if="selectedGate.id > 0 && $router.currentRoute.value.name !== 'um-gate'" class="app-title font-weight-bold leading-normal text-md text-capitalize">
+          <!-- {{ themeConfig.app.title }} -->
+          {{ `${$t('gate.title')} : ${selectedGate.title}` }}
+        </h2>
       </RouterLink>
+
       <VSpacer />
 
       <!-- <NavSearchBar trigger-btn-class="ms-lg-n3" /> -->

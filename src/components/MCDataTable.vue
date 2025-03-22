@@ -55,29 +55,30 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
     sorting,
     GateId: props.gateid,
   },
-}), { immediate: true })
+}), { immediate: false })
 
-// setTimeout(async () => {
-//   await fetchData(false)
-// }, 1000)
+setTimeout(async () => {
+  await fetchData(false)
+}, 1000)
 
 const datatable = ref(VDataTableServer)
 
 onFetchResponse(response => {
-  response.json().then(value => {
-    datatableItems.value.splice(0)
-    resultData.value?.items.forEach(element => {
-    //   element.disabled = false
-    //   element.isLoading = false
-    //   element.isSelected = false
-    //   element.selectable = true
-      datatableItems.value.push(element)
-    })
-    emit('loadCompleted', resultData.value?.items ?? [])
+//   response.json().then(value => {
+  datatableItems.value.splice(0)
+  resultData.value?.items.forEach(element => {
+    element.disabled = false
+    element.isLoading = false
+    element.isSelected = false
+    element.selectable = true
+    datatableItems.value.push(element)
   })
+  emit('loadCompleted', resultData.value?.items ?? [])
 })
 
-onFetchError(() => {
+// })
+
+onFetchError(response => {
   toast.error(t('alert.probleminGetInformation'))
 })
 
@@ -89,7 +90,7 @@ const searchLabelDefault = computed(() => {
     return t('search')
 })
 
-const refreshData = () => fetchData(false)
+const refreshData = async () => await fetchData(false)
 
 const updateAction = (dataModel: Record<string, any>) => {
   emit('editItem', dataModel)
@@ -204,6 +205,7 @@ defineExpose({ refreshData })
         show-select
         :loading="loadingdata"
         select-strategy="single"
+        hover
         @update:options="updateOptions"
       >
         <!--

@@ -26,7 +26,6 @@ const itemsPerPage = ref(10)
 const page = ref(1)
 const selectedItemsLocal = ref<number[]>([])
 const searchResult = reactive<ISimpleSelectableDTO[]>([])
-
 const searchPhrase = ref('')
 
 // const onReset = () => {

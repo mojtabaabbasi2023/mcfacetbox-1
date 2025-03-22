@@ -9,10 +9,19 @@ export interface ISelectable {
   selected?: boolean
 }
 
+export interface IServiceValidationDetails {
+  message: string
+  members: string[]
+}
+export interface IServiceError {
+  code: string
+  details: string
+  validationErrors: IServiceValidationDetails[]
+}
+
 export interface ISimpleDTO {
   id: number
   title: string
-  isEditing?: boolean
 }
 
 export interface ISimpleSelectableDTO extends ISimpleDTO, baseItemState, baseItemAction {
@@ -37,6 +46,10 @@ export interface ISimpleTreeActionable extends ISimpleTree, baseItemAction {
   parentId: number
 }
 
+export class SimpleDTOModel implements ISimpleDTO {
+  id: number = 0
+  title: string = ''
+}
 export class SimpleTreeAcionableModel implements ISimpleTreeActionable {
   parentId: number = -1
   id: number = -1
@@ -91,4 +104,12 @@ export enum SelectAllState {
 export enum SelectionType {
   Single = 0,
   Multiple = 1,
+}
+
+export enum LoginState {
+  Login = 0,
+  Logout = 1,
+  MustLogout = 2,
+  MustLogin = 3,
+
 }

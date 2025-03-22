@@ -93,7 +93,7 @@ const addFootnote = () => {
       //   sup.addEventListener('click', (event: MouseEvent) => {})
       range?.collapse(false)
       range?.insertNode(sup) // افزودن <sup> به محتوای div
-      footnotes.push({ title: '', id: footnotes?.length + 1, isEditing: true, index: footnotes.length + 1 })
+      footnotes.push({ title: '', id: footnotes?.length + 1, editing: true, index: footnotes.length + 1 })
       refreshfootnote()
     }
   }
@@ -153,7 +153,7 @@ function checkForRemovedFootnotes() {
         />
         <div class="d-flex pb-2 flex-column">
           <MCDataBoxEditableFootnote
-            v-for="(footnote, i) in footnoteSort" :id="footnote.id" :key="footnote.id" v-model:editing="footnote.isEditing"
+            v-for="(footnote, i) in footnoteSort" :id="footnote.id" :key="footnote.id" v-model:editing="footnote.editing"
             v-model:text="footnote.title"
             :index="i + 1" @deletefootnote="deletefootnote"
           />

@@ -4,7 +4,6 @@
 import { useToast } from 'vue-toastification'
 import { VForm } from 'vuetify/components/VForm'
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
-import { serviceAdd, serviceUpdate } from '@/services/genericServices'
 import type { GateProperties, IGateNewItem } from '@/types/gate'
 import { GateNewItemModel, GatePropMappedToNewItem } from '@/types/gate'
 
@@ -30,7 +29,6 @@ const refForm = ref<VForm>()
 const isloading = ref(false)
 const opening = ref(false)
 const gateData = reactive<IGateNewItem>(new GateNewItemModel())
-const router = useRouter()
 
 const onReset = () => {
   isloading.value = false
@@ -41,8 +39,12 @@ const onReset = () => {
 }
 
 async function gateAdd() {
-  const { serviceError } = await serviceAdd<IGateNewItem>(gateData, props.gateApiUrl === undefined ? '' : props.gateApiUrl)
-  if (!serviceError.value) {
+  try {
+    await $api(props.gateApiUrl === undefined ? '' : props.gateApiUrl, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(gateData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('gateDataAdded')
     emit('update:isDialogVisible', false)
@@ -50,17 +52,21 @@ async function gateAdd() {
       onReset()
     })
   }
-  else {
-    if (serviceError.value instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${serviceError.value.code}`))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
 }
 
 async function gateEdit() {
-  const { serviceError } = await serviceUpdate<IGateNewItem>(gateData, gateData.id, props.gateApiUrl === undefined ? '' : props.gateApiUrl)
-  if (!serviceError.value) {
+  try {
+    await $api((`${props.gateApiUrl}/`).replace('//', '/') + gateData.id, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(gateData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
     emit('gateDataUpdated')
     emit('update:isDialogVisible', false)
@@ -68,8 +74,10 @@ async function gateEdit() {
       onReset()
     })
   }
-  else {
-    toast.error(t('alert.dataActionFailed'))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
+    else toast.error(t('httpstatuscodes.0'))
   }
   isloading.value = false
 }
@@ -90,7 +98,7 @@ const updateGate = async (gateId: number) => {
   try {
     opening.value = true
 
-    const gateDataItem = await $api(router)<GateProperties>(`app/gate/${gateId}`)
+    const gateDataItem = await $api<GateProperties>(`app/gate/${gateId}`)
 
     Object.assign(gateData, GatePropMappedToNewItem(gateDataItem))
 
@@ -98,8 +106,8 @@ const updateGate = async (gateId: number) => {
   }
   catch (error) {
     opening.value = false
-    if (error instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${error.code}`))
+    if (error instanceof CustomFetchError && error.code > 1)
+      toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
     emit('update:isDialogVisible', false)
   }

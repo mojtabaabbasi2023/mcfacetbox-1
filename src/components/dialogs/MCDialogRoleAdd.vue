@@ -5,7 +5,6 @@ import { useToast } from 'vue-toastification'
 import { VForm } from 'vuetify/components/VForm'
 import { VTreeview } from 'vuetify/labs/VTreeview'
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
-import { serviceAdd, serviceUpdate } from '@/services/genericServices'
 import type { ISimpleTree } from '@/types/baseModels'
 import type { IRole } from '@/types/rolePermission'
 import { RoleModel } from '@/types/rolePermission'
@@ -13,6 +12,7 @@ import { RoleModel } from '@/types/rolePermission'
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
   apiUrl: String,
+  gateId: Number,
 })
 
 const emit = defineEmits<Emit>()
@@ -21,8 +21,8 @@ const toast = useToast()
 
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
-  (e: 'roleDataAdded', value: number): void
-  (e: 'roleDataUpdated', value: number): void
+  (e: 'roleDataAdded'): void
+  (e: 'roleDataUpdated'): void
 
 }
 
@@ -45,36 +45,49 @@ watch(selectedProjects, (newvalue, oldvalue) => {
 })
 
 async function roleAdd() {
-  console.log('addroledata', roleData)
-
-  const { serviceData, serviceError } = await serviceAdd<IRole>(roleData, props.apiUrl == undefined ? '' : props.apiUrl)
-  if (serviceData.value) {
+  roleData.gateId = props.gateId ?? 0
+  try {
+    await $api(props.apiUrl === undefined ? '' : props.apiUrl, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(roleData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
-    emit('roleDataAdded', serviceData.value)
+    emit('roleDataAdded')
     emit('update:isDialogVisible', false)
     nextTick(() => {
       onReset()
     })
   }
-  else if (serviceError.value) {
-    toast.error(t('alert.dataActionFailed'))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
+    else toast.error(t('httpstatuscodes.0'))
   }
+  isloading.value = false
 }
 
 async function roleEdit() {
-  const { serviceData, serviceError } = await serviceUpdate<IRole>(roleData, roleData.id, props.apiUrl == undefined ? '' : props.apiUrl)
-
-  if (serviceData.value) {
+  roleData.gateId = props.gateId ?? 0
+  try {
+    await $api((`${props.apiUrl}/`).replace('//', '/') + roleData.id, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(roleData)),
+      ignoreResponseError: false,
+    })
     toast.success(t('alert.dataActionSuccess'))
-    emit('roleDataUpdated', serviceData.value)
+    emit('roleDataUpdated')
     emit('update:isDialogVisible', false)
     nextTick(() => {
       onReset()
     })
   }
-  else if (serviceError.value) {
-    toast.error(t('alert.dataActionFailed'))
+  catch (error) {
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
+    else toast.error(t('httpstatuscodes.0'))
   }
+  isloading.value = false
 }
 
 const onSubmit = () => {

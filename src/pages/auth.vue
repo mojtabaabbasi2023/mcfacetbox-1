@@ -2,18 +2,12 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { CustomFetchError } from '@/utils/api'
 import type { ITokenProfile } from '@/types/users'
-import { useGateList } from '@/store/gateStore'
-import type { ISimpleSelectableDTO } from '@/types/baseModels'
-
-const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
+import { LoginState } from '@/types/baseModels'
+import { useLoginState } from '@/store/baseStore'
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
@@ -30,7 +24,6 @@ const router = useRouter()
 const toast = useToast()
 const ability = useAbility()
 const loginfailed = ref(false)
-const gatelist = useGateList()
 
 const errors = ref<Record<string, string | undefined>>({
   email: undefined,
@@ -44,33 +37,38 @@ const credentials = ref({
 
 async function sendTokenRequest(systemKey: string) {
   try {
-    const result = await $api(router)<ITokenProfile>(`${ServerApiAddress}api/account/token/${systemKey}`, {
+    const result = await $api<ITokenProfile>(`${ServerApiAddress}api/account/token/${systemKey}`, {
       method: 'GET',
-      ignoreResponseError: true,
     })
 
     if (result.token) {
       useCookie<ITokenProfile>('userData').value = result
       useCookie('accessToken').value = result.token
-      gatelist.value.splice(0)
-      gatelist.value.push(...result.gates.map<ISimpleSelectableDTO>(item => ({ id: item.id, title: item.title, tempData: null })))
-      gatelist.value[0].selected = true
+
+      //   gatelist.value.splice(0)
+      //   gatelist.value.push(...result.gates.map<ISimpleSelectableDTO>(item => ({ id: item.id, title: item.title, tempData: null })))
+      //   gatelist.value[0].selected = true
       useCookie('userAbilityRules').value = JSON.stringify([{ action: 'manage', subject: 'all' }])
       ability.update([{ action: 'manage', subject: 'all' }])
 
+      const loginstate = useLoginState()
+
+      loginstate.Loginstate.value = LoginState.Login
+
       // console.log('ability', ability.can('read', 'Report'), userAbilityRules);
       await nextTick(() => {
-        router.replace(route.query.to ? String(route.query.to) : '/')
+        router.push(route.query.to ? String(route.query.to) : '/')
       })
     }
     else {
-      console.log('no result', result)
       loginfailed.value = true
     }
   }
   catch (error) {
-    if (error instanceof CustomFetchError)
-      toast.error(t(`httpstatuscodes.${error.code}`))
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
+
+    //   toast.error(t(`httpstatuscodes.${error.code}`))
     else toast.error(t('httpstatuscodes.0'))
     loginfailed.value = true
   }
@@ -92,7 +90,7 @@ onMounted(async () => {
 
 const login = async () => {
   try {
-    const res = await $api()('/auth/login', {
+    const res = await $api('/auth/login', {
       method: 'POST',
       body: {
         email: credentials.value.email,

@@ -7,6 +7,7 @@ import { router } from '@/plugins/1.router'
 
 import ApexChartAreaChart from '@/views/charts/apex-chart/ApexChartAreaChart.vue'
 import ApexChartStatistics from '@/views/charts/apex-chart/ApexChartStatistics.vue'
+import { useSelectedGate, useSelectedGateId } from '@/store/gateStore'
 
 const { t } = useI18n({ useScope: 'global' })
 const mcdatatable = ref(MCDataTable)
@@ -14,6 +15,7 @@ const gateEditDataItem = ref<Record<string, any>>(new GateModel())
 const dialogGate = ref(VDialog)
 const isAddNewGateDialogVisible = ref(false)
 const currentgateId = ref(0)
+const currentGate = useSelectedGate()
 
 // const route = useRoute('ums-id')
 
@@ -53,6 +55,16 @@ const gateDataAdded = () => {
 
 const updateCharts = (gateid: number) => {
 
+}
+
+const routeWithGateId = (page: string, gateid: number, gatetitle: string) => {
+  currentGate.value.id = gateid
+  currentGate.value.title = gatetitle
+  console.log('gatemodel', currentGate, gatetitle)
+
+  nextTick(() => {
+    router.push(`gate/${gateid}/${page}`)
+  })
 }
 
 const gateDataUpdated = () => {
@@ -111,13 +123,13 @@ const gateDataUpdated = () => {
       <VCol cols="12">
         <VCard variant="outlined">
           <MCDataTable ref="mcdatatable" :headers="gateHeaders" :api-url="gateApiUrl" @edit-item="gateEdit">
-            <template #item.gateTitle="{ value }">
+            <template #item.title="{ value }">
               <div class="d-flex align-center gap-x-4">
-                <VAvatar size="34" :variant="!value.usersavatar ? 'tonal' : undefined">
-                  <VImg v-if="value.usersavatar" :src="value.usersavatar" />
-                  <!-- <span v-else>{{ avatarText(value.gateTitle) }}</span> -->
+                <VAvatar size="34" :variant="!value.manager.avatarUrl ? 'tonal' : undefined">
+                  <VImg v-if="value.manager.avatarUrl" :src="value.manager.avatarUrl.replace('xxx', 'small')" />
+                  <span v-else>{{ avatarText(value.title) }}</span>
                 </VAvatar>
-                {{ value.gateTitle }}
+                {{ value.title }}
               </div>
               <!-- {{ value + "asdasdasd" }} -->
             </template>
@@ -132,10 +144,10 @@ const gateDataUpdated = () => {
             </template>
 
             <template #action="{ value }">
-              <IconBtn @click="router.push(`gate/${value.id}/user`)">
+              <IconBtn @click="routeWithGateId('user', value.id, value.title)">
                 <VIcon icon="mdi-account-outline" />
               </IconBtn>
-              <IconBtn @click="router.push(`gate/${value.id}/project`)">
+              <IconBtn @click="routeWithGateId('project', value.id, value.title)">
                 <VIcon icon="mdi-file-tree-outline" />
               </IconBtn>
               <IconBtn @click="updateCharts(value.id)">
