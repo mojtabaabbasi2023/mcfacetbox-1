@@ -60,7 +60,8 @@ const addNewNode = () => {
     <DialogCloseBtn @click="onReset(true)" />
     <VCard variant="flat" :subtitle="`${$t('tree.selectednode')}: ${props.selectedNode.title}`" :title="$t('tree.addnewnode')">
       <MCSearchApiAutoComplete
-        v-model:selected-items="selectedNodes" :max-height="400" api-url="/apps/searchsimple" :selection-type="SelectionType.Single" class="pt-1"
+        v-model:selected-items="selectedNodes"
+        auto-focus :max-height="400" api-url="/apps/searchsimple" :selection-type="SelectionType.Single" class="pt-1"
         fill-search-phrase-with-selected @search-phrase-changed="dataEntryChanged"
       />
       <VDivider v-if="activeActions" />

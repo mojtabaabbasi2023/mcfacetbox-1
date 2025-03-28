@@ -2,12 +2,11 @@
 import ContextMenu from '@imengyu/vue3-context-menu'
 import { isUndefined } from '@sindresorhus/is'
 import type { ISearchResultTabBox } from '@/types/SearchResult'
-import { useSelectedNode } from '@/store/treeStore'
-import { SelectionType } from '@/types/baseModels'
+import { useTree } from '@/store/treeStore'
 
 const props = defineProps<Props>()
 const { t } = useI18n({ useScope: 'global' })
-const selectenode = useSelectedNode()
+const { selectedNode } = useTree()
 const dialogSelectNodeVisible = ref(false)
 interface Props {
   dataitems: ISearchResultTabBox
@@ -46,7 +45,7 @@ const onContextMenu = (e: MouseEvent) => {
     y: e.y,
     items: [
       {
-        disabled: selectenode.simpleTreeModelStored.id <= 0,
+        disabled: selectedNode.id <= 0,
         icon: h('i', {
           class: 'tabler-plug-connected icon iconfont',
           style: {

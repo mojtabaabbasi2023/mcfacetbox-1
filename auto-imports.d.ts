@@ -405,8 +405,6 @@ declare module 'vue' {
     readonly DialogSizeSM: UnwrapRef<typeof import('./src/utils/constants')['DialogSizeSM']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly HttpStatusCodesWasHandled: UnwrapRef<typeof import('./src/utils/constants')['HttpStatusCodesWasHandled']>
-    readonly MainPageURI: UnwrapRef<typeof import('./src/utils/constants')['MainPageURI']>
-    readonly ServerApiAddress: UnwrapRef<typeof import('./src/utils/constants')['ServerApiAddress']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly alphaDashValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['alphaDashValidator']>
     readonly alphaValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['alphaValidator']>

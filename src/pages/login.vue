@@ -17,12 +17,6 @@ definePage({
     unauthenticatedOnly: true,
   },
 })
-
-// async function tryLogin() {
-//   await nextTick(() => {
-//     window.location.href = `${ServerApiAddress}signin?returnUrl=http://localhost:5173/auth?key={0}`
-//   })
-// }
 </script>
 
 <template>

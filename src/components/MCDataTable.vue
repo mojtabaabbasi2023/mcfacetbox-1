@@ -2,9 +2,8 @@
 import Swal from 'sweetalert2'
 import { useToast } from 'vue-toastification'
 import { VDataTableServer } from 'vuetify/lib/components/index.mjs'
-import type { FetchError } from 'ofetch'
-import type { GridResult, baseDataTableModel } from '@/types/baseModels'
-import { serviceDelete } from '@/services/genericServices'
+import { destr } from 'destr'
+import type { GridResult, IRootServiceError, baseDataTableModel } from '@/types/baseModels'
 
 // const currentdate = ref('');
 
@@ -29,6 +28,7 @@ interface Emit {
 
 const { t } = useI18n({ useScope: 'global' })
 const searchQuery = ref('')
+const searchQueryFinal = ref('')
 const selectedItem = ref<Array<number>>([])
 const selectedPlan = ref()
 const selectedStatus = ref()
@@ -46,9 +46,9 @@ const updateOptions = (options: any) => {
 //   orderBy.value = options.sorting[0]?.order
 }
 
-const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<GridResult<baseDataTableModel>>(createUrl(props.apiUrl, {
+const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi(createUrl(props.apiUrl, {
   query: {
-    q: searchQuery,
+    Filter: searchQueryFinal,
     status: selectedStatus,
     plan: selectedPlan,
     pageSize,
@@ -64,23 +64,46 @@ setTimeout(async () => {
 
 const datatable = ref(VDataTableServer)
 
-onFetchResponse(response => {
+watch(searchQuery, () => {
+  if (searchQuery.value.length > 2 || searchQuery.value.length === 0) {
+    setTimeout(() => {
+      searchQueryFinal.value = searchQuery.value
+    }, 2000)
+  }
+})
+onFetchResponse(() => {
 //   response.json().then(value => {
-  datatableItems.value.splice(0)
-  resultData.value?.items.forEach(element => {
-    element.disabled = false
-    element.isLoading = false
-    element.isSelected = false
-    element.selectable = true
-    datatableItems.value.push(element)
-  })
-  emit('loadCompleted', resultData.value?.items ?? [])
+  try {
+    const result = resultData.value as GridResult<baseDataTableModel>
+
+    datatableItems.value.splice(0)
+    result.items.forEach(element => {
+      element.disabled = false
+      element.isLoading = false
+      element.isSelected = false
+      element.selectable = true
+      datatableItems.value.push(element)
+    })
+    emit('loadCompleted', result.items ?? [])
+  }
+  catch (error) {
+    toast.error(t('alert.probleminLoadInformation'))
+  }
 })
 
 // })
 
-onFetchError(response => {
-  toast.error(t('alert.probleminGetInformation'))
+onFetchError(() => {
+  try {
+    const result = resultData.value as IRootServiceError
+    if (result && result.error && result.error.code)
+      toast.error(result.error.message)
+    else
+      toast.error(t('alert.probleminGetInformation'))
+  }
+  catch (error) {
+    toast.error(t('alert.probleminLoadInformation'))
+  }
 })
 
 const searchLabelDefault = computed(() => {
@@ -91,8 +114,8 @@ const searchLabelDefault = computed(() => {
     return t('search')
 })
 
-const refreshData = () => {
-  fetchData(false)
+const refreshData = async () => {
+  await fetchData(false)
 }
 
 const updateAction = (dataModel: Record<string, any>) => {
@@ -168,6 +191,7 @@ defineExpose({ refreshData })
             v-model="searchQuery"
             :placeholder="searchLabelDefault"
             style="inline-size: 15.625rem;"
+            clearable
           />
 
           <!-- 👉 Add user button -->

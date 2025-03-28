@@ -17,12 +17,19 @@ export const handleFetchError = async (responseData: any, statusCode: number) =>
   if (statusCode === 401) {
     const loginState = useLoginState()
 
-    loginState.Loginstate.value = LoginState.MustLogout
+    loginState.Loginstate.value = LoginState.MustLogin
 
     return
   }
+  if (responseData && responseData.error && responseData.error.code && responseData.error.code === 'Encyclopedia.ErrorCode:010017' && statusCode === 403) {
+    setTimeout(() => {
+      const loginState = useLoginState()
+
+      loginState.Loginstate.value = LoginState.MustLogout
+    }, 4000)
+  }
   if (responseData && responseData.error && responseData.error.message)
-    throw new CustomFetchError(1, responseData.error.message)
+    throw new CustomFetchError(2, responseData.error.message)
   else
     throw new CustomFetchError(0, 'Error Not Handled')
 

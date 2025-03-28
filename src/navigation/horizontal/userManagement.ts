@@ -18,13 +18,13 @@ export default [
   {
     title: 'workReport',
     icon: { icon: 'mdi-text-box-search-outline' },
-    to: 'rs',
+    to: 'forms-slider',
     subject: 'Report',
     action: 'read',
     children: [
       {
         title: 'Dashboard',
-        to: 'um-gate',
+        to: 'forms-slider',
       },
     ],
   },

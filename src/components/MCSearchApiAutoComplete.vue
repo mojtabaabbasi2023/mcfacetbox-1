@@ -25,7 +25,7 @@ interface Emit {
 const itemsPerPage = ref(10)
 const page = ref(1)
 const selectedItemsLocal = ref<number[]>([])
-const searchResult = reactive<ISimpleSelectableDTO[]>([])
+const searchResult = reactive<ISimpleSelectableDTO<number>[]>([])
 const searchPhrase = ref('')
 
 // const onReset = () => {
@@ -42,7 +42,7 @@ const selectionStrategy = computed(() => {
   }
 })
 
-const { execute: fetchData, isFetching: loadingdata, data: searchResultFirst, onFetchResponse, onFetchError } = useApi<GridResult<ISimpleSelectableDTO>>(createUrl(props.apiUrl ?? '', {
+const { execute: fetchData, isFetching: loadingdata, data: searchResultFirst, onFetchResponse, onFetchError } = useApi<GridResult<ISimpleSelectableDTO<number>>>(createUrl(props.apiUrl ?? '', {
   query: {
     phrase: searchPhrase,
     itemsPerPage,

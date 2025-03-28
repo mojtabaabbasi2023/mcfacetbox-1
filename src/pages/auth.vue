@@ -27,7 +27,7 @@ const loginfailed = ref(false)
 
 async function sendTokenRequest(systemKey: string) {
   try {
-    const result = await $api<ITokenProfile>(`${ServerApiAddress}api/account/token/${systemKey}`, {
+    const result = await $api<ITokenProfile>(`${import.meta.env.VITE_API_BASE_URL}api/account/token/${systemKey}`, {
       method: 'GET',
     })
 
@@ -65,7 +65,7 @@ async function sendTokenRequest(systemKey: string) {
 }
 async function tryLogin() {
   await nextTick(() => {
-    window.location.href = `${ServerApiAddress}signin?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}auth?key={0}`
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}signin?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}auth?key={0}${route.query.to ? `&to=${String(route.query.to)}` : ''}`
   })
 }
 onMounted(async () => {

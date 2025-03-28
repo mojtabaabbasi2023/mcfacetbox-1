@@ -1,5 +1,6 @@
 import { createGlobalState } from '@vueuse/core'
 import { isUndefined } from '@antfu/utils'
+import { i } from 'vite/dist/node/types.d-jgA8ss1A'
 import type { ISimpleTreeActionable } from '@/types/baseModels'
 import { SimpleTreeAcionableModel, SimpleTreeModel } from '@/types/baseModels'
 
@@ -26,6 +27,13 @@ export function useTree() {
     return true
   }
 
+  const deselectAllTreeNodes = () => {
+    for (const key in treeIndex) {
+      if (treeIndex[key].selected)
+        treeIndex[key].selected = false
+    }
+  }
+
   const selectNode = (nodeItem: ISimpleTreeActionable) => {
     selectedNode.id = nodeItem.id
     selectedNode.title = nodeItem.title
@@ -38,6 +46,7 @@ export function useTree() {
     selectedNode,
     addNode,
     selectNode,
+    deselectAllTreeNodes,
   }
 }
 

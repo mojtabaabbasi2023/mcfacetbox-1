@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { VTreeview } from 'vuetify/labs/VTreeview'
-import { isUndefined } from '@sindresorhus/is'
+import { isNumericString, isUndefined } from '@sindresorhus/is'
 import { useToast } from 'vue-toastification'
 import ContextMenu from '@imengyu/vue3-context-menu'
 import MCLoading from '../MCLoading.vue'
@@ -15,6 +15,9 @@ const props = defineProps({
   title: { type: String },
 })
 
+const router = useRouter()
+const route = useRoute()
+
 // const emit = defineEmits<Emit>()
 const treeview = ref()
 const { t } = useI18n({ useScope: 'global' })
@@ -26,7 +29,7 @@ const isLoading = ref(true)
 
 // const treeData = reactive<ISimpleTreeActionable[]>([])
 // const treeIndex = reactive<Record<number, ISimpleTreeActionable>>({})
-const { treeData, treeIndex, selectNode, selectedNode } = useTree()
+const { treeData, treeIndex, selectNode, selectedNode, deselectAllTreeNodes } = useTree()
 
 // const treeIndex = useTreeIndex()
 
@@ -40,18 +43,19 @@ interface Emit {
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<GridResult<ISimpleTreeActionable>>(createUrl('/apps/maintree'), { immediate: false })
 
 onFetchResponse(response => {
-  response.json().then(value => {
-    if (resultData.value) {
-      treeData.push(resultData.value.items)
-      updateTreeIndex(treeData)
-    }
-    if (isUndefined(treeData))
-      toast.error(t('alert.probleminGetInformation'))
-    isLoading.value = false
+  if (resultData.value) {
+    treeData.splice(0)
+    treeData.push(resultData.value.items)
+    updateTreeIndex(treeData)
+    console.log('loadtree')
+    checkTreeRoute(false)
+  }
+  if (isUndefined(treeData))
+    toast.error(t('alert.probleminGetInformation'))
+  isLoading.value = false
 
-    // if ((resultData.value?.items ?? 0) <= 0)
-    //   toast.info(t('alert.resultNotFound'))
-  })
+  // if ((resultData.value?.items ?? 0) <= 0)
+  //   toast.info(t('alert.resultNotFound'))
 })
 onFetchError(response => {
   toast.error(t('alert.dataActionFailed'))
@@ -60,6 +64,22 @@ watch(loadingdata, () => {
   if (loadingdata.value)
     isLoading.value = true
 })
+
+watch(route, newval => {
+  checkTreeRoute(true)
+  console.log('currentroute', newval.query.snd)
+}, { immediate: true })
+
+function checkTreeRoute(deselectAll: boolean) {
+  console.log('checkroute')
+
+  if (route.query.snd && isNumericString(route.query.snd) && selectedNode.id.toString() !== route.query.snd && treeIndex[route.query.snd]) {
+    if (deselectAll)
+      deselectAllTreeNodes()
+    selectNode(treeIndex[route.query.snd])
+    gotoNode(useToNumber(route.query.snd).value)
+  }
+}
 
 // watch(F2, v => {
 //   if (v && activatedNode.value[0])
@@ -88,6 +108,7 @@ const selectTreeNode = (item: ISimpleTreeActionable) => {
   //   treeNodeDeselectAll(projectList)
   item.selected = true
   selectNode(item)
+  router.push({ name: 'rs', query: { snd: item.id } })
 
 //   selectenode.simpleTreeModelStored.id = item.id
 //   selectenode.simpleTreeModelStored.title = item.title
@@ -165,11 +186,11 @@ function gotoNode(nodeId: number) {
   if (nodeId > 0) {
     treeIndex[nodeId].selected = true
     openParents(treeData, nodeId)
-    setTimeout(() => {
+    nextTick(() => {
       const activeNode = document.querySelector('.v-list-item--active')
       if (activeNode)
         activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }, 1000)
+    })
   }
 }
 

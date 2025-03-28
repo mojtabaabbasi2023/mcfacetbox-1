@@ -37,17 +37,29 @@ const navItems = computed<HorizontalNavItems>(() => {
     return researchSoftwareItems
 })
 
+function showGateTitle(): boolean {
+  if (selectedGate.value.id > 0 && router.currentRoute.value.name !== 'um-gate' && import.meta.env.VITE_APP_TYPE === 'UM')
+    return true
+  else
+    return false
+}
 const loginState = useLoginState()
 
 watch(loginState.Loginstate, async newval => {
   if (newval === LoginState.MustLogout) {
     clearUserCookies()
     await nextTick(() => {
-      window.location.href = `${ServerApiAddress}signout?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}login`
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL}signout?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}login&to=${router.currentRoute.value.path}`
+
+    //   router.replace(`${import.meta.env.VITE_API_BASE_URL}signout?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}login&to=${router.currentRoute.value.path}`)
     })
   }
-  if (newval === LoginState.MustLogin)
-    router.push('/login')
+  if (newval === LoginState.MustLogin) {
+    clearUserCookies()
+    await nextTick(() => {
+      router.push('/login')
+    })
+  }
 })
 
 // onMounted(() => {
@@ -96,7 +108,7 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
     <template #navbar>
       <RouterLink to="/" class="app-logo d-flex align-center gap-x-3">
         <VNodeRenderer :nodes="themeConfig.app.logo" />
-        <h2 v-if="selectedGate.id > 0 && $router.currentRoute.value.name !== 'um-gate'" class="app-title font-weight-bold leading-normal text-md text-capitalize">
+        <h2 v-if="showGateTitle()" class="app-title font-weight-bold leading-normal text-md text-capitalize">
           <!-- {{ themeConfig.app.title }} -->
           {{ `${$t('gate.title')} : ${selectedGate.title}` }}
         </h2>

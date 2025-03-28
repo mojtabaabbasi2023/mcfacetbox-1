@@ -1,7 +1,7 @@
 import type { ISimpleSelectableDTO } from '@/types/baseModels'
 
 interface DB {
-  items: ISimpleSelectableDTO[]
+  items: ISimpleSelectableDTO<number>[]
 }
 
 export const db: DB = {

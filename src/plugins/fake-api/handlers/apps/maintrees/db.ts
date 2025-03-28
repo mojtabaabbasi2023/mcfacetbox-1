@@ -7,7 +7,7 @@ interface DB {
 export const db: DB = {
   mainTree:
  {
-   id: 0,
+   id: 20,
    title: 'درخت خانواده',
    tempData: {},
    parentId: -1,
@@ -20,7 +20,7 @@ export const db: DB = {
         editing: false,
         loading: false,
         selected: false,
-        parentId: 0,
+        parentId: 20,
         children: [
           {
             id: 2,

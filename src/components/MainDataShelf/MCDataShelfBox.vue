@@ -2,7 +2,6 @@
 import ContextMenu from '@imengyu/vue3-context-menu'
 import Swal from 'sweetalert2'
 import { useToast } from 'vue-toastification'
-import { useSelectedNode } from '@/store/treeStore'
 import { type IDataShelfBox } from '@/types/dataShelf'
 
 const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number }>()
@@ -11,7 +10,6 @@ const isDialogDataShelfBoxEdit = ref(false)
 const databoxItem = defineModel<IDataShelfBox>()
 const { t } = useI18n({ useScope: 'global' })
 const toast = useToast()
-const selectenode = useSelectedNode()
 const databox = ref()
 const highlightClass = ref(['mc-data-shelf-box'])
 const lastPointerPos = ref({ x: 0, y: 0 })

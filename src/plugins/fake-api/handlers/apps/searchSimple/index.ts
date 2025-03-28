@@ -19,7 +19,7 @@ export const handlerAppsSimpleSearch = [
     const searchQuery = is.string(q) ? q : undefined
     const queryLower = (searchQuery ?? '').toString().toLowerCase()
 
-    const filtereditems = db.items.filter(items => ((items.text.toLowerCase().includes(queryLower)))).reverse()
+    const filtereditems = db.items.filter(items => ((items.title.toLowerCase().includes(queryLower)))).reverse()
     const totalItems = filtereditems.length
 
     // total pages

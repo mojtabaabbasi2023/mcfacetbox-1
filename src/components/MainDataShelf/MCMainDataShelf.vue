@@ -3,7 +3,7 @@ import { useToast } from 'vue-toastification'
 import { isUndefined } from '@sindresorhus/is'
 import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
-import { useSelectedNode } from '@/store/treeStore'
+import { useTree } from '@/store/treeStore'
 import { type GridResult, SelectAllState } from '@/types/baseModels'
 import type { IDataShelfBox } from '@/types/dataShelf'
 
@@ -31,7 +31,7 @@ const { t } = useI18n({ useScope: 'global' })
 const loadmore = ref(null)
 const selectedFacetItems = reactive<Record<string, number[]>>({})
 const toast = useToast()
-const selectenode = useSelectedNode()
+const { selectedNode } = useTree()
 
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<GridResult<IDataShelfBox>>(createUrl('/apps/dataShelf', {
   query: {
@@ -74,9 +74,9 @@ function resetData() {
   selectAll.value.state = SelectAllState.Deselect
   selectAll.value.count = 0
   resultdataItems.value.splice(0)
-  currentNodeId.value = selectenode.simpleTreeModelStored.id
+  currentNodeId.value = selectedNode.id
 }
-watch(selectenode.simpleTreeModelStored, async () => {
+watch(selectedNode, async () => {
   try {
     resetData()
     await fetchData(false)
@@ -292,7 +292,7 @@ function dataBoxItemAddTag(databoxId: number) {
             </div>
           </div>
           <div class="ms-auto">
-            <span class="ma-2">{{ selectenode.simpleTreeModelStored.title }}</span>
+            <span class="ma-2">{{ selectedNode.title }}</span>
           </div>
         </VRow>
         <!-- </VToolbar> -->

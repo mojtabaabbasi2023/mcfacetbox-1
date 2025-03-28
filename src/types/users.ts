@@ -10,7 +10,7 @@ export const clearUserCookies = () => {
 }
 
 export interface IUserEdit extends IUserBase {
-  gateRoles: string[]
+  roles: string[]
   isActive: boolean
 }
 export interface IUser extends baseDataTableModel {
@@ -28,7 +28,7 @@ export interface IUserBase {
   avatarUrl: string
 }
 export class UserEditModel implements IUserEdit {
-  gateRoles: string[] = []
+  roles: string[] = []
   id: number = 0
   fullName: string = ''
   phoneNumber: string = ''
@@ -76,7 +76,7 @@ export class UserModel implements IUser {
   disabled: boolean = false
   id: number = 0
   fullName: string = ''
-  role: ISimpleDTO<number>[] = []
+  role: ISimpleDTO<string>[] = []
   contact: string = ''
   email: string = ''
   createDate: string = ''

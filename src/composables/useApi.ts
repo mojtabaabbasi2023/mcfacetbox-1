@@ -1,8 +1,7 @@
 import { createFetch } from '@vueuse/core'
-import type { RouterTyped } from 'vue-router/auto'
-
 import { destr } from 'destr'
 import { useLoginState } from '@/store/baseStore'
+import type { IRootServiceError } from '@/types/baseModels'
 import { LoginState } from '@/types/baseModels'
 
 export const useApi = createFetch({
@@ -50,14 +49,9 @@ export const useApi = createFetch({
     onFetchError(ctx) {
       const { response, data } = ctx
 
-      const parsedData = null
+      let parsedData = null
       try {
-        // parsedData = destr(data)
-
-        // const res = response?.json()
-
-        // console.log('parsedres', res)
-        // console.log('parseddata', parsedData)
+        parsedData = destr(data)
       }
       catch (error) {
       }
@@ -65,10 +59,20 @@ export const useApi = createFetch({
       if (response && (response.status === 401)) {
         const loginState = useLoginState()
 
-        loginState.Loginstate.value = LoginState.MustLogout
+        loginState.Loginstate.value = LoginState.MustLogin
+      }
+      if (response && response.status === 403) {
+        const result = parsedData as IRootServiceError
+        if (result.error.code && result.error.code === 'Encyclopedia.ErrorCode:010017') {
+          setTimeout(() => {
+            const loginState = useLoginState()
+
+            loginState.Loginstate.value = LoginState.MustLogout
+          }, 5000)
+        }
       }
 
-      return { data, response }
+      return { data: parsedData, response }
     },
   },
 })

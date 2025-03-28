@@ -25,7 +25,7 @@ const logout = async () => {
   // Reset ability to initial ability
   ability.update([])
   await nextTick(() => {
-    window.location.href = `${ServerApiAddress}signout?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}login`
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}signout?returnUrl=${import.meta.env.VITE_CLIENT_ADDRESS}login`
   })
 }
 
@@ -43,9 +43,9 @@ function avatarUrl(): string {
 //   { type: 'navItem', icon: 'tabler-question-mark', title: 'FAQ', to: { name: 'pages-faq' } },
 // ]
 const userProfileList = [
-  { type: 'divider' },
-  { type: 'navItem', icon: 'tabler-user', title: 'profile', to: { name: 'apps-user-view-id', params: { id: 21 } } },
-  { type: 'navItem', icon: 'tabler-settings', title: 'Settings', to: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
+//   { type: 'divider' },
+//   { type: 'navItem', icon: 'tabler-user', title: 'profile', to: { name: 'pages-account-settings-tab', params: { id: 21 } } },
+//   { type: 'navItem', icon: 'tabler-settings', title: 'Settings', to: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
 ]
 </script>
 

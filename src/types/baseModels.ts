@@ -1,4 +1,5 @@
-export class GridResult<T> {
+export class GridResult<T> implements Record<string, any> {
+  [x: string]: any;
   page = 0
   totalCount = 0
   items: T[] = []
@@ -13,9 +14,13 @@ export interface IServiceValidationDetails {
   message: string
   members: string[]
 }
+export interface IRootServiceError {
+  error: IServiceError
+}
 export interface IServiceError {
   code: string
   details: string
+  message: string
   validationErrors: IServiceValidationDetails[]
 }
 

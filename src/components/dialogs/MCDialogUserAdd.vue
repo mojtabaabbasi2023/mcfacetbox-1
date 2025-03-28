@@ -72,7 +72,7 @@ async function userAdd() {
 async function userEdit() {
   try {
     await $api((`${props.apiUrl}/`).replace('//', '/') + userData.id, {
-      method: 'POST',
+      method: 'PUT',
       body: JSON.parse(JSON.stringify(userData)),
       ignoreResponseError: false,
     })
@@ -94,8 +94,8 @@ async function userEdit() {
 const onSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
-      userData.gateRoles.splice(0)
-      userData.gateRoles.push(...selectedRoles.value)
+      userData.roles.splice(0)
+      userData.roles.push(...selectedRoles.value)
       isloading.value = true
       if (userData.id > 0)
         userEdit()
@@ -136,7 +136,7 @@ const updateUser = async (userId: number) => {
   try {
     opening.value = true
 
-    const userDataResult = await $api<IUser>(`app/gate/3/user/${userId}`)
+    const userDataResult = await $api<IUser>(`${props.apiUrl}/${userId}`)
 
     await loadRoles()
 
