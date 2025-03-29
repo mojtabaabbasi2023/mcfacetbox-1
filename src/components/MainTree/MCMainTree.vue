@@ -50,6 +50,7 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
 
 onFetchResponse(() => {
   if (resultData.value) {
+    activatedNode.value.splice(0)
     clearTreeData()
     treeData.push(resultData.value.items)
     updateTreeIndex(treeData)
@@ -229,6 +230,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
   // prevent the browser's default menu
   e.preventDefault()
   activatedNode.value = [nodeItem.id]
+
   ContextMenu.showContextMenu({
     x: e.x,
     y: e.y,
@@ -237,6 +239,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         label: t('tree.newnode'),
         icon: 'tabler-plus',
         onClick: () => {
+          selectTreeNode(nodeItem)
           dialogAddNewNodeVisible.value = true
         },
       },
@@ -309,7 +312,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
     <VRow no-gutters class="btn-box toolbar">
       <VCol md="12">
         <div class="toolbar">
-          <VBtn icon="tabler-plus" size="small" variant="text" />
+          <VBtn icon="tabler-plus" size="small" variant="text" @click=" dialogAddNewNodeVisible = true" />
 
           <VBtn icon="tabler-search" size="small" variant="text" />
           <VBtn icon="tabler-box-multiple" size="small" variant="text" />

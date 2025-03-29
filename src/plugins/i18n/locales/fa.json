@@ -80,7 +80,7 @@
     'nodes': 'نودها',
     'selectednode':'نود انتخاب شده',
     'selectnode':'انتخاب درخت',
-    'newnode':'جدید',
+    'newnode':'نود جدید',
     'editnode':'ویرایش',
     'addcomment':'افزودن توضیحات',
     'merge':'ادغام',

@@ -91,7 +91,7 @@ const loadTrees = async () => {
   try {
     isloading.value = true
 
-    const treeDataResult = await $api<GridResult<ISimpleDTO<number>>>(`app/tree/simple?gateid=${selectedGate.value}`)
+    const treeDataResult = await $api<GridResult<ISimpleDTO<number>>>(`app/tree/simple?ProjectId=${selectedProject.value}`)
 
     selectedTree.value.id = 0
     treeList.value.splice(0)

@@ -195,7 +195,7 @@ function dataBoxItemAddTag(databoxId: number) {
           >
         -->
         <VRow no-gutters class="btn-box data-shelf-toolbar d-flex">
-          <div class="d-flex">
+          <div class="d-flex toolbar">
             <VBtn icon size="small" :variant="selectAll.state === SelectAllState.Select ? 'elevated' : 'text'" @click="changeselectAllState">
               <VIcon :icon="selectAll.state === SelectAllState.Combine ? 'tabler-squares-selected' : 'tabler-select-all'" size="22" />
               <VTooltip
