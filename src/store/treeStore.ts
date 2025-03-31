@@ -19,7 +19,7 @@ const treeIndex = reactive<Record<number, ISimpleTreeActionable>>({})
 const selectedNode = reactive<ISimpleTreeActionable>(new SimpleTreeAcionableModel())
 export function useTree() {
   const addNode = (nodeItem: ISimpleTreeActionable): boolean => {
-    console.log('newnode', nodeItem)
+    // console.log('newnode', nodeItem)
 
     // console.log('treeindex', treeIndex)
     if (nodeItem.parentId && nodeItem.parentId !== -1) {
@@ -30,8 +30,9 @@ export function useTree() {
     }
     else { treeData.push(nodeItem) }
     treeIndex[nodeItem.id] = nodeItem
-    console.log('treedata', treeData)
-    console.log('treeindex', treeIndex)
+
+    // console.log('treedata', treeData)
+    // console.log('treeindex', treeIndex)
 
     return true
   }
@@ -52,8 +53,6 @@ export function useTree() {
       }
       delete treeIndex[nodeItem.id]
     }
-    console.log('treedata', treeData)
-    console.log('treeindex', treeIndex)
   }
 
   //   function createTreeIndex(tree: ISimpleTree[]): Record<number, ISimpleTree> {

@@ -3,12 +3,11 @@ import { VTreeview } from 'vuetify/labs/VTreeview'
 import { isNumericString, isUndefined } from '@sindresorhus/is'
 import { useToast } from 'vue-toastification'
 import ContextMenu from '@imengyu/vue3-context-menu'
+import Swal from 'sweetalert2'
 import MCLoading from '../MCLoading.vue'
 import { type ISimpleDTO, type ISimpleTree, type ISimpleTreeActionable, SimpleTreeAcionableModel } from '@/types/baseModels'
 import { createTreeIndex } from '@/types/tree'
 import { useSelectedTree, useTree } from '@/store/treeStore'
-import Swal from 'sweetalert2'
-
 
 // watch(activatedNode, (newvalue, oldvalue) => {
 //     roleData.projects = convertSimpleTreeToSimpleDtoArray(projectList).filter((item) => activatedNode.value.includes(item.id))
@@ -30,15 +29,15 @@ const activatedNode = ref<number[]>([])
 const openedNode = ref<number[]>([])
 const isLoading = ref(false)
 const selecteTreeStore = useSelectedTree()
-const { treeData, treeIndex, selectNode, selectedNode, clearTreeData, deselectAllTreeNodes,deleteNode } = useTree()
+const { treeData, treeIndex, selectNode, selectedNode, clearTreeData, deselectAllTreeNodes, deleteNode } = useTree()
 const currentTreeId = ref(0)
+const nodeTempTitleForEdit = ref('')
 
 // const currentNodeId = ref(0)
 
 // const treeIndex = useTreeIndex()
 
 const editableNode = ref()
-const disabledSelection = ref(false)
 const dialogAddNewNodeVisible = ref(false)
 interface Emit {
   (e: 'close'): void
@@ -121,36 +120,16 @@ function checkTreeRoute(deselectAll: boolean) {
   }
   currentTreeId.value = useToNumber(gtd).value
 }
-
-// watch(F2, v => {
-//   if (v && activatedNode.value[0])
-//     treeIndex[activatedNode.value[0]].editing = true
-// })
-// watch(alt_s, v => {
-//   if (v)
-//     console.log('Control+A+B have been pressed')
-// })
 function updateTreeIndex(dataItems: ISimpleTree[]) {
-  // اینجا فرض می‌شود که createTreeIndex(tree) یک شیء جدید برمی‌گرداند
   const newTreeIndex = createTreeIndex(dataItems)
 
   // به‌روزرسانی مقادیر در treeIndex
   Object.assign(treeIndex, { ...newTreeIndex })
 }
 
-// watch(openedNode, () => {
-//   console.log('openednode', openedNode.value)
-// })
-
 const selectTreeNode = (item: ISimpleTreeActionable) => {
   router.push({ name: 'rs', query: { gtd: btoa(currentTreeId.value.toString()), snd: btoa(item.id.toString()) } })
 }
-
-// onMounted(() => {
-//   setTimeout(() => {
-//     fetchData()
-//   }, 1000)
-// })
 
 const openParents = (nodeItems: ISimpleTree[], id: number) => {
   for (const item of nodeItems) {
@@ -171,13 +150,13 @@ const openParents = (nodeItems: ISimpleTree[], id: number) => {
 
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'F2' && activatedNode.value.length > 0)
-    editNodeItem()
+    nodeEditStart()
 }
-function editNodeItem() {
+function nodeEditStart() {
   if (activatedNode.value.length > 0) {
-    disabledSelection.value = true
+    nodeTempTitleForEdit.value = treeIndex[activatedNode.value[0]].title
     treeIndex[activatedNode.value[0]].editing = true
-    treeIndex[activatedNode.value[0]].tempData = treeIndex[activatedNode.value[0]].title
+    treeIndex[activatedNode.value[0]].tempData = useCloned(treeIndex[activatedNode.value[0]].title).cloned.value
   }
 }
 function handleTreeViewKeydown(event: KeyboardEvent) {
@@ -186,12 +165,35 @@ function handleTreeViewKeydown(event: KeyboardEvent) {
 //     event.stopPropagation()
 //   }
 }
-async function editNodeITem(nodeitem: ISimpleTreeActionable) {
-  await setTimeout(() => {
-    nodeitem.loading = nodeitem.editing = false
-  }, 5000)
+function nodeEditCancel(nodeitem: ISimpleTreeActionable) {
+  nodeitem.loading = nodeitem.editing = false
+  nodeitem.failed = false
+  nodeitem.title = useCloned(nodeitem.tempData).cloned.value
+  treeview.value.$el.focus()
 }
+async function nodeEditProgress(nodeitem: ISimpleTreeActionable) {
+  nodeitem.loading = true
+  try {
+    await $api(`app/node/${nodeitem.id}/title`, {
+      method: 'PUT',
+      body: JSON.parse(JSON.stringify({ title: nodeTempTitleForEdit.value })),
+      ignoreResponseError: false,
+    })
 
+    nodeitem.loading = nodeitem.editing = false
+    setTimeout(() => {
+      treeIndex[nodeitem.id].title = nodeTempTitleForEdit.value
+      treeview.value.$el.focus()
+    }, 1000)
+  }
+  catch (error) {
+    nodeitem.loading = false
+    nodeitem.failed = true
+    if (error instanceof CustomFetchError && error.code > 0)
+      toast.error(error.message)
+    else toast.error(t('httpstatuscodes.0'))
+  }
+}
 function handleEditableNodeKeydown(event: KeyboardEvent, item: ISimpleTreeActionable) {
   switch (event.key) {
     case ' ':
@@ -199,14 +201,12 @@ function handleEditableNodeKeydown(event: KeyboardEvent, item: ISimpleTreeAction
       break;
     case 'Enter':
       event.stopPropagation()
-      item.loading = true
-      editNodeITem(item)
+      nodeEditProgress(item)
       break;
     case 'Escape':
       if (item.loading)
         break;
-      item.loading = item.editing = false
-      item.title = item.tempData
+    nodeEditCancel(item)
       break;
     default:
       break;
@@ -223,9 +223,10 @@ function gotoNode(nodeId: number) {
     })
   }
 }
-const deleteSelectedNode=(nodeItem:ISimpleTreeActionable)=>{
-    Swal.fire({
-    titleText:  formatString(t('alert.specificItemDeleted'), nodeItem.title),
+
+const deleteSelectedNode = (nodeItem: ISimpleTreeActionable) => {
+  Swal.fire({
+    titleText: formatString(t('alert.specificItemDeleted'), nodeItem.title),
     confirmButtonText: t('$vuetify.confirmEdit.ok'),
     cancelButtonText: t('$vuetify.confirmEdit.cancel'),
     showConfirmButton: true,
@@ -243,6 +244,7 @@ const deleteSelectedNode=(nodeItem:ISimpleTreeActionable)=>{
       catch (error) {
         serviceError.value = error
       }
+
       return { serviceError }
     },
     allowOutsideClick: false,
@@ -259,6 +261,7 @@ const deleteSelectedNode=(nodeItem:ISimpleTreeActionable)=>{
     }
   })
 }
+
 const nodeItemAdded = (nodeItem: ISimpleTreeActionable) => {
   toast.success(formatString(t('alert.specificNodeAdded'), nodeItem.title))
 }
@@ -291,7 +294,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
       {
         label: t('tree.deletenode'),
         icon: 'tabler-trash',
-        customClass:'error',
+        customClass: 'error',
         onClick: () => {
           deleteSelectedNode(nodeItem)
         },
@@ -300,7 +303,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         label: t('tree.editnode'),
         icon: 'tabler-edit',
         onClick: () => {
-          editNodeItem()
+          nodeEditStart()
         },
       },
       {
@@ -330,14 +333,6 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
       {
         label: t('tree.relation'),
         icon: 'tabler-affiliate',
-
-        onClick: () => {
-          alert('You click a menu item')
-        },
-      },
-      {
-        label: t('tree.duplicate'),
-        icon: 'tabler-corner-down-right-double',
 
         onClick: () => {
           alert('You click a menu item')
@@ -407,9 +402,12 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
               <VCol class="tree-title">
                 <span v-if="!(item.editing ?? false)">{{ item.title }}</span>
                 <VTextField
-                  v-else ref="editableNode" v-model:model-value="item.title" autofocus :placeholder="item.title" :loading="item.loading"
-                  :focused="!(item.loading ?? false)" :readonly="item.loading ?? false" @keydown="handleEditableNodeKeydown($event, item)"
+                  v-else ref="editableNode" v-model:model-value="nodeTempTitleForEdit" :color="item.failed ? 'error' : 'primary'" autofocus :placeholder="item.title"
+                  :loading="item.loading"
+                  :focused="!(item.loading ?? false)" :readonly="item.loading ?? false"
+                  @blur="nodeEditCancel(item)" @keydown="handleEditableNodeKeydown($event, item)"
                 />
+                <!-- <span>{{ item.title }}</span> -->
               </VCol>
               <VCol cols="auto" class="tree-node">
                 <template v-if="item.children && item.children.length > 0">

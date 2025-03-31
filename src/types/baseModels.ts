@@ -83,6 +83,7 @@ export interface baseItemState {
   editing?: boolean
   loading?: boolean
   selected?: boolean
+  failed?: boolean | null
   tempData?: any
 }
 export interface baseItemAction {
