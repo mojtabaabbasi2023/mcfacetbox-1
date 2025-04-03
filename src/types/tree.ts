@@ -36,6 +36,23 @@ export class NodeNewModel implements INodeNew {
     this.type = type
   }
 }
+export interface INodeView {
+  id: number
+  isDeleted: boolean
+  isActive: boolean
+  creationTime: string
+  creatorId: string
+  creatorFullName: string
+  lastModificationTime: string
+  lastModifierId: string
+  lastModifierFullName: string
+  title: string
+  treeId: number
+  description: string
+  priority: number
+  pathOrder: string
+  parentId: number
+}
 export interface ITreeTitle extends Record<string, any>, baseItemState {
   id: number
   title: string

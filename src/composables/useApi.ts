@@ -63,12 +63,17 @@ export const useApi = createFetch({
       }
       if (response && response.status === 403) {
         const result = parsedData as IRootServiceError
-        if (result.error.code && result.error.code === 'Encyclopedia.ErrorCode:010017') {
-          setTimeout(() => {
-            const loginState = useLoginState()
+        try {
+          if (result.error.code && result.error.code === 'Encyclopedia.ErrorCode:010017') {
+            setTimeout(() => {
+              const loginState = useLoginState()
 
-            loginState.Loginstate.value = LoginState.MustLogout
-          }, 5000)
+              loginState.Loginstate.value = LoginState.MustLogout
+            }, 5000)
+          }
+        }
+        catch (error) {
+
         }
       }
 
@@ -136,12 +141,17 @@ export const useApiFake = createFetch({
       }
       if (response && response.status === 403) {
         const result = parsedData as IRootServiceError
-        if (result.error.code && result.error.code === 'Encyclopedia.ErrorCode:010017') {
-          setTimeout(() => {
-            const loginState = useLoginState()
+        try {
+          if (result.error.code && result.error.code === 'Encyclopedia.ErrorCode:010017') {
+            setTimeout(() => {
+              const loginState = useLoginState()
 
-            loginState.Loginstate.value = LoginState.MustLogout
-          }, 5000)
+              loginState.Loginstate.value = LoginState.MustLogout
+            }, 5000)
+          }
+        }
+        catch (error) {
+
         }
       }
 

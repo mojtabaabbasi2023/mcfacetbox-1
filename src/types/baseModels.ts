@@ -33,6 +33,7 @@ export interface ISimpleDTO<T extends stringNumber> {
 
 export interface ISimpleSelectableDTO<T extends stringNumber> extends ISimpleDTO<T>, baseItemState, baseItemAction {
   title: string
+  parentTitle?: string
   editing?: boolean
   loading?: boolean
   selected?: boolean
@@ -48,9 +49,13 @@ export interface ISimpleTree extends baseItemState {
   children?: ISimpleTree[] | null
 }
 
-export interface ISimpleTreeActionable extends ISimpleTree, baseItemAction {
+export interface ISimpleTreeActionable extends baseItemAction, baseItemState {
+  id: number
+  title: string
+  children?: ISimpleTreeActionable[] | null
   parentId: number
   priority: number
+  hasDescription?: boolean
 }
 
 export class SimpleDTOModel<T extends stringNumber> implements ISimpleDTO<T> {
@@ -66,7 +71,7 @@ export class SimpleTreeAcionableModel implements ISimpleTreeActionable {
   parentId: number = -1
   id: number = -1
   title: string = ''
-  children?: ISimpleTree[] | undefined
+  children?: ISimpleTreeActionable[] | undefined
   editing?: boolean | undefined = false
   loading?: boolean | undefined = false
   selected?: boolean | undefined = false

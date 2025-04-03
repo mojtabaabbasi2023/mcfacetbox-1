@@ -23,12 +23,13 @@ interface Emit {
   (e: 'searchPhraseChanged', searchPhrase: string): void
 
 }
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(30)
 const page = ref(1)
 const selectedItemsLocal = ref<number[]>([])
 const searchResult = reactive<ISimpleSelectableDTO<number>[]>([])
 const searchPhrase = ref('')
 const actionInprogress = ref(false)
+const showReplace = ref(false)
 let timeout: ReturnType<typeof setTimeout> | null = null
 
 // const onReset = () => {
@@ -97,13 +98,25 @@ watch(searchResult, () => {
 </script>
 
 <template>
-  <VCard variant="flat">
+  <VCard variant="elevated">
     <!-- <MCLoading :showloading="loadingdata" /> -->
-    <div class="search-container">
+    <div class="search-container mb-1 d-flex flex-column">
       <VTextField
-        v-model:model-value="searchPhrase" autofocus :placeholder="$t('search')" append-inner-icon="tabler-search"
+        v-model:model-value="searchPhrase"
+        class="mb-1" autofocus :placeholder="$t('search')" append-inner-icon="tabler-search"
         clearable density="compact" :loading="loadingdata" @click:clear="onReset"
-      />
+      >
+        <template #append>
+          <VBtn variant="plain" :icon="showReplace ? 'tabler-chevron-down' : 'tabler-chevron-right'" size="small" @click="showReplace = !showReplace" />
+        </template>
+      </VTextField>
+      <VExpandTransition>
+        <VTextField
+          v-if="showReplace"
+          v-model:model-value="searchPhrase" :placeholder="$t('replace')"
+          clearable density="compact" @click:clear="onReset"
+        />
+      </VExpandTransition>
     </div>
 
     <VList
@@ -111,7 +124,7 @@ watch(searchResult, () => {
       lines="one"
       :select-strategy="selectionStrategy"
       :return-object="false"
-      :max-height="`${props.maxHeight ?? 500}px`"
+      :max-height="`${props.maxHeight ?? 400}px`"
     >
       <!-- <VVirtualScroll :items="filteredItems" :height="(props.scrollItemCount ?? 10) * 20"> -->
       <VListItem v-for="item in searchResult" :key="item.id" :title="item.title" :value="item.id">
@@ -129,3 +142,9 @@ watch(searchResult, () => {
   </VCard>
   <!-- </PerfectScrollbar> -->
 </template>
+
+<style lang="css">
+.v-input--horizontal .v-input__append{
+margin-inline-start: 0px !important;
+}
+</style>

@@ -83,14 +83,17 @@
     'newnode':'نود جدید',
     'editnode':'ویرایش',
     "deletenode":"حذف نود",
-    'addcomment':'افزودن توضیحات',
+    'comment':'توضیحات',
     'merge':'ادغام',
-    'transfernode':'انتقال',
+    "transfernode":"انتقال نود",
     'relation':'ارجاع / ارتباط',
     'duplicate':'دوبل کردن',
     'addnewnode':'افزدودن نود جدید',
     'samelevelnode':'نود همسطح',
-    'childnode':'نود فرزند'
+    'childnode':'نود فرزند',
+    "loadingnodedetail":"بارگذاری اطلاعات نود",
+    "mergenode":"ادغام نودها",
+    "adddestinationnode":"نود مقصد را انتخاب کنید"
   },
   'book': {
     'title': 'عنوان کتاب',
@@ -151,6 +154,7 @@
   'status': 'وضعیت',
   'users': 'کاربران',
   'search': 'جستجو',
+  "replace":"جایگذاری",
   'projectManagement': 'مدیریت پروژه',
   'workReport': 'گزارش عملکرد',
   'AppName': 'مسیر',

@@ -22,10 +22,10 @@ export const handlerDataShelf = [
     const pageLocal = is.number(parsedPage) ? parsedPage : 1
 
     // filter index
-    const filteredIndexes = db.dataShelfBox.filter(item => {
-      return (item.connectedTreeNode?.id ?? 0) === (is.number(parsedNodeId) ? parsedNodeId : 0)
-    })
-
+    // const filteredIndexes = db.dataShelfBox.filter(item => {
+    //   return (item.connectedTreeNode?.id ?? 0) === (is.number(parsedNodeId) ? parsedNodeId : 0)
+    // })
+    const filteredIndexes = db.dataShelfBox
     const totalItems = filteredIndexes.length
 
     // total pages

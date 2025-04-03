@@ -5,9 +5,12 @@ import { useToast } from 'vue-toastification'
 import ContextMenu from '@imengyu/vue3-context-menu'
 import Swal from 'sweetalert2'
 import MCLoading from '../MCLoading.vue'
+import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import { type ISimpleDTO, type ISimpleTree, type ISimpleTreeActionable, SimpleTreeAcionableModel } from '@/types/baseModels'
+import type { INodeView } from '@/types/tree'
 import { createTreeIndex } from '@/types/tree'
 import { useSelectedTree, useTree } from '@/store/treeStore'
+import { SelectionType } from '@/types/baseModels'
 
 // watch(activatedNode, (newvalue, oldvalue) => {
 //     roleData.projects = convertSimpleTreeToSimpleDtoArray(projectList).filter((item) => activatedNode.value.includes(item.id))
@@ -32,13 +35,18 @@ const selecteTreeStore = useSelectedTree()
 const { treeData, treeIndex, selectNode, selectedNode, clearTreeData, deselectAllTreeNodes, deleteNode } = useTree()
 const currentTreeId = ref(0)
 const nodeTempTitleForEdit = ref('')
+const searchResultSelectedNodes = ref<number[]>([])
 
 // const currentNodeId = ref(0)
 
 // const treeIndex = useTreeIndex()
 
 const editableNode = ref()
+const activeSearch = ref(false)
 const dialogAddNewNodeVisible = ref(false)
+const dialogMergeNodeVisible = ref(false)
+const dialogTransferNodeVisible = ref(false)
+
 interface Emit {
   (e: 'close'): void
   (e: 'open'): void
@@ -83,6 +91,10 @@ watch(currentTreeId, async () => {
 
   }
 })
+watch(searchResultSelectedNodes, () => {
+  activatedNode.value.splice(0)
+  activatedNode.value.push(...searchResultSelectedNodes.value)
+})
 watch(route, newval => {
   checkTreeRoute(true)
   console.log('currentroute1', newval.query.snd)
@@ -119,6 +131,9 @@ function checkTreeRoute(deselectAll: boolean) {
     }
   }
   currentTreeId.value = useToNumber(gtd).value
+}
+function selectSearchTree() {
+  activeSearch.value = !activeSearch.value
 }
 function updateTreeIndex(dataItems: ISimpleTree[]) {
   const newTreeIndex = createTreeIndex(dataItems)
@@ -239,7 +254,7 @@ const deleteSelectedNode = (nodeItem: ISimpleTreeActionable) => {
         await $api(('app/node/').replace('//', '/') + nodeItem.id, {
           method: 'DELETE',
         })
-        deleteNode(nodeItem)
+        deleteNode(nodeItem, true)
       }
       catch (error) {
         serviceError.value = error
@@ -256,6 +271,7 @@ const deleteSelectedNode = (nodeItem: ISimpleTreeActionable) => {
         else toast.error(t('httpstatuscodes.0'))
       }
       else {
+        selectNode({ id: -1, parentId: -1, priority: 0, title: '' })
         toast.success(t('alert.deleteDataSuccess'))
       }
     }
@@ -270,8 +286,100 @@ const nodeaddfailed = (message: string) => {
   toast.error(message)
 }
 
+const parentNodeTitle = (nodeid: number | null): string => {
+  if (nodeid && treeIndex[nodeid] && treeIndex[nodeid].parentId && treeIndex[treeIndex[nodeid].parentId])
+    return treeIndex[treeIndex[nodeid].parentId].title
+  else
+    return ''
+}
+
+const nodeMerged = (sourceNodeId: number, destinationNodeID: number) => {
+  if (treeIndex[destinationNodeID]) {
+    selectNode({ id: treeIndex[destinationNodeID].id, parentId: treeIndex[destinationNodeID].parentId, title: treeIndex[destinationNodeID].title, priority: treeIndex[destinationNodeID].priority })
+    gotoNode(destinationNodeID)
+  }
+}
+
+const nodeTransfered = (sourceNodeId: number, destinationNodeID: number) => {
+//   if (treeIndex[destinationNodeID]) {
+//     selectNode({ id: treeIndex[destinationNodeID].id, parentId: treeIndex[destinationNodeID].parentId, title: treeIndex[destinationNodeID].title, priority: treeIndex[destinationNodeID].priority })
+//     gotoNode(destinationNodeID)
+//   }
+}
+
 const refreshTree = async () => {
   await fetchData()
+}
+
+const addcomment = (nodeItem: ISimpleTreeActionable) => {
+  let resultTree: INodeView | null = null
+
+  Swal.fire({
+    title: t('tree.loadingnodedetail'),
+    showCloseButton: false,
+    allowOutsideClick: false,
+    didOpen: async () => {
+      Swal.showLoading()
+      try {
+        resultTree = await $api<INodeView>(('app/node/').replace('//', '/') + nodeItem.id, {
+          method: 'GET',
+          ignoreResponseError: false,
+        })
+
+        Swal.hideLoading()
+        Swal.close()
+      }
+      catch (error) {
+        if (error instanceof CustomFetchError && error.code > 0)
+          toast.error(error.message)
+        else toast.error(t('httpstatuscodes.0'))
+      }
+    },
+  }).then(() => {
+    if (!resultTree?.id)
+      return
+    Swal.fire({
+      input: 'textarea',
+      inputLabel: t('tree.comment'),
+      inputValue: resultTree.description,
+      inputPlaceholder: t('datashelfbox.enteryourcomment'),
+      confirmButtonText: t('$vuetify.confirmEdit.ok'),
+      cancelButtonText: t('$vuetify.confirmEdit.cancel'),
+      showConfirmButton: true,
+      showCancelButton: true,
+      showLoaderOnConfirm: true,
+      showCloseButton: true,
+      preConfirm: async value => {
+        const serviceError = ref()
+        try {
+          await $api(`app/node/${resultTree?.id}/Description`, {
+            method: 'PUT',
+            body: JSON.parse(JSON.stringify({ description: value })),
+            ignoreResponseError: false,
+          })
+          treeIndex[resultTree.id].hasDescription = value.length > 0
+        }
+
+        catch (error) {
+          serviceError.value = error
+        }
+
+        return { serviceError }
+      },
+      allowOutsideClick: false,
+    }).then(value => {
+      if (value.isConfirmed) {
+        if (value.value?.serviceError.value) {
+          if (value.value?.serviceError.value instanceof CustomFetchError && value.value?.serviceError.value.code > 0)
+            toast.error(value.value?.serviceError.value.message)
+          else toast.error(t('httpstatuscodes.0'))
+        }
+        else {
+          toast.success(t('alert.dataActionSuccess'))
+        }
+      }
+    })
+  })
 }
 
 const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
@@ -307,11 +415,10 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         },
       },
       {
-        label: t('tree.addcomment'),
+        label: t('tree.comment'),
         icon: 'tabler-square-plus',
-
         onClick: () => {
-          alert('You click a menu item')
+          addcomment(nodeItem)
         },
       },
       {
@@ -319,7 +426,8 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         icon: 'tabler-arrow-merge',
 
         onClick: () => {
-          alert('You click a menu item')
+          selectTreeNode(nodeItem)
+          dialogMergeNodeVisible.value = true
         },
       },
       {
@@ -327,7 +435,10 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         icon: 'tabler-arrow-merge-alt-left',
 
         onClick: () => {
-          alert('You click a menu item')
+          console.log('treeindex', treeIndex)
+
+          selectTreeNode(nodeItem)
+          dialogTransferNodeVisible.value = true
         },
       },
       {
@@ -359,13 +470,20 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
       v-if="dialogAddNewNodeVisible" v-model:is-dialog-visible="dialogAddNewNodeVisible" :selected-tree-id="currentTreeId" :selected-node="activatedNode.length > 0 ? treeIndex[activatedNode[0]] : new SimpleTreeAcionableModel(-1, '', -1)"
       @node-added="nodeItemAdded" @node-added-failed="nodeaddfailed"
     />
-
+    <MCDialogMergeNode
+      v-if="dialogMergeNodeVisible" v-model:is-dialog-visible="dialogMergeNodeVisible" :selected-tree-id="currentTreeId" :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)" :selected-node="activatedNode.length > 0 ? treeIndex[activatedNode[0]] : new SimpleTreeAcionableModel(-1, '', -1)"
+      @nodemerged="nodeMerged" @node-merge-failed="nodeaddfailed"
+    />
+    <MCDialogTransferNode
+      v-if="dialogTransferNodeVisible" v-model:is-dialog-visible="dialogTransferNodeVisible" :selected-tree-id="currentTreeId" :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)" :selected-node="activatedNode.length > 0 ? treeIndex[activatedNode[0]] : new SimpleTreeAcionableModel(-1, '', -1)"
+      @node-transfered="nodeTransfered" @node-transfer-faild="nodeaddfailed"
+    />
     <VRow no-gutters class="btn-box toolbar">
       <VCol md="12">
         <div class="toolbar">
           <VBtn icon="tabler-plus" size="small" variant="text" @click=" dialogAddNewNodeVisible = true" />
 
-          <VBtn icon="tabler-search" size="small" variant="text" />
+          <VBtn icon="tabler-search" size="small" :variant="activeSearch ? 'elevated' : 'text'" @click="selectSearchTree" />
           <VBtn icon="tabler-box-multiple" size="small" variant="text" />
           <VBtn icon="tabler-select" size="small" variant="text" />
           <VBtn icon="tabler-trash-x" size="small" variant="text" />
@@ -375,6 +493,17 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         </div>
       </VCol>
     </VRow>
+    <VExpandTransition>
+      <VRow v-if="activeSearch" class="mt-0 mb-2">
+        <VCol md="12">
+          <MCSearchApiTree
+            v-model:selected-items="searchResultSelectedNodes"
+            auto-focus :max-height="300" :api-url="`app/node/simple?treeid=${currentTreeId}`" :selection-type="SelectionType.Single" class="pt-1"
+          />
+          <VDivider thickness="2" color="primary" />
+        </VCol>
+      </VRow>
+    </VExpandTransition>
 
     <VRow dense class="header">
       <VCol />
@@ -399,7 +528,8 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
               <template #activator="{ props }">
             -->
             <VRow dense class="mx-0">
-              <VCol class="tree-title">
+              <VCol class="tree-title d-flex align-center">
+                <VIcon v-if="item.hasDescription" size="16" icon="tabler-message" class="ml-1" />
                 <span v-if="!(item.editing ?? false)">{{ item.title }}</span>
                 <VTextField
                   v-else ref="editableNode" v-model:model-value="nodeTempTitleForEdit" :color="item.failed ? 'error' : 'primary'" autofocus :placeholder="item.title"
