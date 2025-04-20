@@ -38,7 +38,10 @@ setTimeout(async () => {
   }
 }, 1000)
 
-const loadmore = ref(null)
+const loadmorestart = ref(null)
+const loadmoreend = ref(null)
+const mainDataResult = ref(null)
+
 const toast = useToast()
 const isDialogSelectBookVisible = ref(false)
 const infoSearch = ref()
@@ -48,17 +51,22 @@ const selectedFacetItems = reactive<Record<string, string[]>>({})
 const testfacetlist = ref<IFacetBox[]>([{ key: 'book', title: 'کتاب', hasSearchBox: true, scrollSize: 5, itemList: [{ key: '1', title: 'پژوهشگر', count: 10 }, { key: '2', title: 'مدیر کل', count: 11 }, { key: '3', title: 'ناظر', count: 5 }, { key: '4', title: 'ارزیاب یک', count: 7 }, { key: '5', title: 'ارزیاب دو', count: 7 }] }, { key: 'book1', title: 'قرن', isTree: true, hasSearchBox: false, scrollSize: 5, itemList: [{ key: '1', title: 'پژوهشگر', count: 13 }, { key: '2', parent: 1, title: 'مدیر کل', count: 18 }, { key: '3', title: 'ناظر', count: 16 }, { key: '4', parent: 3, title: 'ارزیاب یک', count: 13 }, { key: '5', parent: 4, title: 'ارزیاب دو', count: 1 }] }])
 
 const { stop } = useIntersectionObserver(
-  loadmore,
-  ([entry], observerElement) => {
-    if (entry?.isIntersecting) {
-      console.log('total', resultdataItems.value.length, totalItems.value)
-
-      if (resultdataItems.value.length >= totalItems.value)
-        return
-      page.value += 1
-    }
+  [loadmorestart, loadmoreend],
+  ([entrystart, entryend], observerElement) => {
+    if ((entrystart?.isIntersecting || entryend?.isIntersecting) && (resultdataItems.value.length <= totalItems.value))
+      ispaginationFullSize.value = true
   },
 )
+
+const { y: scrolly, isScrolling: isscrolling, arrivedState: scrollarriveState, directions } = useScroll(mainDataResult)
+
+watch(isscrolling, () => {
+  //   if (!isscrolling.value && (scrollarriveState.bottom || scrollarriveState.top) && !ispaginationFullSize.value)
+  //     ispaginationFullSize.value = true
+  //   else
+  if (isscrolling && !(scrollarriveState.bottom || scrollarriveState.top))
+    ispaginationFullSize.value = false
+})
 
 // function scrollTo(view: Ref<HTMLElement | null>) {
 //   if (view === undefined || view == null)
@@ -176,7 +184,7 @@ const dataTabValue = ref(null)
     </VRow>
     <VDivider />
 
-    <VTabsWindow v-model="dataTabValue" class="mc-data-scroll">
+    <VTabsWindow ref="mainDataResult" v-model="dataTabValue" class="mc-data-scroll">
       <VTabsWindowItem :value="1" :transition="false">
         <VRow dense>
           <VCol md="3">
@@ -190,18 +198,20 @@ const dataTabValue = ref(null)
           </VCol>
           <VCol md="9">
             <!-- <VInfiniteScroll side="end" height="500px" @load="loadMoreCollectingData"> -->
-            <!-- <div> -->
-            <!-- <template v-for="(item, index) in resultdataItems" :key="item"> -->
-            <MCSearchResultTabBox
-              v-for="(item, index) in resultdataItems" :key="item.id"
-              :dataitems="item" :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id"
-              @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded"
-            />
-            <!-- </template> -->
-            <!--
-              <div v-show="!loadingdata" ref="loadmore" />
-              </div>
-            -->
+            <div>
+              <!-- <template v-for="(item, index) in resultdataItems" :key="item"> -->
+              <div v-show="!loadingdata" ref="loadmorestart" />
+
+              <MCSearchResultTabBox
+                v-for="(item, index) in resultdataItems" :key="item.id"
+                :dataitems="item" :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id"
+                @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded"
+              />
+              <!-- </template> -->
+
+              <div v-show="!loadingdata" ref="loadmoreend" />
+            </div>
+
             <!-- </VInfiniteScroll> -->
           </VCol>
         </VRow>

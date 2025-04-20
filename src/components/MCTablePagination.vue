@@ -15,8 +15,28 @@ interface Emit {
 }
 
 const props = defineProps<Props>()
-
 const emit = defineEmits<Emit>()
+const showPaging = ref(false)
+const showNumber = ref(true)
+
+watch(() => props.fullSize, newval => {
+  if (newval === false) {
+    setTimeout(() => {
+      showPaging.value = newval
+      setTimeout(() => {
+        showNumber.value = true
+      }, 500)
+    }, 500)
+
+    return
+  }
+  showNumber.value = !newval
+  setTimeout(() => {
+    // console.log('newvla', props.fullSize, showPaging.value)
+
+    showPaging.value = newval
+  }, 500)
+})
 
 const updatePage = (value: number) => {
   emit('update:page', value)
@@ -40,19 +60,24 @@ function paginationMouseEnter() {
 <template>
   <div>
     <VBtn
-      v-if="props.fullSize" icon size="xsmall" variant="elevated" color="secondary" class="close-btn"
+      v-if="showPaging" icon size="xsmall" variant="elevated" color="secondary" class="close-btn"
       @click="updateFullSize(false)"
     >
       <VIcon icon="tabler-x" size="16" />
     </VBtn>
     <VDivider v-if="props.divider" />
 
-    <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 px-1 py-1">
-      <p class=" mb-0" @mouseenter="paginationMouseEnter">
-        {{ paginationMeta({ page, itemsPerPage }, totalItems, $t("Show"), $t("to"), $t("of"), $t("entries")) }}
-      </p>
+    <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-1 px-1 py-0">
+      <VSlideYReverseTransition>
+        <p v-if="showNumber" class=" mb-0" @mouseenter="paginationMouseEnter">
+          {{ paginationMeta({ page, itemsPerPage }, totalItems, $t("Show"), $t("to"), $t("of"), $t("entries")) }}
+        </p>
+      </VSlideYReverseTransition>
       <VSlideXTransition>
-        <div v-if="props.fullSize" class="d-flex align-center">
+        <div v-if="showPaging" class="d-flex align-center">
+          <p class=" mb-0" @mouseenter="paginationMouseEnter">
+            {{ paginationMeta({ page, itemsPerPage }, totalItems, $t("Show"), $t("to"), $t("of"), $t("entries")) }}
+          </p>
           <VPagination
 
             :model-value="page" active-color="primary" :length="Math.ceil(totalItems / itemsPerPage)"
