@@ -19,6 +19,7 @@
   'hadith': 'حدیث',
   'ayah': 'آیه',
   'word': 'لغت',
+  "refresh":"بروزرسانی",
   "thereisnoitem":"موردی وجود ندارد",
   "before":"قبل از",
   "after":"بعد از ",
@@ -108,6 +109,11 @@
     'publishYear': 'سال نشر'
   },
   'datashelfbox': {
+    "labelscount":"تعدا برچسب : '(0)' عدد",
+    "labeltitle":"عنوان برچسب",
+    "labeladded":"برچسب ها به فیش اضافه شدند",
+    "connectednode:":"گره متصل : '(0)'",
+
     'addedit': 'افزودن / ویرایش فیش',
     'addfootnote': 'افزودن پاورقی',
     'pintotop': 'چسباندن به قیش بالا',
@@ -116,7 +122,7 @@
     'duplicate': 'دوبل کردن',
     'connecttonode': 'اتصال به نود',
     'delete': 'حذف فیش',
-    'addtag': 'افزودن برچسب',
+    'addlabel': 'افزودن برچسب',
     'addcomment': 'افزودن توضیحات',
     'showrelateddata': 'نمایش داده های مرتبط',
     'refreshtobase': 'بازیابی نسخه اولیه',
@@ -131,7 +137,9 @@
     'allnode': 'مشاهده تمام فیش ها',
     'enteryourcomment': 'توضیحات مورد نظر خود را وارد کنید...',
     'movedown':'حرکت به پایین',
-    'moveup':'حرکت به بالا'
+    'moveup':'حرکت به بالا',
+    "yourfishadded":"فیش مورد نظر اضافه شد",
+    "fishnotexist":"فیش وجود ندارد"
   },
   'datagathering': {
     'connecttoselectednode': 'اتصال به نود انتخاب شده',
@@ -288,7 +296,11 @@
     'deleteSelectedItem?': 'مورد انتخاب شده حذف گردد؟',
     'resultNotFound': 'نتیجه یافت نشد',
     'probleminGetInformation': 'مشکل در دریافت اطلاعات وجود دارد',
+    "probleminGetExcerpt": "مشکل در دریافت اطلاعات فیش ها وجود دارد",
+
     "probleminLoadInformation":"مشکل در بارگذاری اطلاعات بوجود آمد.",
+    "probleminLoadExcerpt":"مشکل در بارگذاری فیش ها بوجود آمد.",
+
     'specificNodeAdded':"نود (0) اضافه شد",
     "specificItemDeleted":"آیا مورد '(0)' حذف شود",
 

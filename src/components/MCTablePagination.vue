@@ -69,7 +69,7 @@ function paginationMouseEnter() {
 
     <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-1 px-1 py-0">
       <VSlideYReverseTransition>
-        <p v-if="showNumber" class=" mb-0" @mouseenter="paginationMouseEnter">
+        <p v-if="showNumber && !showPaging" class=" mb-0" @mouseenter="paginationMouseEnter">
           {{ paginationMeta({ page, itemsPerPage }, totalItems, $t("Show"), $t("to"), $t("of"), $t("entries")) }}
         </p>
       </VSlideYReverseTransition>
@@ -91,11 +91,11 @@ function paginationMouseEnter() {
             <AppSelect
               :model-value="itemsPerPage"
               :items="[
-                { value: 5, title: '5' },
+                { value: 10, title: '10' },
                 { value: 25, title: '25' },
                 { value: 50, title: '50' },
                 { value: 100, title: '100' },
-                { value: -1, title: 'All' },
+                { value: -1, title: 'همه' },
               ]"
               style="inline-size: 5.5rem;"
               @update:model-value="updatePageSize"

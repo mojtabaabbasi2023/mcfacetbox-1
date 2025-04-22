@@ -93,6 +93,9 @@ function searchinfacet(e: any) {
             <VCheckbox :model-value="isSelected" density="compact" />
           </VListItemAction>
         </template>
+        <template #append="">
+          <span class="px-2">{{ item.count }}</span>
+        </template>
       </VListItem>
     </VList>
 

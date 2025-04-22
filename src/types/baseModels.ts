@@ -1,10 +1,18 @@
+import type { IFacetBox } from './SearchResult'
+
 export class GridResult<T> implements Record<string, any> {
   [x: string]: any;
   page = 0
   totalCount = 0
   items: T[] = []
 }
-
+export class GridResultFacet<T> implements Record<string, any> {
+  [x: string]: any;
+  page = 0
+  totalCount = 0
+  items: T[] = []
+  facets: IFacetBox[] = []
+}
 export interface ISelectable {
   selectable?: boolean
   selected?: boolean

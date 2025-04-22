@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
-import { isUndefined } from '@sindresorhus/is'
+import { isNumericString, isUndefined } from '@sindresorhus/is'
 import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useTree } from '@/store/treeStore'
-import { type GridResult, SelectAllState } from '@/types/baseModels'
-import type { IDataShelfBox } from '@/types/dataShelf'
-import { useApiFake } from '@/composables/useApi'
+import { LoginState, MessageType, SelectAllState, SizeType } from '@/types/baseModels'
+import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
+import type { IDataShelfBoxView } from '@/types/dataShelf'
+import { useDataShelfStateChanged } from '@/store/databoxStore'
+import type { IFacetBox } from '@/types/SearchResult'
+import { useLoginState } from '@/store/baseStore'
 
 interface ISelectAllState {
   state: SelectAllState
@@ -16,25 +19,37 @@ interface IMCDataShelfBoxREF {
   element: any
   dataBoxId: number
 }
-const itemsPerPage = ref(16)
+const loadmorestart = ref(null)
+const loadmoreend = ref(null)
+const mainDataResult = ref(null)
+const activefilter = ref(false)
+const itemsPerPage = ref(10)
 const page = ref(1)
 const totalItems = ref(0)
 const sortBy = ref()
 const orderBy = ref()
 const currentNodeId = ref(0)
+const currentTreeId = ref(0)
 const searchQuery = ref('')
 const selectAll = ref<ISelectAllState>({ state: SelectAllState.Deselect, count: 0 })
-const resultdataItems = ref<IDataShelfBox[]>([])
+const resultdataItems = ref<IDataShelfBoxView[]>([])
+const facetboxItems = ref<IFacetBox[]>([])
 const databoxrefs = ref<IMCDataShelfBoxREF[]>([])
 const increasebtn = ref<VBtn>()
 const decreasebtn = ref<VBtn>()
 const { t } = useI18n({ useScope: 'global' })
-const loadmore = ref(null)
-const selectedFacetItems = reactive<Record<string, number[]>>({})
+
+// const loadmore = ref(null)
+const selectedFacetItems = reactive<Record<string, string[]>>({})
 const toast = useToast()
 const { selectedNode } = useTree()
+const shelfState = useDataShelfStateChanged()
+const { treeIndex } = useTree()
 
-const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApiFake<GridResult<IDataShelfBox>>(createUrl('/apps/dataShelf', {
+const route = useRoute()
+const ispaginationFullSize = ref(false)
+
+const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi(createUrl('app/excerpt', {
   query: {
     q: searchQuery,
     itemsPerPage,
@@ -42,12 +57,9 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
     sortBy,
     orderBy,
     nodeId: currentNodeId,
+    treeId: currentTreeId,
   },
 }), { immediate: false })
-
-setTimeout(async () => {
-
-}, 1000)
 
 // const testfacetlist = ref<IFacetResult[]>([{ key: 'book', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }, { key: 'book1', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }])
 
@@ -57,15 +69,42 @@ setTimeout(async () => {
 //   view.value?.scrollIntoView()
 // }
 const { stop } = useIntersectionObserver(
-  loadmore,
-  ([entry], observerElement) => {
-    if (entry?.isIntersecting) {
-      if (resultdataItems.value.length >= totalItems.value)
-        return
-      page.value += 1
-    }
+  [loadmorestart, loadmoreend],
+  ([entrystart, entryend]) => {
+    if ((entrystart?.isIntersecting || entryend?.isIntersecting) && (resultdataItems.value.length <= totalItems.value))
+      ispaginationFullSize.value = true
   },
 )
+
+const { isScrolling: isscrolling, arrivedState: scrollarriveState } = useScroll(mainDataResult)
+
+watch(isscrolling, () => {
+  if (isscrolling && !(scrollarriveState.bottom || scrollarriveState.top))
+    ispaginationFullSize.value = false
+})
+watch(route, () => {
+  checkRoute()
+}, { immediate: true })
+async function checkRoute() {
+  if (!route.query.gtd)
+    return
+
+  const gtd = atob(route.query.gtd.toString())
+  if (!isNumericString(gtd))
+    return
+  currentTreeId.value = useToNumber(gtd).value
+
+  if (currentTreeId.value === useToNumber(gtd).value && route.query.snd) {
+    const snd = atob(route.query.snd.toString())
+
+    if (isNumericString(snd) && treeIndex[snd]) {
+      currentTreeId.value = useToNumber(gtd).value
+      currentNodeId.value = useToNumber(snd).value
+      refreshDataShelf()
+      console.log('nodeid', snd, gtd)
+    }
+  }
+}
 
 const resultdataItemsSort = computed(() => {
   return resultdataItems.value.sort((a, b) => a.order - b.order)
@@ -75,32 +114,78 @@ function resetData() {
   selectAll.value.state = SelectAllState.Deselect
   selectAll.value.count = 0
   resultdataItems.value.splice(0)
+  facetboxItems.value.splice(0)
   currentNodeId.value = selectedNode.id
 }
-watch(selectedNode, async () => {
+
+// watch(selectedNode, async () => {
+//   try {
+//     refreshDataShelf('selectednode')
+//   }
+//   catch (error) {
+//     console.log('fetchthrow', error)
+//   }
+// })
+watch(shelfState.lastState, async () => {
   try {
-    resetData()
-    await fetchData(false)
+    if (resultdataItems.value.length < itemsPerPage.value * page.value)
+      refreshDataShelf()
   }
   catch (error) {
-    console.log('fetchthrow', error)
   }
+}, { deep: true })
+onFetchResponse(() => {
+//   response.json().then(value => {
+  try {
+    const result = resultData.value as GridResultFacet<IDataShelfBoxView>
+
+    totalItems.value = result.totalCount
+    resultdataItems.value.splice(0)
+
+    //   result.items.forEach(element => {
+    facetboxItems.value.push(...result.facets)
+    resultdataItems.value.push(...result.items)
+
+    //   })
+    if (isUndefined(resultdataItems.value))
+      toast.error(t('alert.probleminGetExcerpt'))
+
+    //   if ((result.items.length ?? 0) <= 0)
+    //     toast.info(t('alert.resultNotFound'))
+  }
+  catch (error) {
+    toast.error(t('alert.probleminLoadExcerpt'))
+  }
+
+  // loading.value = true
+//   })
 })
 
-onFetchResponse(response => {
-  response.json().then(value => {
-    totalItems.value = value.totalItems
-    resultData.value?.items.forEach(element => {
-      resultdataItems.value.push(element)
-    })
-    if (isUndefined(resultdataItems.value))
-      toast.error(t('alert.probleminGetInformation'))
-    if ((resultData.value?.items.length ?? 0) <= 0)
-      toast.info(t('alert.resultNotFound'))
-  })
-})
-onFetchError(response => {
-  toast.error(t('alert.dataActionFailed'))
+onFetchError(error => {
+  if (isNullOrUndefined(error) || error.name === 'AbortError')
+    return
+
+  //   console.log('responseerror', error.name)
+
+  //   error.json().then(value => {
+  try {
+    console.log('fetcherror2', resultData.value)
+
+    const result = resultData.value as IRootServiceError
+
+    console.log('fetcherror2', result)
+
+    if (result && result.error && result.error.code)
+      toast.error(result.error.message)
+    else
+      toast.error(t('alert.probleminGetExcerpt'))
+  }
+  catch {
+    toast.error(t('alert.probleminLoadExcerpt'))
+  }
+
+  // loading.value = true
+//   })
 })
 
 watch(selectAll.value, () => {
@@ -116,6 +201,16 @@ watch(selectAll.value, () => {
   }
   selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
 })
+
+async function refreshDataShelf() {
+  resetData()
+  await fetchData()
+
+//   console.log('startfetching', entry)
+}
+function selectFilterDataShelf() {
+  activefilter.value = !activefilter.value
+}
 
 // این تابع برای بررسی این است که آیا هر کدام از موارد انتخاب شده از انتخاب خارج شده اند یا نه؟
 function checkSelectAllState(itemselected: boolean) {
@@ -136,7 +231,7 @@ function changeselectAllState() {
 }
 
 // برای کار کردن با متدهای داخلی حعبه های داده انتخاب شده آنها را در یک لیست ذخیره می کنیم
-const setdataboxref = (elementParam: any, item: IDataShelfBox) => {
+const setdataboxref = (elementParam: any, item: IDataShelfBoxView) => {
   const elementIndex = databoxrefs.value.findIndex(elementItem => elementItem.dataBoxId === item.id)
   if (item.selected && elementIndex < 0) {
     databoxrefs.value.push({ element: elementParam, dataBoxId: item.id })
@@ -167,8 +262,23 @@ const decreaseOrder = () => {
   }
 }
 
-function handleDataBoxMessages(messsage: string, messageType: MessageType) {
-
+function handleDataBoxMessages(message: string, messagetype: MessageType) {
+  switch (messagetype) {
+    case MessageType.error:
+      toast.error(message)
+      break;
+    case MessageType.info:
+      toast.info(message)
+      break;
+    case MessageType.warning:
+      toast.warning(message)
+      break;
+    case MessageType.success:
+      toast.success(message)
+      break;
+    default:
+      break;
+  }
 }
 function databoxOrderChanged(databoxItemId: number) {
   const itemIndex = resultdataItemsSort.value.findIndex(item => item.id === databoxItemId)
@@ -182,14 +292,12 @@ function databoxOrderChanged(databoxItemId: number) {
   if (itemIndex === resultdataItemsSort.value.length - 1 && increasebtn.value)
     increasebtn.value.$el.classList.add('orderdisable')
 }
-function dataBoxItemAddTag(databoxId: number) {
-  console.log('addtag', databoxId)
-}
 </script>
 
 <template>
   <VContainer class="mc-data-container mc-data-shelf">
     <VRow no-gutters>
+      <MCLoading :showloading="loadingdata" :loadingsize="SizeType.MD" />
       <VCol class="">
         <!--
           <VToolbar
@@ -197,7 +305,8 @@ function dataBoxItemAddTag(databoxId: number) {
           dir="rtl"
           >
         -->
-        <VRow no-gutters class="btn-box data-shelf-toolbar d-flex">
+        <VRow no-gutters class="btn-box data-shelf-toolbar d-flex align-center justify-space-between">
+          <!-- <VCol md="12" > -->
           <div class="d-flex toolbar">
             <VBtn icon size="small" :variant="selectAll.state === SelectAllState.Select ? 'elevated' : 'text'" @click="changeselectAllState">
               <VIcon :icon="selectAll.state === SelectAllState.Combine ? 'tabler-squares-selected' : 'tabler-select-all'" size="22" />
@@ -217,7 +326,7 @@ function dataBoxItemAddTag(databoxId: number) {
                 {{ $t('datashelfbox.search') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" :variant="activefilter ? 'elevated' : 'text'" @click="selectFilterDataShelf">
               <VIcon icon="tabler-filter" size="22" />
               <VTooltip
                 activator="parent"
@@ -273,6 +382,15 @@ function dataBoxItemAddTag(databoxId: number) {
                 {{ $t('datashelfbox.listdetail') }}
               </VTooltip>
             </VBtn>
+            <VBtn icon size="small" variant="text" @click="refreshDataShelf">
+              <VIcon icon="tabler-refresh" size="22" />
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('refresh') }}
+              </VTooltip>
+            </VBtn>
             <div v-if="selectAll.count === 1" class="border-thin rounded d-flex align-center">
               <VBtn ref="decreasebtn" icon size="25" variant="text" @click="decreaseOrder">
                 <VIcon icon="tabler-arrow-up" size="22" />
@@ -295,51 +413,78 @@ function dataBoxItemAddTag(databoxId: number) {
               </VBtn>
             </div>
           </div>
-          <div class="ms-auto">
-            <span class="ma-2">{{ selectedNode.title }}</span>
+          <div class="right-0">
+            <span class="ma-2">{{ selectedNode.title }}
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('tree.selectednode') }}
+              </VTooltip>
+            </span>
           </div>
+          <!-- </VCol> -->
         </VRow>
         <!-- </VToolbar> -->
       </VCol>
     </VRow>
-    <VRow dense class="mc-data-scroll">
-      <VCol md="3">
-        <div>
-          <!--
-            <MCFacetBox
-            v-for="item in testfacetlist" :key="item.key"
-            v-model:selected-items="selectedFacetItems[item.key]" searchable :dataitems="item.facetGroups"
-            :facettitle="$t('tree.autorizedbook')" class="mb-2"
-            />
-          -->
+    <VRow ref="mainDataResult" class="mc-data-scroll">
+      <MCLoading :showloading="loadingdata" :loadingsize="SizeType.MD" />
+      <VCol md="12">
+        <VRow v-if="resultdataItems.length > 0">
+          <!-- <VSlideXReverseTransition> -->
+          <VCol v-if="activefilter" md="3">
+            <div>
+              <MCFacetBox
+                v-for="item in facetboxItems" :key="item.key"
+                v-model:selected-items="selectedFacetItems[item.key]" :searchable="false" :dataitems="item.itemList"
+                :facettitle="item.title" class="mb-2"
+              />
+            </div>
+          </VCol>
+          <!-- </VSlideXReverseTransition> -->
+          <VCol :md="activefilter ? 9 : 12">
+            <div>
+              <div v-show="!loadingdata" ref="loadmorestart" />
+              <MCDataShelfBox
+                v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
+                :prev-item-order="i"
+                :next-item-order="i"
+                @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages"
+              />
+              <!--
+                :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : -100"
+                :next-item-order="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].order : -100"
+              -->
+              <div v-show="!loadingdata" ref="loadmoreend" />
+            </div>
+          </VCol>
+        </VRow>
+        <!-- <VRow > -->
+
+        <div v-else-if="!loadingdata" class="w-100 h-100 d-flex align-center justify-center">
+          <p>{{ $t('datashelfbox.fishnotexist') }}</p>
         </div>
-      </VCol>
-      <VCol md="9">
-        <div>
-          <MCDataShelfBox
-            v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
-            :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : -100"
-            :next-item-order="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].order : -100" @addtag="dataBoxItemAddTag"
-            @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages"
-          />
-          <div v-show="!loadingdata" ref="loadmore" />
-        </div>
+
+        <!-- </VRow> -->
       </VCol>
     </VRow>
 
-    <VRow dense>
+    <!--
+      <VRow dense>
       <div v-show="loadingdata" class="loading-container">
-        <VProgressCircular size="20" width="2" indeterminate />
+      <VProgressCircular size="20" width="2" indeterminate />
       </div>
-    </VRow>
+      </VRow>
+    -->
     <VRow dense>
       <VCol md="12">
-        <TablePagination
+        <MCTablePagination
           v-if="resultdataItems.length > 0"
           v-model:page="page"
-          :divider="false" class="paging-container"
-          :items-per-page="itemsPerPage"
-          :total-items="resultData?.totalCount === undefined ? 0 : resultData?.totalCount"
+          v-model:full-size="ispaginationFullSize" v-model:items-per-page="itemsPerPage"
+          :divider="false"
+          class="paging-container" :total-items="totalItems"
         />
       </VCol>
     </VRow>

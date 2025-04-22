@@ -1,32 +1,29 @@
 <script setup lang="ts">
 import ContextMenu from '@imengyu/vue3-context-menu'
 import Swal from 'sweetalert2'
-import MCDialogAddTag from '../dialogs/MCDialogAddTag.vue'
-import { type IDataShelfBox } from '@/types/dataShelf'
+import { DataShelfBoxModelView, type IDataShelfBoxView } from '@/types/dataShelf'
 import { MessageType } from '@/types/baseModels'
 
 const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number }>()
 const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
-const dialogAddTagVisible = ref(false)
-const databoxItem = defineModel<IDataShelfBox>()
+const dialogAddLabelVisible = ref(false)
+const databoxItem = defineModel<IDataShelfBoxView>({ default: new DataShelfBoxModelView() })
 const { t } = useI18n({ useScope: 'global' })
 
 // const toast = useToast()
 const databox = ref()
 const highlightClass = ref(['mc-data-shelf-box'])
-const lastPointerPos = ref({ x: 0, y: 0 })
-const btnTag = ref()
+const btnlabel = ref()
 
-const { x: btntagX, y: btntagY }
-        = useElementBounding(btnTag)
+const { x: btnlabelX, y: btnlabelY }
+        = useElementBounding(btnlabel)
 
 // interface Props {
 //   databoxitem: IDataShelfBox
 // }
 interface Emits {
-  (e: 'addtag', dataBoxId: number): void
-  (e: 'editdataboxcontent', dataBoxId: IDataShelfBox): void
+  (e: 'editdataboxcontent', dataBoxId: IDataShelfBoxView): void
   (e: 'selectedchanged', isSelected: boolean): void
   (e: 'orderchanged', itemId: number): void
   (e: 'handlemessage', message: string, type: MessageType): void
@@ -79,54 +76,54 @@ const onContextMenu = (e: MouseEvent) => {
   })
 }
 
-const addtag = () => {
-  dialogAddTagVisible.value = true
+const addlabels = () => {
+  dialogAddLabelVisible.value = true
 }
 
 const addcomment = () => {
-  Swal.fire({
-    input: 'textarea',
-    inputLabel: t('datashelfbox.addcomment'),
-    inputValue: databoxItem.value?.comment ?? '',
-    inputPlaceholder: t('datashelfbox.enteryourcomment'),
-    confirmButtonText: t('$vuetify.confirmEdit.ok'),
-    cancelButtonText: t('$vuetify.confirmEdit.cancel'),
-    showConfirmButton: true,
-    showCancelButton: true,
-    showLoaderOnConfirm: true,
-    showCloseButton: true,
-    preConfirm: async value => {
-      console.log('text', value)
+//   Swal.fire({
+//     input: 'textarea',
+//     inputLabel: t('datashelfbox.addcomment'),
+//     inputValue: databoxItem.value?.comment ?? '',
+//     inputPlaceholder: t('datashelfbox.enteryourcomment'),
+//     confirmButtonText: t('$vuetify.confirmEdit.ok'),
+//     cancelButtonText: t('$vuetify.confirmEdit.cancel'),
+//     showConfirmButton: true,
+//     showCancelButton: true,
+//     showLoaderOnConfirm: true,
+//     showCloseButton: true,
+//     preConfirm: async value => {
+//       console.log('text', value)
 
-      //   const { serviceData, serviceError } = await serviceDelete(item.id, props.apiUrl)
+  //       //   const { serviceData, serviceError } = await serviceDelete(item.id, props.apiUrl)
 
-      //   console.log('insidemethod', serviceData.value, serviceError.value)
-      const serviceData = ref(value)
-      const serviceError = ref()
+  //       //   console.log('insidemethod', serviceData.value, serviceError.value)
+  //       const serviceData = ref(value)
+  //       const serviceError = ref()
 
-      return { serviceData, serviceError }
-    },
-    allowOutsideClick: false,
-  }).then(value => {
-    if (value.isConfirmed) {
-    //   console.log('deletevalue', value)
+  //       return { serviceData, serviceError }
+  //     },
+  //     allowOutsideClick: false,
+  //   }).then(value => {
+  //     if (value.isConfirmed) {
+  //     //   console.log('deletevalue', value)
 
-      if (value.value?.serviceError.value)
-        emits('handlemessage', t('alert.dataActionFailed'), MessageType.error)
+  //       if (value.value?.serviceError.value)
+  //         emits('handlemessage', t('alert.dataActionFailed'), MessageType.error)
 
-      if (value.value?.serviceData.value) {
-        emits('handlemessage', t('alert.dataActionSuccess'), MessageType.success)
+  //       if (value.value?.serviceData.value) {
+  //         emits('handlemessage', t('alert.dataActionSuccess'), MessageType.success)
 
-        if (databoxItem.value)
-          databoxItem.value.comment = value.value?.serviceData.value
-      }
+  //         if (databoxItem.value)
+  //           databoxItem.value.comment = value.value?.serviceData.value
+  //       }
 
-      // emit('deletedItem', true)
-    }
-    else {
-      emits('handlemessage', t('alert.dataActionSuccess'), MessageType.info)
-    }
-  })
+//       // emit('deletedItem', true)
+//     }
+//     else {
+//       emits('handlemessage', t('alert.dataActionSuccess'), MessageType.info)
+//     }
+//   })
 }
 
 const focuToElementAfterMove = () => {
@@ -163,6 +160,11 @@ const increaseOrder = () => {
   focuToElementAfterMove()
 }
 
+function labelhasbeenadded(nodeid: number, labelcount: number) {
+  databoxItem.value.labelCount = labelcount
+  emits('handlemessage', t('datashelfbox.labeladded'), MessageType.success)
+}
+
 const isSelected = computed({
   get(): boolean {
     return databoxItem.value?.selected ?? false
@@ -182,34 +184,12 @@ defineExpose({ increaseOrder, decreaseOrder })
 
 <template>
   <VCard ref="databox" :class="[highlightClass]">
-    <!--
-      <VDialog
-      v-model="dialogAddTagVisible" location-strategy="static" location="top center" target="cursor"
-      width="auto"
-      >
-      <VCard
-      max-width="400"
-      prepend-icon="mdi-update"
-      text="Your application will relaunch automatically after the update is complete."
-      title="Update in progress"
-      >
-      <template #actions>
-      <VBtn
-      class="ms-auto"
-      text="Ok"
-      @click="dialogAddTagVisible = false"
-      />
-      </template>
-      </VCard>
-      </VDialog>
-    -->
-
     <VCardText class="h-auto">
       <VRow no-gutters class="justify-start align-start box">
         <VCheckbox v-model="isSelected" density="compact" />
         <VCol>
-          <div class="text pb-1" v-html="databoxItem?.text" />
-          <VDivider v-if="databoxItem?.footnotes.length ?? 0 > 0" />
+          <div class="text pb-1" v-html="databoxItem?.content" />
+          <VDivider v-if="((databoxItem?.footnotes && databoxItem?.footnotes.length) ?? 0) > 0" />
           <div v-for="item in databoxItem?.footnotes" :key="item.id" class="d-flex flex-column">
             <div>
               <span class="footenote-index">{{ item.index }} -</span>
@@ -246,7 +226,7 @@ defineExpose({ increaseOrder, decreaseOrder })
               {{ $t('datashelfbox.about') }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="25" variant="text" @click="addtag">
+          <VBtn icon size="25" variant="text" @click="isDialogDataShelfBoxEdit = true">
             <VIcon icon="tabler-edit" size="22" />
             <VTooltip
               activator="parent"
@@ -282,13 +262,13 @@ defineExpose({ increaseOrder, decreaseOrder })
               {{ $t('datashelfbox.delete') }}
             </VTooltip>
           </VBtn>
-          <VBtn ref="btnTag" icon size="25" variant="text" @click="addtag">
+          <VBtn ref="btnlabel" icon size="25" variant="text" @click="addlabels">
             <VIcon icon="tabler-tag" size="22" />
             <VTooltip
               activator="parent"
               location="top center"
             >
-              {{ $t('datashelfbox.addtag') }}
+              {{ $t('datashelfbox.addlabel') }}
             </VTooltip>
           </VBtn>
           <VBtn icon size="25" variant="text" @click="addcomment">
@@ -336,15 +316,36 @@ defineExpose({ increaseOrder, decreaseOrder })
           </span>
         </VRow>
       </div>
-      <div>
+      <div class="px-2">
         <VRow no-gutters class="btn-box data-box-toolbar d-flex justify-content-between">
-          <VIcon v-if="(databoxItem?.connectedTreeNode?.id ?? 0) > 0" icon="tabler-plug-connected-x" size="12" />
-          <VIcon v-if="(databoxItem?.comment?.length ?? 0) > 0" icon="tabler-message" size="12" />
-          <VIcon v-if="(databoxItem?.tags?.length ?? 0) > 0" icon="tabler-tag" size="12" />
+          <VIcon v-if="(databoxItem?.node?.id ?? 0) > 0" icon="tabler-plug-connected-x" size="12">
+            <!--
+              <VTooltip
+              activator="parent"
+              location="top center"
+              >
+              {{ $t(formatString(t('datashelfbox.connectednode'), databoxItem?.node?.title)) }}
+              </VTooltip>
+            -->
+          </VIcon>
+          <VIcon v-if="databoxItem?.hasDescription" icon="tabler-message" size="12" />
+          <VIcon v-if="(databoxItem?.labelCount ?? 0) > 0" icon="tabler-tag" size="12">
+            <!--
+              <VTooltip
+              activator="parent"
+              location="top center"
+              >
+              {{ $t(formatString(t('datashelfbox.labelscount'), databoxItem?.labelCount.toString())) }}
+              </VTooltip>
+            -->
+          </VIcon>
         </VRow>
       </div>
       <MCDialogDataShelfBoxEdit v-if="isDialogDataShelfBoxEdit" v-model:is-dialog-visible="isDialogDataShelfBoxEdit" v-model:databox-item="databoxItem" />
-      <MCDialogAddTag v-if="dialogAddTagVisible" v-model:is-dialog-visible="dialogAddTagVisible" :selected-data-box-id="databoxItem.id ?? 0" :loc-x="btntagX" :loc-y="btntagY - 60" />
+      <MCDialogAddLabel
+        v-if="dialogAddLabelVisible" v-model:is-dialog-visible="dialogAddLabelVisible" :tree-id="databoxItem?.treeId ?? 0" :selected-data-box-id="databoxItem.id ?? 0"
+        :loc-x="btnlabelX" :loc-y="btnlabelY - 200" @error-has-occured="emits('handlemessage', $event, MessageType.error)" @label-added="labelhasbeenadded"
+      />
       <!-- @node-added="nodeItemAdded" @node-added-failed="nodeaddfailed" -->
     </VRow>
   </VCard>

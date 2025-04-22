@@ -6,6 +6,7 @@ import { SelectionType } from '@/types/baseModels'
 
 interface Prop {
   apiUrl: string
+  apiUrlAddData?: string
   selectionType: SelectionType
   seletedItems?: number[]
   maxHeight?: number
@@ -13,11 +14,16 @@ interface Prop {
   showParentTitle?: boolean
   listItemSize?: SizeType
   loadAllList?: boolean
+  placeholder?: string
+  activeaction?: boolean
+  actionedata?: Record<string, any>
 }
-
 const props = defineProps<Prop>()
 
 const emit = defineEmits<Emit>()
+
+const { t } = useI18n({ useScope: 'global' })
+
 interface Emit {
   (e: 'errorHasOccured', message: string): void
   (e: 'update:selectedItems', seletedItems: number[]): void
@@ -31,6 +37,7 @@ const selectedItemsLocal = ref<number[]>([])
 const searchResult = reactive<ISimpleSelectableDTO<number>[]>([])
 const searchPhrase = ref('')
 const actionInprogress = ref(false)
+const actionloading = ref(false)
 let timeout: ReturnType<typeof setTimeout> | null = null
 
 // const onReset = () => {
@@ -79,6 +86,30 @@ onFetchError(() => {
   emit('errorHasOccured', 'probleminGetInformation')
 })
 
+async function addSearchData() {
+  try {
+    const actionDatas = { ...props.actionedata, title: searchPhrase.value }
+    if (isNullOrUndefined(props.apiUrlAddData))
+      return
+    actionloading.value = true
+    await $api(props.apiUrlAddData, {
+      method: 'POST',
+      body: JSON.parse(JSON.stringify(actionDatas)),
+      ignoreResponseError: false,
+    })
+    actionloading.value = false
+    fetchData()
+  }
+  catch (error) {
+    console.log('error', error)
+
+    actionloading.value = false
+    if (error instanceof CustomFetchError && error.code > 0)
+      emit('errorHasOccured', error.message)
+    else emit('errorHasOccured', t('httpstatuscodes.0'))
+  }
+}
+
 const onReset = () => {
   actionInprogress.value = false
   searchPhrase.value = ''
@@ -111,13 +142,19 @@ watch(searchResult, () => {
 </script>
 
 <template>
-  <VCard variant="flat">
+  <VCard variant="flat" class="pb-3">
     <!-- <MCLoading :showloading="loadingdata" /> -->
     <div class="search-container">
       <VTextField
-        v-model:model-value="searchPhrase" autofocus :placeholder="$t('search')" append-inner-icon="tabler-search"
+        v-model:model-value="searchPhrase" autofocus :placeholder="$t(props.placeholder ? props.placeholder : 'search')" append-inner-icon="tabler-search"
         clearable density="compact" :loading="loadingdata" @click:clear="onReset"
-      />
+      >
+        <template #append>
+          <div v-if="props.activeaction" class="px-2">
+            <VBtn variant="elevated" icon="tabler-plus" rounded="lg" size="small" :loading="actionloading" @click="addSearchData" />
+          </div>
+        </template>
+      </VTextField>
     </div>
 
     <VList
@@ -142,7 +179,7 @@ watch(searchResult, () => {
         </template>
       </VListItem>
     </VList>
-    <div v-else-if="actionInprogress" class="w-100 h-100 py-2" style="text-align: center;">
+    <div v-else-if="actionInprogress" class="w-100 h-100 py-6" style="text-align: center;">
       <span>
         {{ $t('thereisnoitem') }}
       </span>

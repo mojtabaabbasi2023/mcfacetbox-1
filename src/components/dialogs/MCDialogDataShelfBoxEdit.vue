@@ -3,11 +3,12 @@
 
 import { v4 as uuidV4 } from 'uuid'
 import { useToast } from 'vue-toastification'
-import { DataShelfBoxModel, type IDataShelfBox, type IFootNote } from '@/types/dataShelf'
+import { DataShelfBoxModelView } from '@/types/dataShelf'
+import type { IDataShelfBoxView, IFootNote } from '@/types/dataShelf'
 
 interface Props {
   isDialogVisible: boolean
-  databoxItem?: IDataShelfBox
+  databoxItem?: IDataShelfBoxView
 }
 
 const props = defineProps<Props>()
@@ -15,12 +16,12 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 const { t } = useI18n({ useScope: 'global' })
 const toast = useToast()
-const tempdataItem = reactive<IDataShelfBox>(new DataShelfBoxModel())
+const tempdataItem = reactive<IDataShelfBoxView>(new DataShelfBoxModelView())
 const footnotes = reactive<IFootNote[]>([])
 
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
-  (e: 'update:databoxItem', databoxItem: IDataShelfBox): void
+  (e: 'update:databoxItem', databoxItem: IDataShelfBoxView): void
 }
 
 const isloading = ref(false)
@@ -50,7 +51,7 @@ const acceptchanged = () => {
 //   console.log('htmlbefore', editor.value?.innerHTML)
   isloading.value = true
   setTimeout(() => {
-    tempdataItem.text = editor.value?.innerHTML ?? ''
+    tempdataItem.content = editor.value?.innerHTML ?? ''
     tempdataItem.footnotes.splice(0)
     tempdataItem.footnotes.push(...footnotes)
 
@@ -151,7 +152,7 @@ function checkForRemovedFootnotes() {
           contenteditable="true"
           class="fish-editor"
           @input="checkForRemovedFootnotes"
-          v-html="tempdataItem.text"
+          v-html="tempdataItem.content"
         />
         <div class="d-flex pb-2 flex-column">
           <MCDataBoxEditableFootnote

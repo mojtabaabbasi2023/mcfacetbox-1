@@ -36,7 +36,7 @@ interface Emit {
 const tabdatamodel = ref()
 async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
   try {
-    await $api('app/excerpt', {
+    await $api('app/excerpt/text', {
       method: 'POST',
       body: datashelfbox,
       ignoreResponseError: false,
@@ -75,7 +75,7 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
         label: t('datagathering.connecttoselectednode'),
         onClick: () => {
           loadinglocal.value = true
-          addContentToNode({ content: selectedItem.title, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 0, footNotes: [], id: 0 })
+          addContentToNode({ content: selectedItem.title, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 9, footNotes: [], id: 0 })
         },
       },
       {

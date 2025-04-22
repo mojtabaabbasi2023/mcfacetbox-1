@@ -2,13 +2,14 @@
 import { VCol } from 'vuetify/lib/components/index.mjs'
 import { useToast } from 'vue-toastification'
 import MCDialogBookSelect from '../dialogs/MCDialogBookSelect.vue'
-import { InfiniteScrollSide, InfiniteScrollStatus, MessageType } from '@/types/baseModels'
+import { MessageType, SizeType } from '@/types/baseModels'
 import type { GridResult } from '@/types/baseModels'
 import type { IFacetBox, ISearchResultTabBox } from '@/types/SearchResult'
 import { useApiFake } from '@/composables/useApi'
 import { useSelectedTree, useTree } from '@/store/treeStore'
+import { useDataShelfStateChanged } from '@/store/databoxStore'
 
-const itemsPerPage = ref(5)
+const itemsPerPage = ref(10)
 const page = ref(1)
 const totalItems = ref(0)
 const sortBy = ref()
@@ -17,7 +18,9 @@ const searchQuery = ref('')
 const resultdataItems = ref<ISearchResultTabBox[]>([])
 const { selectedNode } = useTree()
 const selectedTreeItem = useSelectedTree()
+const shelfState = useDataShelfStateChanged()
 const ispaginationFullSize = ref(false)
+const { t } = useI18n({ useScope: 'global' })
 
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse } = useApiFake<GridResult<ISearchResultTabBox>>(createUrl('/apps/DC', {
   query: {
@@ -58,7 +61,7 @@ const { stop } = useIntersectionObserver(
   },
 )
 
-const { y: scrolly, isScrolling: isscrolling, arrivedState: scrollarriveState, directions } = useScroll(mainDataResult)
+const { isScrolling: isscrolling, arrivedState: scrollarriveState } = useScroll(mainDataResult)
 
 watch(isscrolling, () => {
   //   if (!isscrolling.value && (scrollarriveState.bottom || scrollarriveState.top) && !ispaginationFullSize.value)
@@ -67,12 +70,6 @@ watch(isscrolling, () => {
   if (isscrolling && !(scrollarriveState.bottom || scrollarriveState.top))
     ispaginationFullSize.value = false
 })
-
-// function scrollTo(view: Ref<HTMLElement | null>) {
-//   if (view === undefined || view == null)
-//     return
-//   view.value?.scrollIntoView()
-// }
 
 watch(selectedFacetItems, newval => {
   const result = Object.keys(newval).map(key => ({
@@ -106,12 +103,9 @@ onFetchResponse(response => {
 //       options.done(InfiniteScrollStatus.ok)
 //   }
 // }
-function paginationMouseEnter() {
-}
-function paginationMouseLeave() {
-}
 function contentToNodeAdded() {
-
+  toast.success(t('datashelfbox.yourfishadded'))
+  shelfState.lastState.value = !shelfState.lastState.value
 }
 function searchResultBoxMessageHandle(message: string, messagetype: MessageType) {
   switch (messagetype) {
@@ -183,6 +177,7 @@ const dataTabValue = ref(null)
       </VBtn>
     </VRow>
     <VDivider />
+    <MCLoading :showloading="loadingdata" :loadingsize="SizeType.MD" />
 
     <VTabsWindow ref="mainDataResult" v-model="dataTabValue" class="mc-data-scroll">
       <VTabsWindowItem :value="1" :transition="false">
@@ -219,11 +214,13 @@ const dataTabValue = ref(null)
       <VTabsWindowItem :value="2" :transition="false" />
       <VTabsWindowItem :value="2" :transition="false" />
     </VTabsWindow>
-    <VRow dense>
+    <!--
+      <VRow dense>
       <div v-show="loadingdata" class="loading-container">
-        <VProgressCircular size="20" width="2" indeterminate />
+      <VProgressCircular size="20" width="2" indeterminate />
       </div>
-    </VRow>
+      </VRow>
+    -->
     <VRow dense>
       <VCol md="12">
         <MCTablePagination
@@ -232,7 +229,6 @@ const dataTabValue = ref(null)
           v-model:full-size="ispaginationFullSize" v-model:items-per-page="itemsPerPage"
           :divider="false"
           class="paging-container" :total-items="resultData?.totalCount === undefined ? 0 : resultData?.totalCount"
-          @mouseenter="paginationMouseEnter" @mouseleave="paginationMouseLeave"
         />
       </VCol>
     </VRow>

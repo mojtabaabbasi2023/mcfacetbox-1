@@ -349,6 +349,7 @@ declare module 'vue' {
     MCDataBoxEditableFootnote: typeof import('./src/components/MCDataBoxEditableFootnote.vue')['default']
     MCDataShelfBox: typeof import('./src/components/MainDataShelf/MCDataShelfBox.vue')['default']
     MCDataTable: typeof import('./src/components/MCDataTable.vue')['default']
+    MCDialogAddLabel: typeof import('./src/components/dialogs/MCDialogAddLabel.vue')['default']
     MCDialogAddNewNode: typeof import('./src/components/dialogs/MCDialogAddNewNode.vue')['default']
     MCDialogAddTag: typeof import('./src/components/dialogs/MCDialogAddTag.vue')['default']
     MCDialogBookSelect: typeof import('./src/components/dialogs/MCDialogBookSelect.vue')['default']

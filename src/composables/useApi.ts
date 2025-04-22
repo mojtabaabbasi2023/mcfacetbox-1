@@ -55,7 +55,6 @@ export const useApi = createFetch({
       }
       catch (error) {
       }
-
       if (response && (response.status === 401)) {
         const loginState = useLoginState()
 
@@ -76,6 +75,7 @@ export const useApi = createFetch({
 
         }
       }
+      console.log('fetcherror', ctx)
 
       return { data: parsedData, response }
     },

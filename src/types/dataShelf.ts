@@ -1,15 +1,17 @@
 import type { ISimpleDTO, baseItemState } from './baseModels'
 
 // NOTE - بازای هر تغییری در محتوای جعبه داده باید یک نسخه ثبت گردد و قابلیت آندو داشته باشد
-export interface IDataShelfBox {
+export interface IDataShelfBoxView {
   id: number
-  text: string
+  content: string
 
   // NOTE - فقط یک نود متصل رو اینجا ذخیره می کنیم که چسنچو راحت تر باشه، بعد میشه از طریق شناسه، اتصالات یک جعبه داده به چند نود را استخراج کرد
-  connectedTreeNode?: ISimpleDTO<number>
+  node?: ISimpleDTO<number>
+  treeId: number
 
   // NOTE - مشخص کننده، حدیث، متن، آیه و یا لغت
-  contentType: number
+  excerptType: ISimpleDTO<number>
+
   order: number
 
   // NOTE - برای پاورقی یک تگ اچ تی ام ال با شناسه پاورقی در محتوای جعبه داده درج میشود و باید بررسی گردد که اگر در ویرایش کاربر این تگ حذف شد در پاورقی هم حذف شود
@@ -17,14 +19,19 @@ export interface IDataShelfBox {
 
   // NOTE - شناسه جعبه داده ای که به این جعبه داده وصل شده و باید با آن حرکت کند
   pinnedItem?: number
-  createdDate: string
-  creator?: ISimpleDTO<number>
+  creationTime?: string
+  creatorId?: string
+  creatorFullName?: string
   selected?: boolean
-  tags?: ISimpleDTO<number>[]
-  comment?: string
+
+  //   tags?: ISimpleDTO<number>[]
+  labelCount: number
+
+  //   comment?: string
+  hasDescription: boolean
 
   // NOTE - شناسه سایتی که محتوا از آن دریافت شده مثلا شناسه حدیث، آیه یا لغت
-  refrenceId: number
+  refrenceId: string
 }
 
 export interface IDataShelfBoxNew {
@@ -56,20 +63,33 @@ export class DataShelfBoxModelNew implements IDataShelfBoxNew {
   }
 }
 
-export class DataShelfBoxModel implements IDataShelfBox {
+export class DataShelfBoxModelView implements IDataShelfBoxView {
   id: number = 0
-  text: string = ''
-  connectedTreeNode?: ISimpleDTO<number> | undefined
-  contentType: number = 0
+  content: string = ''
+  node?: ISimpleDTO<number> | undefined = { id: 0, title: '' }
+  treeId: number = 0
+  excerptType: ISimpleDTO<number> = { id: 0, title: '' }
   order: number = 0
   footnotes: IFootNote[] = []
-  pinnedItem?: number | undefined
-  createdDate: string = ''
-  creator?: ISimpleDTO<number> | undefined
-  tags?: ISimpleDTO<number>[] | undefined
-  selected?: boolean = false
-  comment?: string | undefined
-  refrenceId: number = 0
+  pinnedItem?: number | undefined = 0
+  creationTime?: string | undefined = ''
+  creatorId?: string | undefined = ''
+  creatorFullName?: string | undefined = ''
+  selected?: boolean | undefined = false
+  labelCount: number = 0
+  hasDescription: boolean = false
+  refrenceId: string = ''
+
+//   constructor(id: number, content: string, treeId: number, excerptType: ISimpleDTO<number>, footnotes: IFootNote[], hasDescription: boolean, labelCount: number, refrenceId: string) {
+//     this.id = id
+//     this.treeId = treeId
+//     this.content = content
+//     this.hasDescription = hasDescription
+//     this.footnotes = footnotes
+//     this.labelCount = labelCount
+//     this.refrenceId = refrenceId
+//     this.excerptType = excerptType
+//   }
 }
 
 export interface IFootNote extends ISimpleDTO<string>, baseItemState {

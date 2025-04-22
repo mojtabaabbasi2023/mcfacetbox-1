@@ -44,8 +44,10 @@ function loadingTreeStateChanged(loadingstate: boolean, resultCount: number) {
     <DialogCloseBtn @click="onReset(true)" />
     <VCard variant="flat">
       <VCardTitle>{{ $t('tree.selectnode') }}</VCardTitle>
-      <MCSearchApiAutoComplete v-model:selected-items="selectedNodes" :max-height="400" api-url="/apps/searchsimple" :selection-type="SelectionType.Single" @loading-state-changed="loadingTreeStateChanged" />
-      <VDivider v-if="activeActions" />
+      <VCardText>
+        <MCSearchApiAutoComplete v-model:selected-items="selectedNodes" :max-height="400" api-url="/apps/searchsimple" :selection-type="SelectionType.Single" @loading-state-changed="loadingTreeStateChanged" />
+        <VDivider v-if="activeActions" />
+      </VCardText>
       <template #actions>
         <div v-if="activeActions" class="w-100 d-flex justify-center py-2">
           <VBtn type="submit" class="me-3">
