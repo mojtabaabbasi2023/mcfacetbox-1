@@ -4,12 +4,11 @@ import { isNumericString, isUndefined } from '@sindresorhus/is'
 import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useTree } from '@/store/treeStore'
-import { LoginState, MessageType, SelectAllState, SizeType } from '@/types/baseModels'
 import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
+import { MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxView } from '@/types/dataShelf'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 import type { IFacetBox } from '@/types/SearchResult'
-import { useLoginState } from '@/store/baseStore'
 
 interface ISelectAllState {
   state: SelectAllState
@@ -37,6 +36,11 @@ const facetboxItems = ref<IFacetBox[]>([])
 const databoxrefs = ref<IMCDataShelfBoxREF[]>([])
 const increasebtn = ref<VBtn>()
 const decreasebtn = ref<VBtn>()
+const queryRequestData = reactive<QueryRequestModel>(new QueryRequestModel())
+const facetQuery = ref<Record<string, any>>()
+
+const facettimeout: ReturnType<typeof setTimeout> | null = null
+const facetinterval = ref(3000)
 const { t } = useI18n({ useScope: 'global' })
 
 // const loadmore = ref(null)
@@ -45,21 +49,12 @@ const toast = useToast()
 const { selectedNode } = useTree()
 const shelfState = useDataShelfStateChanged()
 const { treeIndex } = useTree()
-
 const route = useRoute()
 const ispaginationFullSize = ref(false)
 
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi(createUrl('app/excerpt', {
-  query: {
-    q: searchQuery,
-    itemsPerPage,
-    page,
-    sortBy,
-    orderBy,
-    nodeId: currentNodeId,
-    treeId: currentTreeId,
-  },
-}), { immediate: false })
+  query: queryRequestData,
+}), { immediate: false, refetch: false })
 
 // const testfacetlist = ref<IFacetResult[]>([{ key: 'book', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }, { key: 'book1', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }])
 
@@ -82,6 +77,14 @@ watch(isscrolling, () => {
   if (isscrolling && !(scrollarriveState.bottom || scrollarriveState.top))
     ispaginationFullSize.value = false
 })
+watch(page, () => {
+  queryRequestData.PageNumber = page.value
+  refreshDataShelf(false)
+})
+watch(itemsPerPage, () => {
+  queryRequestData.PageSize = itemsPerPage.value
+  refreshDataShelf(true)
+})
 watch(route, () => {
   checkRoute()
 }, { immediate: true })
@@ -93,17 +96,32 @@ async function checkRoute() {
   if (!isNumericString(gtd))
     return
   currentTreeId.value = useToNumber(gtd).value
-
   if (currentTreeId.value === useToNumber(gtd).value && route.query.snd) {
     const snd = atob(route.query.snd.toString())
-
-    if (isNumericString(snd) && treeIndex[snd]) {
+    if (isNumericString(snd)) {
       currentTreeId.value = useToNumber(gtd).value
       currentNodeId.value = useToNumber(snd).value
-      refreshDataShelf()
-      console.log('nodeid', snd, gtd)
+      queryRequestData.nodeId = currentNodeId.value
+      queryRequestData.treeId = currentTreeId.value
+
+      refreshDataShelf(true)
     }
   }
+}
+watch(selectedFacetItems, newval => {
+//   const result = Object.keys(newval).map(key => ({
+//     titleKey: key,
+//     items: newval[key],
+//   }))
+
+  Object.keys(newval).forEach(key => (
+    queryRequestData[key] = newval[key]
+  ))
+  refreshDataShelf(true)
+})
+
+function addfacetToQuery() {
+
 }
 
 const resultdataItemsSort = computed(() => {
@@ -111,6 +129,9 @@ const resultdataItemsSort = computed(() => {
 })
 
 function resetData() {
+//   Object.keys(facetQuery.value).forEach(key => {
+//     delete facetQuery.value[key]
+//   })
   selectAll.value.state = SelectAllState.Deselect
   selectAll.value.count = 0
   resultdataItems.value.splice(0)
@@ -128,8 +149,11 @@ function resetData() {
 // })
 watch(shelfState.lastState, async () => {
   try {
-    if (resultdataItems.value.length < itemsPerPage.value * page.value)
-      refreshDataShelf()
+    // if (resultdataItems.value.length < itemsPerPage.value * page.value)
+    refreshDataShelf(false)
+
+    // else
+    //   totalItems.value += 1
   }
   catch (error) {
   }
@@ -140,14 +164,11 @@ onFetchResponse(() => {
     const result = resultData.value as GridResultFacet<IDataShelfBoxView>
 
     resetData()
+
     totalItems.value = result.totalCount
     resultdataItems.value.splice(0)
-
-    //   result.items.forEach(element => {
     facetboxItems.value.push(...result.facets)
     resultdataItems.value.push(...result.items)
-
-    //   })
     if (isUndefined(resultdataItems.value))
       toast.error(t('alert.probleminGetExcerpt'))
 
@@ -203,8 +224,12 @@ watch(selectAll.value, () => {
   selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
 })
 
-async function refreshDataShelf() {
+async function refreshDataShelf(resetpaging: boolean) {
   // resetData()
+  console.log('data', queryRequestData)
+  if (resetpaging)
+    queryRequestData.PageNumber = 1
+
   await fetchData()
 
 //   console.log('startfetching', entry)
@@ -383,7 +408,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.listdetail') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="refreshDataShelf">
+            <VBtn icon size="small" variant="text" @click="refreshDataShelf(false)">
               <VIcon icon="tabler-refresh" size="22" />
               <VTooltip
                 activator="parent"
@@ -439,7 +464,7 @@ function databoxOrderChanged(databoxItemId: number) {
               <MCFacetBox
                 v-for="item in facetboxItems" :key="item.key"
                 v-model:selected-items="selectedFacetItems[item.key]" :searchable="false" :dataitems="item.itemList"
-                :facettitle="item.title" class="mb-2"
+                :facettitle="item.title" class="mb-2" :facettype="item.type"
               />
             </div>
           </VCol>
@@ -451,7 +476,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
                 :prev-item-order="i"
                 :next-item-order="i"
-                @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf"
+                @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf(true)"
               />
               <!--
                 :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : -100"

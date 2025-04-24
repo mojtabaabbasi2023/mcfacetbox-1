@@ -83,9 +83,9 @@ const addlabels = () => {
   dialogAddLabelVisible.value = true
 }
 
-const deleteSelectedExcerpt = (excerptId: number) => {
+const deleteSelectedExcerpt = () => {
   Swal.fire({
-    titleText: formatString(t('alert.specificItemDeleted'), nodeItem.title),
+    titleText: t('datashelfbox.deleteselecteditem'),
     confirmButtonText: t('$vuetify.confirmEdit.ok'),
     cancelButtonText: t('$vuetify.confirmEdit.cancel'),
     showConfirmButton: true,
@@ -95,10 +95,9 @@ const deleteSelectedExcerpt = (excerptId: number) => {
     preConfirm: async () => {
       const serviceError = shallowRef()
       try {
-        await $api(('app/node/').replace('//', '/') + nodeItem.id, {
+        await $api(('app/excerpt/').replace('//', '/') + databoxItem.value.id, {
           method: 'DELETE',
         })
-        deleteNode(nodeItem, true)
       }
       catch (error) {
         serviceError.value = error
@@ -111,12 +110,12 @@ const deleteSelectedExcerpt = (excerptId: number) => {
     if (value.isConfirmed) {
       if (value.value?.serviceError.value) {
         if (value.value?.serviceError.value instanceof CustomFetchError && value.value?.serviceError.value.code > 0)
-          toast.error(value.value?.serviceError.value.message)
-        else toast.error(t('httpstatuscodes.0'))
+          emits('handlemessage', value.value?.serviceError.value.message, MessageType.error)
+        else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
       }
       else {
-        clearActivateNode()
-        toast.success(t('alert.deleteDataSuccess'))
+        emits('handlemessage', t('alert.deleteDataSuccess'), MessageType.success)
+        emits('refreshdatashelf')
       }
     }
   })
@@ -320,7 +319,7 @@ defineExpose({ increaseOrder, decreaseOrder })
                   {{ $t('datashelfbox.connecttonode') }}
                 </VTooltip>
               </VBtn>
-              <VBtn icon size="25" variant="text" color="error" @click="">
+              <VBtn icon size="25" variant="text" color="error" @click="deleteSelectedExcerpt">
                 <VIcon icon="tabler-trash-x" size="20" />
                 <VTooltip
                   activator="parent"

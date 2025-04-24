@@ -130,6 +130,14 @@ export class SimpleTreeModel implements ISimpleTree {
   selected?: boolean | undefined = false
 }
 
+export class QueryRequestModel implements Record<string, any> {
+  [x: string]: any;
+  PageSize: number = 10
+  PageNumber: number = 1
+  Sorting: string = ''
+  Filter: string = ''
+}
+
 export enum SelectAllState {
   Select = 0,
   Deselect = 1,
@@ -174,4 +182,10 @@ export enum InfiniteScrollStatus {
   loading = 'loading',
   empty = 'empty',
   ok = 'ok',
+}
+
+export enum FacetType {
+  flat = 1,
+  tree = 2,
+  switch = 3,
 }

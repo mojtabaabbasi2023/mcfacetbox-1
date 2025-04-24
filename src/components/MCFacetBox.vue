@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { isNull, isUndefined } from '@sindresorhus/is'
+import { isBoolean, isNull, isUndefined } from '@sindresorhus/is'
 import { VTreeview } from 'vuetify/labs/VTreeview'
 
+import { toBoolean } from '@iconify/utils'
+import { toString } from '@antfu/utils'
 import type { IFacetItem } from '@/types/SearchResult'
 import { convertFacetItemToFacetTree } from '@/types/SearchResult'
+import { FacetType } from '@/types/baseModels'
 
 interface Props {
   dataitems: IFacetItem[]
@@ -12,6 +15,7 @@ interface Props {
   istree?: boolean
   scrollItemCount?: number
   selectedItems?: string[]
+  facettype?: FacetType
 }
 interface Emit {
   (e: 'update:selectedItems', selectdItems: string[]): void
@@ -26,7 +30,7 @@ const treeItems = computed(() =>
 
 const selectedTreeFacetItems = ref<string[]>([])
 const selectedFacetItems = ref<string[]>([])
-
+const switchState = ref<boolean>(props.dataitems[0].key === 'true')
 const searchText = ref('')
 const filteredItems = ref<IFacetItem[]>(props.dataitems)
 
@@ -40,6 +44,9 @@ watch((selectedTreeFacetItems), newval => {
 })
 watch((selectedFacetItems), newval => {
   emit('update:selectedItems', newval)
+})
+watch(switchState, newval => {
+  emit('update:selectedItems', [String(switchState.value)])
 })
 
 // if (selectedTreeFacetItems.find(element => element === item.facetKey))
@@ -63,7 +70,9 @@ function filterItems() {
     filteredItems.value = searchItems<IFacetItem>(props.dataitems, searchText.value, 'title')
   }
 }
-
+function chagenSwitchValue(value: boolean | null) {
+  console.log('swith', value)
+}
 function searchinfacet(e: any) {
   searchText.value = (isNull(e) || isUndefined(e)) ? '' : e
   filterItems()
@@ -81,7 +90,7 @@ function searchinfacet(e: any) {
     </div>
 
     <VList
-      v-if="!(props.istree ?? false)" v-model:selected="selectedFacetItems" item-value="key" item-title="title"
+      v-if="!(props.istree ?? false) && (isNullOrUndefined(props.facettype) || props.facettype === FacetType.flat)" v-model:selected="selectedFacetItems" item-value="key" item-title="title"
       lines="one"
       select-strategy="leaf"
       :return-object="false" :height="(filteredItems.length ?? 10) * 35" :max-height="(props.scrollItemCount ?? 10) * 35"
@@ -100,11 +109,17 @@ function searchinfacet(e: any) {
     </VList>
 
     <VTreeview
-      v-else
+      v-else-if="(props.facettype === FacetType.tree)"
       v-model:activated="selectedTreeFacetItems" :items="treeItems" expand-icon="mdi-menu-left" item-value="facetKey"
       item-title="title" min-height="300px" activatable
       density="compact" active-strategy="single-independent"
     />
+    <div v-else class="d-flex align-center justify-space-between">
+      <span>
+        {{ `${dataitems[0].title}(${dataitems[0].count})` }}
+      </span>
+      <VSwitch v-model="switchState" class="pl-2" @update:model-value="chagenSwitchValue" />
+    </div>
     <!--
       <template #title="{ item }">
       <VTreeviewItem>

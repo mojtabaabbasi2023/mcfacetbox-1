@@ -1,5 +1,5 @@
 import { isNull, isUndefined } from '@sindresorhus/is'
-import type { ISimpleSelectableDTO } from './baseModels'
+import type { FacetType, ISimpleSelectableDTO } from './baseModels'
 
 export function convertFacetItemToFacetTree(items: IFacetItem[]): IFacetTreeItem[] {
   const map = new Map<string, IFacetTreeItem>()
@@ -57,7 +57,7 @@ export interface IFacetBox {
   key: string
   scrollSize: number
   title: string
-  type?: string
+  type?: FacetType
   itemList: IFacetItem[]
   isTree?: boolean
 }
