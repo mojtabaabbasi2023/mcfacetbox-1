@@ -351,7 +351,6 @@ declare module 'vue' {
     MCDataTable: typeof import('./src/components/MCDataTable.vue')['default']
     MCDialogAddLabel: typeof import('./src/components/dialogs/MCDialogAddLabel.vue')['default']
     MCDialogAddNewNode: typeof import('./src/components/dialogs/MCDialogAddNewNode.vue')['default']
-    MCDialogAddTag: typeof import('./src/components/dialogs/MCDialogAddTag.vue')['default']
     MCDialogBookSelect: typeof import('./src/components/dialogs/MCDialogBookSelect.vue')['default']
     MCDialogDataShelfBoxEdit: typeof import('./src/components/dialogs/MCDialogDataShelfBoxEdit.vue')['default']
     MCDialogGateAdd: typeof import('./src/components/dialogs/MCDialogGateAdd.vue')['default']

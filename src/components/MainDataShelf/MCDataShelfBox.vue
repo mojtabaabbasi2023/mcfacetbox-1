@@ -253,7 +253,7 @@ defineExpose({ increaseOrder, decreaseOrder })
           <template #activator="{ props }">
             <VIcon v-if="(databoxItem?.node?.id ?? 0) > 0" icon="tabler-plug-connected-x" size="12" class="mb-1" v-bind="props" />
           </template>
-          {{ $t(formatString(t('datashelfbox.connectednode'), databoxItem?.node?.title)) }}
+          {{ formatString($t('datashelfbox.connectednode'), databoxItem?.node?.title) }}
         </VTooltip>
 
         <VIcon v-if="databoxItem?.hasDescription" icon="tabler-message" size="12" class="mb-1" />
@@ -267,7 +267,7 @@ defineExpose({ increaseOrder, decreaseOrder })
               v-bind="props"
             />
           </template>
-          {{ $t(formatString(t('datashelfbox.labelscount'), databoxItem?.labelCount.toString())) }}
+          {{ formatString($t('datashelfbox.labelscount'), databoxItem?.labelCount.toString()) }}
         </VTooltip>
       </div>
       <VExpandTransition>

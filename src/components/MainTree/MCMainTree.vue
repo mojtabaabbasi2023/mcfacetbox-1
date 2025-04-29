@@ -147,7 +147,16 @@ function updateTreeIndex(dataItems: ISimpleTree[]) {
 }
 
 const selectTreeNode = (item: ISimpleTreeActionable) => {
-  router.push({ name: 'rs', query: { gtd: btoa(currentTreeId.value.toString()), snd: btoa(item.id.toString()) } })
+  const newQuery = { ...route.query }
+
+  Object.keys(newQuery).forEach(key => {
+    delete newQuery[key]
+  })
+
+  //   router.push({ name: 'rs', query: { gtd: btoa(currentTreeId.value.toString()), snd: btoa(item.id.toString()) } })
+  newQuery.gtd = btoa(currentTreeId.value.toString())
+  newQuery.snd = btoa(item.id.toString())
+  router.push({ query: newQuery })
 }
 
 const openParents = (nodeItems: ISimpleTree[], id: number) => {

@@ -63,6 +63,37 @@ export class DataShelfBoxModelNew implements IDataShelfBoxNew {
   }
 }
 
+/**
+ * این شیء برای ایجاد مقادیر صفحه بندی و فست قفسه داده در url اصلی برنامه میباشد
+ * نام ها کدگذاری شده برای مشخص نبود
+ */
+export class DataShelfRouteQueryParams {
+  /** اندازه صفحه */
+  pageSize: number
+
+  /** شماره صفحه */
+  pageNumber: number
+
+  selectedFacetItems: Record<string, string[]>
+
+  /** فست ها به شکل یک عبارت رشته ای تک خطی */
+  get rawFacets(): string {
+    return Object.keys(this.selectedFacetItems)
+      .filter(key => this.selectedFacetItems[key].length > 0)
+      .map(key => `#${key}=${this.selectedFacetItems[key].join(',')}`)
+      .join('')
+  }
+
+  constructor(
+    pageSize: number = 10,
+    pageNumber: number = 1,
+    selectedFacetItems: Record<string, string[]> = {},
+  ) {
+    this.pageSize = pageSize
+    this.pageNumber = pageNumber
+    this.selectedFacetItems = selectedFacetItems
+  }
+}
 export class DataShelfBoxModelView implements IDataShelfBoxView {
   id: number = 0
   content: string = ''

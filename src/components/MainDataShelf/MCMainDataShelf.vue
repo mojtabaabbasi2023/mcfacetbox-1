@@ -7,6 +7,7 @@ import { useTree } from '@/store/treeStore'
 import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
 import { MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxView } from '@/types/dataShelf'
+import { DataShelfRouteQueryParams } from '@/types/dataShelf'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 import type { IFacetBox } from '@/types/SearchResult'
 
@@ -22,8 +23,9 @@ const loadmorestart = ref(null)
 const loadmoreend = ref(null)
 const mainDataResult = ref(null)
 const activefilter = ref(false)
-const itemsPerPage = ref(10)
-const page = ref(1)
+
+// const itemsPerPage = ref(10)
+// const page = ref(1)
 const totalItems = ref(0)
 const sortBy = ref()
 const orderBy = ref()
@@ -36,33 +38,25 @@ const facetboxItems = ref<IFacetBox[]>([])
 const databoxrefs = ref<IMCDataShelfBoxREF[]>([])
 const increasebtn = ref<VBtn>()
 const decreasebtn = ref<VBtn>()
-const queryRequestData = reactive<QueryRequestModel>(new QueryRequestModel())
-const facetQuery = ref<Record<string, any>>()
+const apiQueryParamtData = reactive<QueryRequestModel>(new QueryRequestModel())
+const routeQueryParamData = reactive<DataShelfRouteQueryParams>(new DataShelfRouteQueryParams())
 
 const facettimeout: ReturnType<typeof setTimeout> | null = null
 const facetinterval = ref(3000)
 const { t } = useI18n({ useScope: 'global' })
 
 // const loadmore = ref(null)
-const selectedFacetItems = reactive<Record<string, string[]>>({})
 const toast = useToast()
 const { selectedNode } = useTree()
 const shelfState = useDataShelfStateChanged()
-const { treeIndex } = useTree()
 const route = useRoute()
+const router = useRouter()
 const ispaginationFullSize = ref(false)
 
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi(createUrl('app/excerpt', {
-  query: queryRequestData,
+  query: apiQueryParamtData,
 }), { immediate: false, refetch: false })
 
-// const testfacetlist = ref<IFacetResult[]>([{ key: 'book', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }, { key: 'book1', facetGroups: [{ id: 1, text: 'پژوهشگر' }, { id: 2, text: 'مدیر کل' }, { id: 3, text: 'ناظر' }, { id: 4, text: 'ارزیاب یک' }, { id: 5, text: 'ارزیاب دو' }] }])
-
-// function scrollTo(view: Ref<HTMLElement | null>) {
-//   if (view === undefined || view == null)
-//     return
-//   view.value?.scrollIntoView()
-// }
 const { stop } = useIntersectionObserver(
   [loadmorestart, loadmoreend],
   ([entrystart, entryend]) => {
@@ -77,51 +71,73 @@ watch(isscrolling, () => {
   if (isscrolling && !(scrollarriveState.bottom || scrollarriveState.top))
     ispaginationFullSize.value = false
 })
-watch(page, () => {
-  queryRequestData.PageNumber = page.value
-  refreshDataShelf(false)
-})
-watch(itemsPerPage, () => {
-  queryRequestData.PageSize = itemsPerPage.value
-  refreshDataShelf(true)
-})
+
 watch(route, () => {
   checkRoute()
 }, { immediate: true })
 async function checkRoute() {
-  if (!route.query.gtd)
-    return
+  /**
+   * 1- بررسی وجود شناسه درخت و رمز گشایی آن
+   * 2- مقدار دهی شناسه درخت
+   * 3- بررسی وجود شناسه گره درخت و رمز گشایی آن
+   * 4- مقداردهی شناسه گره جاری
+   * 5-بررسی شماره صفحه و اندازه صفحه در Url
+   * 6- در صورت وجود مقادیر در ظرف موقت ریخته میشود
+   * 7- بررسی وجود فست در url ، رمز گشایی آنها و تبدیل به مدل مورد نیاز برای ارسال به سرویس دیتا
+   * 8- انتقال ظرف موفت دیتای صفحه بندی و فست و شیء اصلی نگهداری این دیتا
+   * Note : مقادیر دریافتی از url در متغیر های محلی مورد نیاز و یا در شیء مورد استفاده در دریافت دیتای لیست قرار میگیرند
+   */
+  try {
+    if (!route.query.gtd)
+      return
+    const gtd = atob(route.query.gtd.toString())
+    if (!isNumericString(gtd))
+      return
+    apiQueryParamtData.resetDynamicFields()
 
-  const gtd = atob(route.query.gtd.toString())
-  if (!isNumericString(gtd))
-    return
-  currentTreeId.value = useToNumber(gtd).value
-  if (currentTreeId.value === useToNumber(gtd).value && route.query.snd) {
-    const snd = atob(route.query.snd.toString())
-    if (isNumericString(snd)) {
-      currentTreeId.value = useToNumber(gtd).value
-      currentNodeId.value = useToNumber(snd).value
-      queryRequestData.nodeId = currentNodeId.value
-      queryRequestData.treeId = currentTreeId.value
-
-      refreshDataShelf(true)
+    currentTreeId.value = useToNumber(gtd).value
+    apiQueryParamtData.treeId = currentTreeId.value
+    if (route.query.snd) {
+      const snd = atob(route.query.snd.toString())
+      if (isNumericString(snd)) {
+        currentNodeId.value = useToNumber(snd).value
+        apiQueryParamtData.nodeId = currentNodeId.value
+      }
+      else { return }
     }
+    else { return }
+
+    const temprouteQueryParam = new DataShelfRouteQueryParams()
+    if (route.query.dp) {
+      const temppagenumber = atob(route.query.dp.toString())
+      if (isNumericString(temppagenumber))
+        temprouteQueryParam.pageNumber = apiQueryParamtData.PageNumber = useToNumber(temppagenumber).value
+    }
+    if (route.query.dps) {
+      const temppagesize = atob(route.query.dps.toString())
+      if (isNumericString(temppagesize))
+        temprouteQueryParam.pageSize = apiQueryParamtData.PageSize = useToNumber(temppagesize).value
+    }
+    if (route.query.df) {
+      const tempfacets = atob(route.query.df.toString())
+
+      const facetlist = tempfacets.split('#')
+
+      facetlist.forEach(facetitem => {
+        if (facetitem.includes('=')) {
+          temprouteQueryParam.selectedFacetItems[facetitem.split('=')[0]] = facetitem.split('=')[1].split(',')
+          apiQueryParamtData[facetitem.split('=')[0]] = facetitem.split('=')[1].split(',')
+        }
+      })
+    }
+    Object.assign(routeQueryParamData, temprouteQueryParam)
+    console.log('facetbeforechange', routeQueryParamData.selectedFacetItems)
+
+    refreshDataShelf()
   }
-}
-watch(selectedFacetItems, newval => {
-//   const result = Object.keys(newval).map(key => ({
-//     titleKey: key,
-//     items: newval[key],
-//   }))
-
-  Object.keys(newval).forEach(key => (
-    queryRequestData[key] = newval[key]
-  ))
-  refreshDataShelf(true)
-})
-
-function addfacetToQuery() {
-
+  catch (error) {
+    console.log('checkrouteeroor', error)
+  }
 }
 
 const resultdataItemsSort = computed(() => {
@@ -134,30 +150,63 @@ function resetData() {
 //   })
   selectAll.value.state = SelectAllState.Deselect
   selectAll.value.count = 0
-  resultdataItems.value.splice(0)
-  facetboxItems.value.splice(0)
+  resultdataItems.value = []
+  facetboxItems.value = []
   currentNodeId.value = selectedNode.id
 }
+watch(selectAll.value, () => {
+  switch (selectAll.value.state) {
+  case SelectAllState.Select:
+  case SelectAllState.Deselect:
+    resultdataItemsSort.value.forEach(dataItem => {
+      dataItem.selected = selectAll.value.state === SelectAllState.Select
+    })
+    break;
+  default:
+    break;
+  }
+  selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
+})
+watch(() => routeQueryParamData.pageNumber, (newVal, oldVal) => {
+  if (newVal === oldVal)
+    return // از تغییرات مشابه جلوگیری می‌کنیم
 
-// watch(selectedNode, async () => {
-//   try {
-//     refreshDataShelf('selectednode')
-//   }
-//   catch (error) {
-//     console.log('fetchthrow', error)
-//   }
-// })
+  updateRouteIfNeeded({ dp: newVal })
+})
+watch(() => routeQueryParamData.pageSize, (newVal, oldVal) => {
+  if (newVal === oldVal)
+    return
+
+  // اگر اندازه صفحه تغییر کرده باشد شماره صفحه باید 1 باشد
+  updateRouteIfNeeded({ dps: newVal, dp: 1 })
+})
+watch(() => routeQueryParamData.rawFacets, (newVal, oldVal) => {
+  if (newVal === oldVal)
+    return
+
+  // اگر فیلترها تغییر کرده باشند صفحه باید یک شود
+  updateRouteIfNeeded({ df: newVal, dp: 1 })
+})
+function updateRouteIfNeeded(params: Record<string, any>) {
+  const newQuery = { ...route.query }
+
+  Object.keys(params).forEach(paramKey => {
+    const newVal = params[paramKey]
+
+    // 👉 - بررسی اینکه آیا تغییرات صفحه بندی و فست تکراری است یا نه؟ برای جلوگیری از ایجاد حلقه
+    if (newQuery[paramKey] !== btoa(newVal.toString()))
+      newQuery[paramKey] = btoa(newVal.toString())
+  })
+
+  router.replace({ query: newQuery })
+}
 watch(shelfState.lastState, async () => {
   try {
-    // if (resultdataItems.value.length < itemsPerPage.value * page.value)
-    refreshDataShelf(false)
-
-    // else
-    //   totalItems.value += 1
+    refreshDataShelf()
   }
   catch (error) {
   }
-}, { deep: true })
+})
 onFetchResponse(() => {
 //   response.json().then(value => {
   try {
@@ -167,8 +216,8 @@ onFetchResponse(() => {
 
     totalItems.value = result.totalCount
     resultdataItems.value.splice(0)
-    facetboxItems.value.push(...result.facets)
-    resultdataItems.value.push(...result.items)
+    facetboxItems.value = [...result.facets]
+    resultdataItems.value = [...result.items]
     if (isUndefined(resultdataItems.value))
       toast.error(t('alert.probleminGetExcerpt'))
 
@@ -191,11 +240,7 @@ onFetchError(error => {
 
   //   error.json().then(value => {
   try {
-    console.log('fetcherror2', resultData.value)
-
     const result = resultData.value as IRootServiceError
-
-    console.log('fetcherror2', result)
 
     if (result && result.error && result.error.code)
       toast.error(result.error.message)
@@ -210,29 +255,8 @@ onFetchError(error => {
 //   })
 })
 
-watch(selectAll.value, () => {
-  switch (selectAll.value.state) {
-    case SelectAllState.Select:
-    case SelectAllState.Deselect:
-    resultdataItemsSort.value.forEach(dataItem => {
-        dataItem.selected = selectAll.value.state === SelectAllState.Select
-      })
-      break;
-    default:
-      break;
-  }
-  selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
-})
-
-async function refreshDataShelf(resetpaging: boolean) {
-  // resetData()
-  console.log('data', queryRequestData)
-  if (resetpaging)
-    queryRequestData.PageNumber = 1
-
+async function refreshDataShelf() {
   await fetchData()
-
-//   console.log('startfetching', entry)
 }
 function selectFilterDataShelf() {
   activefilter.value = !activefilter.value
@@ -290,20 +314,20 @@ const decreaseOrder = () => {
 
 function handleDataBoxMessages(message: string, messagetype: MessageType) {
   switch (messagetype) {
-    case MessageType.error:
-      toast.error(message)
-      break;
-    case MessageType.info:
-      toast.info(message)
-      break;
-    case MessageType.warning:
-      toast.warning(message)
-      break;
-    case MessageType.success:
-      toast.success(message)
-      break;
-    default:
-      break;
+  case MessageType.error:
+    toast.error(message)
+    break;
+  case MessageType.info:
+    toast.info(message)
+    break;
+  case MessageType.warning:
+    toast.warning(message)
+    break;
+  case MessageType.success:
+    toast.success(message)
+    break;
+  default:
+    break;
   }
 }
 function databoxOrderChanged(databoxItemId: number) {
@@ -325,12 +349,6 @@ function databoxOrderChanged(databoxItemId: number) {
     <VRow no-gutters>
       <MCLoading :showloading="loadingdata" :loadingsize="SizeType.MD" />
       <VCol class="">
-        <!--
-          <VToolbar
-          no-gutters class="btn-box data-shelf-toolbar" :title="selectenode.title" height="40"
-          dir="rtl"
-          >
-        -->
         <VRow no-gutters class="btn-box data-shelf-toolbar d-flex align-center justify-space-between">
           <!-- <VCol md="12" > -->
           <div class="d-flex toolbar">
@@ -343,7 +361,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.selectall') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" variant="text">
               <VIcon icon="tabler-search" size="22" />
               <VTooltip
                 activator="parent"
@@ -361,7 +379,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.filter') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" variant="text">
               <VIcon icon="tabler-list-tree" size="22" />
               <VTooltip
                 activator="parent"
@@ -370,7 +388,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.treemode') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" variant="text">
               <VIcon icon="tabler-trash-x" size="22" />
               <VTooltip
                 activator="parent"
@@ -380,7 +398,7 @@ function databoxOrderChanged(databoxItemId: number) {
               </VTooltip>
             </VBtn>
 
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" variant="text">
               <VIcon icon="tabler-filters" size="22" />
               <VTooltip
                 activator="parent"
@@ -390,7 +408,7 @@ function databoxOrderChanged(databoxItemId: number) {
               </VTooltip>
             </VBtn>
 
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" variant="text">
               <VIcon icon="tabler-pencil-plus" size="22" />
               <VTooltip
                 activator="parent"
@@ -399,7 +417,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.add') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" variant="text">
               <VIcon icon="tabler-list-details" size="22" />
               <VTooltip
                 activator="parent"
@@ -408,7 +426,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.listdetail') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="refreshDataShelf(false)">
+            <VBtn icon size="small" variant="text" @click="refreshDataShelf">
               <VIcon icon="tabler-refresh" size="22" />
               <VTooltip
                 activator="parent"
@@ -463,7 +481,7 @@ function databoxOrderChanged(databoxItemId: number) {
             <div>
               <MCFacetBox
                 v-for="item in facetboxItems" :key="item.key"
-                v-model:selected-items="selectedFacetItems[item.key]" :searchable="false" :dataitems="item.itemList"
+                v-model:selected-items="routeQueryParamData.selectedFacetItems[item.key]" :searchable="false" :dataitems="item.itemList"
                 :facettitle="item.title" class="mb-2" :facettype="item.type"
               />
             </div>
@@ -476,7 +494,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
                 :prev-item-order="i"
                 :next-item-order="i"
-                @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf(true)"
+                @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf"
               />
               <!--
                 :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : -100"
@@ -507,8 +525,8 @@ function databoxOrderChanged(databoxItemId: number) {
       <VCol md="12">
         <MCTablePagination
           v-if="resultdataItems.length > 0"
-          v-model:page="page"
-          v-model:full-size="ispaginationFullSize" v-model:items-per-page="itemsPerPage"
+          v-model:page="routeQueryParamData.pageNumber"
+          v-model:full-size="ispaginationFullSize" v-model:items-per-page="routeQueryParamData.pageSize"
           :divider="false"
           class="paging-container" :total-items="totalItems"
         />

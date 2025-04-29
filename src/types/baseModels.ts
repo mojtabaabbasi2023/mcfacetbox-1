@@ -130,12 +130,30 @@ export class SimpleTreeModel implements ISimpleTree {
   selected?: boolean | undefined = false
 }
 
+/**
+ * این تابع کلاس برای ارسال مثادیر فیلتر به api ارسال میشود
+ * با توجه به اینکه معمولا لیست ها برای لود شدن به یکسری پارامتر ثابت نیاز دارند انها را در یک شیء نگهداری کردیم
+ * مقادر داینامیک هم برای فست ها هستند
+ */
 export class QueryRequestModel implements Record<string, any> {
   [x: string]: any;
   PageSize: number = 10
   PageNumber: number = 1
   Sorting: string = ''
   Filter: string = ''
+
+  /** کلید های داینامیک شیء را حذف میکنیم تا شیء به حالت اولیه برگردد */
+  resetDynamicFields() {
+    // لیست کلیدهای اصلی (غیر داینامیک)
+    const staticKeys = ['PageSize', 'PageNumber', 'Sorting', 'Filter']
+
+    // تمام کلیدهای شیء فعلی را بررسی می‌کنیم
+    Object.keys(this).forEach(key => {
+      // اگر کلید جزو کلیدهای اصلی نبود، آن را حذف می‌کنیم
+      if (!staticKeys.includes(key))
+        delete this[key]
+    })
+  }
 }
 
 export enum SelectAllState {

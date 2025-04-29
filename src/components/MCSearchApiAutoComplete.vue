@@ -8,7 +8,6 @@ interface Prop {
   apiUrl: string
   apiUrlAddData?: string
   selectionType: SelectionType
-  seletedItems?: number[]
   maxHeight?: number
   fillSearchPhraseWithSelected?: boolean
   showParentTitle?: boolean
@@ -26,14 +25,13 @@ const { t } = useI18n({ useScope: 'global' })
 
 interface Emit {
   (e: 'errorHasOccured', message: string): void
-  (e: 'update:selectedItems', seletedItems: number[]): void
   (e: 'loadingStateChanged', loading: boolean, dataItemsCount: number): void
   (e: 'searchPhraseChanged', searchPhrase: string): void
 
 }
 const itemsPerPage = ref(10000)
 const page = ref(1)
-const selectedItemsLocal = ref<number[]>([])
+const selectedItemsLocal = defineModel<number[]>('selectedItems', { default: [] })
 const searchResult = reactive<ISimpleSelectableDTO<number>[]>([])
 const searchPhrase = ref('')
 const actionInprogress = ref(false)
@@ -75,6 +73,10 @@ onFetchResponse(response => {
 })
 
 onMounted(() => {
+//   if (props.selectedItems)
+//     selectedItemsLocal.value.push(...props.selectedItems)
+//   console.log('selecteditems', props.selectedItems)
+
   if (props.loadAllList) {
     setTimeout(() => {
       fetchData()
@@ -121,7 +123,6 @@ const onReset = () => {
 watch(selectedItemsLocal, () => {
   if ((props.fillSearchPhraseWithSelected ?? false) && props.selectionType === SelectionType.Single)
     searchPhrase.value = searchResult.find(item => { return item.id === selectedItemsLocal.value[0] })?.title ?? ''
-  emit('update:selectedItems', selectedItemsLocal.value)
 })
 watch(searchPhrase, () => {
   if (searchPhrase.value.length > 2) {
@@ -136,6 +137,7 @@ watch(searchPhrase, () => {
 
   emit('searchPhraseChanged', searchPhrase.value)
 })
+
 watch(searchResult, () => {
   emit('loadingStateChanged', loadingdata.value, searchResult.length)
 })

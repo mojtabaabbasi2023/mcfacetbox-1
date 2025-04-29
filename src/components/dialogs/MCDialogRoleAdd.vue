@@ -133,17 +133,8 @@ const loadPermissions = async () => {
   const projectListResult = await $api<IBasePermissionTree[]>(`app/permissions?gateId=${props.gateId}`)
   const permissionListResult = await $api<IBasePermissionTree[]>('app/permissions/static')
 
-  //   setTimeout(() => {
-  //     projectList.push(...[{ id: 1, title: 'موسوعه یک', children: [{ id: 2, title: 'درخت یک' }, { id: 3, title: 'درخت دو' }] }, { id: 4, title: 'موسوعه دو', children: [{ id: 5, title: 'درخت سه' }, { id: 6, title: 'درخت چهار', children: [{ id: 7, title: 'درخت پنج' }, { id: 8, title: 'درخت ثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثثشش', children: [{ id: 51, title: 'درخت 9', children: [{ id: 65, title: 'درخت 9', children: [{ id: 21, title: 'درخت 9', children: [{ id: 54, title: 'درخت 9', children: [{ id: 80, title: 'درخت 9', children: [{ id: 90, title: 'درخت 9', children: [{ id: 19, title: 'درخت 9', children: [{ id: 91, title: 'درخت 9' }] }] }] }] }] }] }] }] }] }] }])
-  //   }, 2000)
   projectList.splice(0)
   permissionList.splice(0)
-
-  //   const result1 = attachUniqueIds(projectListResult)
-  //   const result2 = attachUniqueIds(permissionListResult)
-
-  //   console.log('project', result1)
-  //   console.log('permission', result2)
 
   projectList.push(...attachUniqueIds(projectListResult))
   permissionList.push(...attachUniqueIds(permissionListResult))

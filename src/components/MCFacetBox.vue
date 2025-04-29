@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { isBoolean, isNull, isUndefined } from '@sindresorhus/is'
+import { isNull, isUndefined } from '@sindresorhus/is'
 import { VTreeview } from 'vuetify/labs/VTreeview'
-
-import { toBoolean } from '@iconify/utils'
-import { toString } from '@antfu/utils'
 import type { IFacetItem } from '@/types/SearchResult'
 import { convertFacetItemToFacetTree } from '@/types/SearchResult'
 import { FacetType } from '@/types/baseModels'
@@ -28,24 +25,62 @@ const treeItems = computed(() =>
   convertFacetItemToFacetTree(props.dataitems),
 )
 
-const selectedTreeFacetItems = ref<string[]>([])
-const selectedFacetItems = ref<string[]>([])
+const selectedTreeFacetItems = ref<number[]>([])
+const selectedFacetItems = ref<number[]>([])
+
 const switchState = ref<boolean>(props.dataitems[0].key === 'true')
 const searchText = ref('')
 const filteredItems = ref<IFacetItem[]>(props.dataitems)
 
-watch(filteredItems, newValue => {
-  if ((props.selectedItems?.length ?? 0) > 0)
-    !(props.istree ?? false) ? selectedFacetItems.value.push(...(props.selectedItems ?? [])) : selectedTreeFacetItems.value.push(...(props.selectedItems ?? []))
+watch(() => props.selectedItems, newVal => {
+  if (!newVal || newVal.length === 0)
+    return
+  if (props.facettype === FacetType.switch) {
+    const boolVal = (newVal[0] === 'true')
+    if (switchState.value !== boolVal)
+      switchState.value = boolVal
+  }
+  else if (props.facettype === FacetType.tree) {
+    if (JSON.stringify(selectedTreeFacetItems.value) !== JSON.stringify(newVal.map(item => useToNumber(item).value)))
+      selectedTreeFacetItems.value = [...newVal].map(item => useToNumber(item).value)
+  }
+  else { // Flat list
+    if (JSON.stringify(selectedFacetItems.value) !== JSON.stringify(newVal.map(item => useToNumber(item).value)))
+      selectedFacetItems.value = [...newVal].map(item => useToNumber(item).value)
+  }
 }, { immediate: true })
 
+onMounted(() => {
+  if (!props.selectedItems || props.selectedItems.length === 0)
+    return
+  if (props.facettype === FacetType.switch) {
+    const boolVal = (props.selectedItems[0] === 'true')
+
+    if (switchState.value !== boolVal)
+      switchState.value = boolVal
+  }
+  else if (props.facettype === FacetType.tree) {
+    if (JSON.stringify(selectedTreeFacetItems.value) !== JSON.stringify(props.selectedItems))
+      selectedTreeFacetItems.value = [...props.selectedItems].map(item => useToNumber(item).value)
+  }
+  else { // Flat list
+    console.log('onmounte', props.selectedItems)
+
+    if (JSON.stringify(selectedFacetItems.value) !== JSON.stringify(props.selectedItems))
+      selectedTreeFacetItems.value = [...props.selectedItems].map(item => useToNumber(item).value)
+  }
+})
+watch(filteredItems, () => {
+  if ((props.selectedItems?.length ?? 0) > 0)
+    !(props.istree ?? false) ? selectedFacetItems.value.push(...(props.selectedItems?.map(item => useToNumber(item).value) ?? [])) : selectedTreeFacetItems.value.push(...(props.selectedItems?.map(item => useToNumber(item).value) ?? []))
+}, { immediate: true })
 watch((selectedTreeFacetItems), newval => {
-  emit('update:selectedItems', newval)
+  emit('update:selectedItems', newval.map(item => item.toString()))
 })
 watch((selectedFacetItems), newval => {
-  emit('update:selectedItems', newval)
+  emit('update:selectedItems', newval.map(item => item.toString()))
 })
-watch(switchState, newval => {
+watch(switchState, () => {
   emit('update:selectedItems', [String(switchState.value)])
 })
 
@@ -81,7 +116,9 @@ function searchinfacet(e: any) {
 
 <template>
   <VCard class="mc-facet-box" variant="flat">
-    <VCardTitle>{{ props.facettitle }}</VCardTitle>
+    <VCardTitle v-if="props.facettype !== FacetType.switch">
+      {{ props.facettitle }}
+    </VCardTitle>
     <div class="search-container">
       <VTextField
         v-show="props.searchable" :placeholder="$t('search')" append-inner-icon="tabler-search" clearable
