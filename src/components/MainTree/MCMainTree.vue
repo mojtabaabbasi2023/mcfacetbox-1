@@ -101,6 +101,7 @@ watch(currentTreeId, async () => {
 watch(searchResultSelectedNodes, () => {
   activatedNode.value.splice(0)
   activatedNode.value.push(...searchResultSelectedNodes.value)
+  gotoNode(searchResultSelectedNodes.value[0], false)
 })
 watch(route, newval => {
   checkTreeRoute(true)
@@ -213,6 +214,7 @@ async function nodeEditProgress(nodeitem: ISimpleTreeActionable) {
     nodeitem.loading = nodeitem.editing = false
     setTimeout(() => {
       treeIndex[nodeitem.id].title = nodeTempTitleForEdit.value
+      selectedNode.title = nodeTempTitleForEdit.value
       treeview.value.$el.focus()
     }, 1000)
   }
@@ -242,9 +244,9 @@ function handleEditableNodeKeydown(event: KeyboardEvent, item: ISimpleTreeAction
       break;
   }
 }
-function gotoNode(nodeId: number) {
+function gotoNode(nodeId: number, mustSelectNode: boolean = true) {
   if (nodeId > 0) {
-    treeIndex[nodeId].selected = true
+    treeIndex[nodeId].selected = mustSelectNode
     openParents(treeData, nodeId)
     nextTick(() => {
       const activeNode = document.querySelector('.v-list-item--active')
@@ -597,16 +599,68 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
     />
     <VRow no-gutters class="btn-box toolbar">
       <VCol md="12">
-        <div class="toolbar">
-          <VBtn icon="tabler-plus" size="small" variant="text" @click=" dialogAddNewNodeVisible = true" />
+        <div class="d-flex toolbar">
+          <VBtn size="small" variant="text" @click=" dialogAddNewNodeVisible = true">
+            <VIcon icon="tabler-plus" size="22" />
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('datashelfbox.selectall') }}
+            </VTooltip>
+          </VBtn>
 
-          <VBtn icon="tabler-search" size="small" :variant="activeSearch ? 'elevated' : 'text'" @click="selectSearchTree" />
-          <VBtn icon="tabler-box-multiple" size="small" variant="text" />
-          <VBtn icon="tabler-select" size="small" variant="text" />
-          <VBtn icon="tabler-trash-x" size="small" variant="text" />
-          <VBtn icon="tabler-plug-connected" size="small" variant="text" />
-          <VBtn icon="tabler-eraser" size="small" variant="text" />
-          <VBtn icon="tabler-refresh" size="small" variant="text" @click="refreshTree" />
+          <VBtn size="small" :variant="activeSearch ? 'elevated' : 'text'" @click="selectSearchTree">
+            <VIcon icon="tabler-search" size="22" />
+
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('search') }}
+            </VTooltip>
+          </VBtn>
+          <VBtn size="small" variant="text">
+            <VIcon icon="tabler-box-multiple" size="22" />
+
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('tree.duplicate') }}
+            </VTooltip>
+          </VBtn>
+          <!-- <VBtn icon="tabler-select" size="small" variant="text" /> -->
+          <VBtn size="small" variant="text">
+            <VIcon icon="tabler-trash-x" size="22" />
+
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('delete') }}
+            </VTooltip>
+          </VBtn>
+          <VBtn size="small" variant="text">
+            <VIcon icon="tabler-eraser" size="22" />
+
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('tree.treecleaning') }}
+            </VTooltip>
+          </VBtn>
+          <VBtn size="small" variant="text" @click="refreshTree">
+            <VIcon icon="tabler-refresh" size="22" />
+
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('refresh') }}
+            </VTooltip>
+          </VBtn>
         </div>
       </VCol>
     </VRow>

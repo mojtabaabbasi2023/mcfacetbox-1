@@ -131,7 +131,8 @@ async function checkRoute() {
       })
     }
     Object.assign(routeQueryParamData, temprouteQueryParam)
-    console.log('facetbeforechange', routeQueryParamData.selectedFacetItems)
+
+    // console.log('facetbeforechange', routeQueryParamData.selectedFacetItems)
 
     refreshDataShelf()
   }
@@ -417,15 +418,17 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.add') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text">
+            <!--
+              <VBtn icon size="small" variant="text">
               <VIcon icon="tabler-list-details" size="22" />
               <VTooltip
-                activator="parent"
-                location="top center"
+              activator="parent"
+              location="top center"
               >
-                {{ $t('datashelfbox.listdetail') }}
+              {{ $t('datashelfbox.listdetail') }}
               </VTooltip>
-            </VBtn>
+              </VBtn>
+            -->
             <VBtn icon size="small" variant="text" @click="refreshDataShelf">
               <VIcon icon="tabler-refresh" size="22" />
               <VTooltip

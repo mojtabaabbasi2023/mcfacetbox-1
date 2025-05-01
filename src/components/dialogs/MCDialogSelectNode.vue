@@ -1,7 +1,4 @@
 <script lang="ts" setup>
-// !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
-
-import { useTree } from '@/store/treeStore'
 import { SelectionType } from '@/types/baseModels'
 
 interface Prop {

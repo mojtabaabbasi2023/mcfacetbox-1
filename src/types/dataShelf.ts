@@ -16,13 +16,17 @@ export interface IDataShelfBoxView {
 
   // NOTE - برای پاورقی یک تگ اچ تی ام ال با شناسه پاورقی در محتوای جعبه داده درج میشود و باید بررسی گردد که اگر در ویرایش کاربر این تگ حذف شد در پاورقی هم حذف شود
   footnotes: IFootNote[]
+  description?: string
 
   // NOTE - شناسه جعبه داده ای که به این جعبه داده وصل شده و باید با آن حرکت کند
   pinnedItem?: number
   creationTime?: string
   creatorId?: string
   creatorFullName?: string
+  lastModifierFullName?: string
+  lastModificationTime?: string
   selected?: boolean
+  labels: ISimpleDTO<number>[]
 
   //   tags?: ISimpleDTO<number>[]
   labelCount: number
@@ -31,7 +35,7 @@ export interface IDataShelfBoxView {
   hasDescription: boolean
 
   // NOTE - شناسه سایتی که محتوا از آن دریافت شده مثلا شناسه حدیث، آیه یا لغت
-  refrenceId: string
+  sourceId: string
 }
 
 export interface IDataShelfBoxNew {
@@ -95,6 +99,11 @@ export class DataShelfRouteQueryParams {
   }
 }
 export class DataShelfBoxModelView implements IDataShelfBoxView {
+  private _creationTime?: string
+  private _lastModificationTime?: string
+  private creationTimePersianCache?: string
+  private modificationTimePersianCache?: string
+
   id: number = 0
   content: string = ''
   node?: ISimpleDTO<number> | undefined = { id: 0, title: '' }
@@ -103,24 +112,45 @@ export class DataShelfBoxModelView implements IDataShelfBoxView {
   order: number = 0
   footnotes: IFootNote[] = []
   pinnedItem?: number | undefined = 0
-  creationTime?: string | undefined = ''
   creatorId?: string | undefined = ''
   creatorFullName?: string | undefined = ''
   selected?: boolean | undefined = false
   labelCount: number = 0
   hasDescription: boolean = false
-  refrenceId: string = ''
+  sourceId: string = ''
+  description?: string | undefined
+  lastModifierFullName?: string | undefined
+  get creationTime(): string | undefined {
+    if (!this._creationTime)
+      return undefined
 
-//   constructor(id: number, content: string, treeId: number, excerptType: ISimpleDTO<number>, footnotes: IFootNote[], hasDescription: boolean, labelCount: number, refrenceId: string) {
-//     this.id = id
-//     this.treeId = treeId
-//     this.content = content
-//     this.hasDescription = hasDescription
-//     this.footnotes = footnotes
-//     this.labelCount = labelCount
-//     this.refrenceId = refrenceId
-//     this.excerptType = excerptType
-//   }
+    if (!this.creationTimePersianCache)
+      this.creationTimePersianCache = Intl.DateTimeFormat('fa-IR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(this._creationTime))
+
+    return this.creationTimePersianCache
+  }
+
+  set creationTime(value: string | undefined) {
+    this._creationTime = value
+    this.creationTimePersianCache = undefined
+  }
+
+  get lastModificationTime(): string | undefined {
+    if (!this._lastModificationTime)
+      return undefined
+
+    if (!this.modificationTimePersianCache)
+      this.modificationTimePersianCache = Intl.DateTimeFormat('fa-IR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(this._lastModificationTime))
+
+    return this.modificationTimePersianCache
+  }
+
+  set lastModificationTime(value: string | undefined) {
+    this._lastModificationTime = value
+    this.modificationTimePersianCache = undefined
+  }
+
+  labels: ISimpleDTO<number>[] = []
 }
 
 export interface IFootNote extends ISimpleDTO<string>, baseItemState {

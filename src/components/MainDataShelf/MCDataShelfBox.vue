@@ -8,6 +8,8 @@ const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrde
 const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
 const dialogAddLabelVisible = ref(false)
+const dialogDataBoxInfo = ref(false)
+
 const databoxItem = defineModel<IDataShelfBoxView>({ default: new DataShelfBoxModelView() })
 const { t } = useI18n({ useScope: 'global' })
 const showTools = ref(true)
@@ -83,6 +85,44 @@ const addlabels = () => {
   dialogAddLabelVisible.value = true
 }
 
+const disconnectSelectedExcerpt = () => {
+  Swal.fire({
+    titleText: t('datashelfbox.disconnectselecteditem'),
+    confirmButtonText: t('$vuetify.confirmEdit.ok'),
+    cancelButtonText: t('$vuetify.confirmEdit.cancel'),
+    showConfirmButton: true,
+    showCancelButton: true,
+    showLoaderOnConfirm: true,
+    showCloseButton: true,
+    preConfirm: async () => {
+      const serviceError = shallowRef()
+      try {
+        await $api(`app/excerpt/${databoxItem.value.id}/disconnect`, {
+          method: 'DELETE',
+        })
+      }
+      catch (error) {
+        serviceError.value = error
+      }
+
+      return { serviceError }
+    },
+    allowOutsideClick: false,
+  }).then(value => {
+    if (value.isConfirmed) {
+      if (value.value?.serviceError.value) {
+        if (value.value?.serviceError.value instanceof CustomFetchError && value.value?.serviceError.value.code > 0)
+          emits('handlemessage', value.value?.serviceError.value.message, MessageType.error)
+        else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
+      }
+      else {
+        emits('handlemessage', t('alert.deleteDataSuccess'), MessageType.success)
+        emits('refreshdatashelf')
+      }
+    }
+  })
+}
+
 const deleteSelectedExcerpt = () => {
   Swal.fire({
     titleText: t('datashelfbox.deleteselecteditem'),
@@ -122,49 +162,76 @@ const deleteSelectedExcerpt = () => {
 }
 
 const addcomment = () => {
-//   Swal.fire({
-//     input: 'textarea',
-//     inputLabel: t('datashelfbox.addcomment'),
-//     inputValue: databoxItem.value?.comment ?? '',
-//     inputPlaceholder: t('datashelfbox.enteryourcomment'),
-//     confirmButtonText: t('$vuetify.confirmEdit.ok'),
-//     cancelButtonText: t('$vuetify.confirmEdit.cancel'),
-//     showConfirmButton: true,
-//     showCancelButton: true,
-//     showLoaderOnConfirm: true,
-//     showCloseButton: true,
-//     preConfirm: async value => {
-//       console.log('text', value)
+  let description: ''
+  let haserror = false
 
-  //       //   const { serviceData, serviceError } = await serviceDelete(item.id, props.apiUrl)
+  Swal.fire({
+    title: t('datashelfbox.loadingdesc'),
+    showCloseButton: false,
+    allowOutsideClick: false,
+    didOpen: async () => {
+      Swal.showLoading()
+      try {
+        description = await $api(`app/excerpt/${databoxItem.value.id}/description`, {
+          method: 'GET',
+          ignoreResponseError: false,
+        })
 
-  //       //   console.log('insidemethod', serviceData.value, serviceError.value)
-  //       const serviceData = ref(value)
-  //       const serviceError = ref()
+        Swal.hideLoading()
+        Swal.close()
+      }
+      catch (error) {
+        if (error instanceof CustomFetchError && error.code > 0)
+          emits('handlemessage', error.message, MessageType.error)
+        emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
+        haserror = true
+      }
+    },
+  }).then(() => {
+    if (haserror)
+      return
+    Swal.fire({
+      input: 'textarea',
+      inputLabel: t('datashelfbox.comment'),
+      inputValue: description,
+      inputPlaceholder: t('datashelfbox.enteryourcomment'),
+      confirmButtonText: t('$vuetify.confirmEdit.ok'),
+      cancelButtonText: t('$vuetify.confirmEdit.cancel'),
+      showConfirmButton: true,
+      showCancelButton: true,
+      showLoaderOnConfirm: true,
+      showCloseButton: true,
+      preConfirm: async value => {
+        const serviceError = ref()
+        try {
+          await $api(`app/excerpt/${databoxItem.value.id}/description`, {
+            method: 'PUT',
+            body: `"${value}"`,
+            ignoreResponseError: false,
+          })
+          databoxItem.value.hasDescription = value.length > 0
+        }
 
-  //       return { serviceData, serviceError }
-  //     },
-  //     allowOutsideClick: false,
-  //   }).then(value => {
-  //     if (value.isConfirmed) {
-  //     //   console.log('deletevalue', value)
+        catch (error) {
+          serviceError.value = error
+        }
 
-  //       if (value.value?.serviceError.value)
-  //         emits('handlemessage', t('alert.dataActionFailed'), MessageType.error)
-
-  //       if (value.value?.serviceData.value) {
-  //         emits('handlemessage', t('alert.dataActionSuccess'), MessageType.success)
-
-  //         if (databoxItem.value)
-  //           databoxItem.value.comment = value.value?.serviceData.value
-  //       }
-
-//       // emit('deletedItem', true)
-//     }
-//     else {
-//       emits('handlemessage', t('alert.dataActionSuccess'), MessageType.info)
-//     }
-//   })
+        return { serviceError }
+      },
+      allowOutsideClick: false,
+    }).then(value => {
+      if (value.isConfirmed) {
+        if (value.value?.serviceError.value) {
+          if (value.value?.serviceError.value instanceof CustomFetchError && value.value?.serviceError.value.code > 0)
+            emits('handlemessage', value.value?.serviceError.value.message, MessageType.error)
+          else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
+        }
+        else {
+          emits('handlemessage', t('alert.dataActionSuccess'), MessageType.success)
+        }
+      }
+    })
+  })
 }
 
 const focuToElementAfterMove = () => {
@@ -283,7 +350,7 @@ defineExpose({ increaseOrder, decreaseOrder })
                   {{ $t('datashelfbox.pintotop') }}
                 </VTooltip>
               </VBtn>
-              <VBtn icon size="25" variant="text" @click="">
+              <VBtn icon size="25" variant="text" @click="dialogDataBoxInfo = true">
                 <VIcon icon="tabler-info-circle" size="20" />
                 <VTooltip
                   activator="parent"
@@ -308,6 +375,15 @@ defineExpose({ increaseOrder, decreaseOrder })
                   location="top center"
                 >
                   {{ $t('datashelfbox.duplicate') }}
+                </VTooltip>
+              </VBtn>
+              <VBtn v-if="databoxItem.node && databoxItem.node.id > 0" icon size="25" variant="text" @click="disconnectSelectedExcerpt">
+                <VIcon icon="tabler-plug-connected-x" size="20" color="error" />
+                <VTooltip
+                  activator="parent"
+                  location="top center"
+                >
+                  {{ $t('datashelfbox.disconnect') }}
                 </VTooltip>
               </VBtn>
               <VBtn icon size="25" variant="text" @click="">
@@ -391,6 +467,10 @@ defineExpose({ increaseOrder, decreaseOrder })
     <MCDialogAddLabel
       v-if="dialogAddLabelVisible" v-model:is-dialog-visible="dialogAddLabelVisible" :tree-id="databoxItem?.treeId ?? 0" :selected-data-box-id="databoxItem.id ?? 0"
       :loc-x="btnlabelX" :loc-y="btnlabelY - 200" @error-has-occured="emits('handlemessage', $event, MessageType.error)" @label-added="labelhasbeenadded"
+    />
+    <MCDialogDataBoxInfo
+      v-if="dialogDataBoxInfo" v-model:is-dialog-visible="dialogDataBoxInfo" :selected-data-box-id="databoxItem.id ?? 0"
+      @error-has-occured="emits('handlemessage', $event, MessageType.error)"
     />
   </div>
 </template>
