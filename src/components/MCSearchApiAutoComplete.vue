@@ -66,6 +66,7 @@ const { execute: fetchData, isFetching: loadingdata, data: searchResultFirst, on
 onFetchResponse(response => {
   response.json().then(value => {
     searchResult.splice(0)
+    selectedItemsLocal.value.splice(0)
     if (searchResultFirst.value)
       searchResult.push(...searchResultFirst.value.items)
     actionInprogress.value = true
@@ -115,6 +116,7 @@ async function addSearchData() {
 const onReset = () => {
   actionInprogress.value = false
   searchPhrase.value = ''
+  selectedItemsLocal.value.splice(0)
   searchResult.splice(0)
   if (props.loadAllList)
     fetchData()

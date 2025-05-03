@@ -1,20 +1,31 @@
 <script lang="ts" setup>
+import type { MessageType } from '@/types/baseModels'
 import { SelectionType } from '@/types/baseModels'
 
 interface Prop {
   isDialogVisible: boolean
+  selectedTreeId: number
 }
 
 const props = defineProps<Prop>()
 const emit = defineEmits<Emit>()
-const selectedNodes = ref<number[]>([])
 const activeActions = ref(false)
+const selectedNodes = ref<number[]>([])
+const loading = ref(false)
 
 const { t } = useI18n({ useScope: 'global' })
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
-  (e: 'errorHasOccured', message: string): void
 
+  //   (e: 'messageHasOccured', message: string, type: MessageType): void
+  (e: 'nodehasbeenselected', nodeid: number): void
+
+}
+function dataEntryChanged(phrase: string) {
+  if (phrase.length > 0)
+    activeActions.value = true
+  else
+    activeActions.value = false
 }
 
 const onReset = (closedialog: boolean = false) => {
@@ -23,13 +34,26 @@ const onReset = (closedialog: boolean = false) => {
   activeActions.value = false
 }
 
-watch(selectedNodes, () => {
-  console.log('selectednode', selectedNodes)
-})
-function loadingTreeStateChanged(loadingstate: boolean, resultCount: number) {
-  console.log('statechange', loadingstate, resultCount)
+const selectNode = async () => {
+  emit('nodehasbeenselected', selectedNodes.value[0])
+  emit('update:isDialogVisible', false)
 
-  activeActions.value = (!loadingstate && resultCount > 0)
+  //   loading.value = true
+
+//   try {
+//     await $api('app/excerpt/text', {
+//       method: 'POST',
+//       body: JSON.stringify(new DataShelfBoxModelNew(0, props.selectedTreeId, selectedNodes.value[0], props.selectedItem.content)),
+//       ignoreResponseError: false,
+//     })
+//     emit('contentToNodeAdded')
+//   }
+//   catch (error) {
+//     if (error instanceof CustomFetchError && error.code > 0)
+//       emit('messageHasOccured', error.message, MessageType.error)
+//     else emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error)
+//   }
+//   loading.value = false
 }
 </script>
 
@@ -41,18 +65,21 @@ function loadingTreeStateChanged(loadingstate: boolean, resultCount: number) {
     <DialogCloseBtn @click="onReset(true)" />
     <VCard variant="flat">
       <VCardTitle>{{ $t('tree.selectnode') }}</VCardTitle>
-      <VCardText>
-        <MCSearchApiAutoComplete v-model:selected-items="selectedNodes" :max-height="400" api-url="/apps/searchsimple" :selection-type="SelectionType.Single" @loading-state-changed="loadingTreeStateChanged" />
-        <VDivider v-if="activeActions" />
-      </VCardText>
+      <MCSearchApiAutoComplete
+        v-model:selected-items="selectedNodes"
+        auto-focus :max-height="400" :api-url="`app/node/simple?treeid=${props.selectedTreeId}`" :selection-type="SelectionType.Single" class="pt-1"
+        @search-phrase-changed="dataEntryChanged"
+      />
+      <VDivider v-if="selectedNodes.length > 0" />
+
       <template #actions>
-        <div v-if="activeActions" class="w-100 d-flex justify-center py-2">
-          <VBtn type="submit" class="me-3">
+        <div v-if="selectedNodes.length > 0" class="w-100 d-flex justify-center py-2 px-2">
+          <VBtn type="submit" class="me-3" :loading="loading" @click="selectNode">
             <span>
               {{ $t('accept') }}
             </span>
           </VBtn>
-          <VBtn type="reset" variant="tonal" color="error" @click="onReset">
+          <VBtn type="reset" variant="tonal" color="error" :disabled="loading" @click="onReset">
             {{ $t('cancel') }}
           </VBtn>
         </div>

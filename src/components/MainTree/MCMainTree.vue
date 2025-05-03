@@ -631,16 +631,18 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
             </VTooltip>
           </VBtn>
           <!-- <VBtn icon="tabler-select" size="small" variant="text" /> -->
-          <VBtn size="small" variant="text">
+          <!--
+            <VBtn size="small" variant="text">
             <VIcon icon="tabler-trash-x" size="22" />
 
             <VTooltip
-              activator="parent"
-              location="top center"
+            activator="parent"
+            location="top center"
             >
-              {{ $t('delete') }}
+            {{ $t('delete') }}
             </VTooltip>
-          </VBtn>
+            </VBtn>
+          -->
           <VBtn size="small" variant="text">
             <VIcon icon="tabler-eraser" size="22" />
 

@@ -2,14 +2,14 @@
 import ContextMenu from '@imengyu/vue3-context-menu'
 import Swal from 'sweetalert2'
 import { DataShelfBoxModelView, type IDataShelfBoxView } from '@/types/dataShelf'
-import { MessageType } from '@/types/baseModels'
+import { MessageType, SizeType } from '@/types/baseModels'
 
 const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number }>()
 const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
 const dialogAddLabelVisible = ref(false)
 const dialogDataBoxInfo = ref(false)
-
+const dialogSelectNodeVisible = ref(false)
 const databoxItem = defineModel<IDataShelfBoxView>({ default: new DataShelfBoxModelView() })
 const { t } = useI18n({ useScope: 'global' })
 const showTools = ref(true)
@@ -17,6 +17,7 @@ const showTools = ref(true)
 // const toast = useToast()
 const databox = ref()
 const highlightClass = ref(['mc-data-shelf-box'])
+const loadinglocal = ref(false)
 const btnlabel = ref()
 
 const { x: btnlabelX, y: btnlabelY }
@@ -83,6 +84,24 @@ const onContextMenu = (e: MouseEvent) => {
 
 const addlabels = () => {
   dialogAddLabelVisible.value = true
+}
+
+const connecttoselectedNode = async (nodeid: number) => {
+  loadinglocal.value = true
+  try {
+    await $api(`app/excerpt/${databoxItem.value.id}/connect/${nodeid}`, {
+      method: 'PUT',
+    })
+    emits('handlemessage', t('alert.dataActionSuccess'), MessageType.success)
+    loadinglocal.value = false
+  }
+  catch (error) {
+    loadinglocal.value = false
+
+    if (error instanceof CustomFetchError && error.code > 0)
+      emits('handlemessage', error.message, MessageType.error)
+    else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
+  }
 }
 
 const disconnectSelectedExcerpt = () => {
@@ -294,6 +313,8 @@ defineExpose({ increaseOrder, decreaseOrder })
 <template>
   <div class="d-flex" @mouseenter="showTools = true" @mouseleave="">
     <VCard ref="databox" :class="`${[highlightClass]}` " style="overflow: visible !important;">
+      <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
+
       <VCardText class="h-auto">
         <VRow no-gutters class="justify-start align-start box">
           <VCheckbox v-model="isSelected" density="compact" />
@@ -386,7 +407,7 @@ defineExpose({ increaseOrder, decreaseOrder })
                   {{ $t('datashelfbox.disconnect') }}
                 </VTooltip>
               </VBtn>
-              <VBtn icon size="25" variant="text" @click="">
+              <VBtn icon size="25" variant="text" @click="dialogSelectNodeVisible = true">
                 <VIcon icon="tabler-plug-connected" size="20" />
                 <VTooltip
                   activator="parent"
@@ -463,6 +484,10 @@ defineExpose({ increaseOrder, decreaseOrder })
         </VRow>
       </VExpandTransition>
     </VCard>
+    <MCDialogSelectNode
+      v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible"
+      :selected-tree-id="databoxItem.treeId" @nodehasbeenselected="(nodeid) => connecttoselectedNode(nodeid)"
+    />
     <MCDialogDataShelfBoxEdit v-if="isDialogDataShelfBoxEdit" v-model:is-dialog-visible="isDialogDataShelfBoxEdit" v-model:databox-item="databoxItem" />
     <MCDialogAddLabel
       v-if="dialogAddLabelVisible" v-model:is-dialog-visible="dialogAddLabelVisible" :tree-id="databoxItem?.treeId ?? 0" :selected-data-box-id="databoxItem.id ?? 0"

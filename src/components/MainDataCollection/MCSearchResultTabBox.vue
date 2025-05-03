@@ -4,11 +4,12 @@ import { isUndefined } from '@sindresorhus/is'
 import type { ISearchResultTabBox } from '@/types/SearchResult'
 import type { ISimpleDTO, ISimpleTreeActionable } from '@/types/baseModels'
 import { MessageType, SizeType } from '@/types/baseModels'
-import type { IDataShelfBoxNew } from '@/types/dataShelf'
+import { DataShelfBoxModelNew, type IDataShelfBoxNew } from '@/types/dataShelf'
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 const { t } = useI18n({ useScope: 'global' })
+const tempSelectedTabBoxItem = reactive<DataShelfBoxModelNew>(new DataShelfBoxModelNew(0, props.selectedTreeId, 0, ''))
 
 // const { selectedNode } = useTree()
 const dialogSelectNodeVisible = ref(false)
@@ -35,10 +36,11 @@ interface Emit {
 
 const tabdatamodel = ref()
 async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
+  loadinglocal.value = true
   try {
     await $api('app/excerpt/text', {
       method: 'POST',
-      body: datashelfbox,
+      body: JSON.stringify(datashelfbox),
       ignoreResponseError: false,
     })
     emit('contentToNodeAdded')
@@ -74,7 +76,6 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
         }),
         label: t('datagathering.connecttoselectednode'),
         onClick: () => {
-          loadinglocal.value = true
           addContentToNode({ content: selectedItem.title, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 9, footNotes: [], id: 0 })
         },
       },
@@ -88,6 +89,7 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
           },
         }),
         onClick: () => {
+          tempSelectedTabBoxItem.content = selectedItem.title
           dialogSelectNodeVisible.value = true
         },
       },
@@ -138,7 +140,10 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
       <VTabsWindowItem v-for="item in props.dataitems.content" :key="item.id" :value="item.id">
         <VCard variant="text">
           <VCardText>
-            <MCDialogSelectNode v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" />
+            <MCDialogSelectNode
+              v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="tempSelectedTabBoxItem"
+              :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, tempSelectedTabBoxItem.content))"
+            />
             <VDataIterator :items="item.content" :items-per-page="1">
               <template #default="{ items }">
                 <VRow

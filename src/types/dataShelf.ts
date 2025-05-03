@@ -56,7 +56,7 @@ export class DataShelfBoxModelNew implements IDataShelfBoxNew {
   description: string = ''
   footNotes: IFootNote[] = []
   labels: number[] = []
-  constructor(id: number, treeId: number, nodeId: number, content: string, description: string, footNotes: IFootNote[], labels: number[]) {
+  constructor(id: number, treeId: number, nodeId: number, content: string, description: string = '', footNotes: IFootNote[] = [], labels: number[] = []) {
     this.id = id
     this.treeId = treeId
     this.nodeId = nodeId
