@@ -2,7 +2,7 @@
 import { v4 as uuidV4 } from 'uuid'
 import { DataShelfBoxModelNew, DataShelfBoxModelView } from '@/types/dataShelf'
 import type { IDataShelfBoxView, IFootNote } from '@/types/dataShelf'
-import { MessageType, SizeType } from '@/types/baseModels'
+import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 
 interface Props {
   isDialogVisible: boolean
@@ -78,7 +78,7 @@ const acceptchanged = async () => {
   tempdataItem.footNotes.splice(0)
   tempdataItem.footNotes.push(...footNotes)
   try {
-    const result = await $api<IDataShelfBoxView>(`app/excerpt${props.datashelfboxid !== 0 ? `/${tempdataItem.id}` : ''}/text`, {
+    const result = await $api<IDataShelfBoxView>(`app/excerpt${props.datashelfboxid !== 0 ? `/${tempdataItem.id}` : ''}/${DataBoxType[tempdataItem.excerptType.id]}`, {
       method: props.datashelfboxid === 0 ? 'POST' : 'PUT',
       body: JSON.stringify(new DataShelfBoxModelNew(tempdataItem.id, props.datashelfboxid === 0 ? props.treeid ?? 0 : tempdataItem.treeId, props.datashelfboxid === 0 ? props.nodeid ?? 0 : tempdataItem.node?.id ?? 0, tempdataItem.content, tempdataItem.description, tempdataItem.footNotes, tempdataItem.labels.map(item => item.id))),
     })
@@ -115,7 +115,7 @@ const refreshfootnote = () => {
       const footnoteid = sups[footnoteIndex].attributes[1].value
       const footnoteItem = footNotes.find(item => item.id === footnoteid)
       if (footnoteItem)
-        footnoteItem.index = footnoteIndex + 1
+        footnoteItem.order = footnoteIndex + 1
       sups[footnoteIndex].textContent = (footnoteIndex + 1).toString()
     }
   }
@@ -139,14 +139,14 @@ const addFootnote = () => {
       //   sup.addEventListener('click', (event: MouseEvent) => {})
       range?.collapse(false)
       range?.insertNode(sup) // افزودن <sup> به محتوای div
-      footNotes.push({ title: '', id: uuid.toString(), editing: true, index: footNotes.length + 1 })
+      footNotes.push({ title: '', id: uuid.toString(), editing: true, order: footNotes.length + 1, isReference: false })
       refreshfootnote()
     }
   }
 }
 
 const footnoteSort = computed(() => {
-  return footNotes.sort((a, b) => a.index - b.index)
+  return footNotes.sort((a, b) => a.order - b.order)
 })
 
 const deletefootnote = (footnoteId: string) => {
@@ -186,7 +186,7 @@ function checkForRemovedFootnotes() {
     // بررسی آیا پاورقی‌ها در لیست موجود هستند
     const currentFootnotes = Array.from(supElements).map(sup => Number.parseInt(sup.innerText))
 
-    footNotes.filter(footnote => !currentFootnotes.includes(footnote.index)).forEach(footnoteisdelete => {
+    footNotes.filter(footnote => !currentFootnotes.includes(footnote.order)).forEach(footnoteisdelete => {
       deletefootnote(footnoteisdelete.id)
     })
   }
@@ -217,7 +217,7 @@ function checkForRemovedFootnotes() {
           <MCDataBoxEditableFootnote
             v-for="(footnote, i) in footnoteSort" :id="footnote.id" :key="footnote.id" v-model:editing="footnote.editing"
             v-model:text="footnote.title"
-            :index="i + 1" @deletefootnote="deletefootnote"
+            :index="i + 1" :order="i + 1" @deletefootnote="deletefootnote"
           />
         </div>
         <VDivider />

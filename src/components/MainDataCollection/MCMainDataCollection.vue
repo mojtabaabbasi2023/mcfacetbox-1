@@ -2,7 +2,7 @@
 import { VCol } from 'vuetify/lib/components/index.mjs'
 import { useToast } from 'vue-toastification'
 import MCDialogBookSelect from '../dialogs/MCDialogBookSelect.vue'
-import { MessageType, SizeType } from '@/types/baseModels'
+import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import type { GridResult } from '@/types/baseModels'
 import type { IFacetBox, ISearchResultTabBox } from '@/types/SearchResult'
 import { useApiFake } from '@/composables/useApi'
@@ -103,8 +103,9 @@ onFetchResponse(response => {
 //       options.done(InfiniteScrollStatus.ok)
 //   }
 // }
-function contentToNodeAdded() {
+function contentToNodeAdded(connectednodeid: number) {
   toast.success(t('datashelfbox.yourfishadded'))
+  shelfState.connectednodeid.value = connectednodeid
   shelfState.lastState.value = !shelfState.lastState.value
 }
 function searchResultBoxMessageHandle(message: string, messagetype: MessageType) {
@@ -127,7 +128,7 @@ function searchResultBoxMessageHandle(message: string, messagetype: MessageType)
 }
 function getInfoSearch() { }
 
-const dataTabValue = ref(null)
+const dataTabValue = ref<DataBoxType>(DataBoxType.hadith)
 </script>
 
 <template>
@@ -162,13 +163,13 @@ const dataTabValue = ref(null)
     <!-- v-for="(item, i) in testfacetlist" :key="i"  -->
     <VRow no-gutters dense class="align-center" justify="space-between">
       <VTabs v-model="dataTabValue" density="compact" hide-slider class="data-collection-tabs">
-        <VTab :value="1" variant="elevated" rounded="sm">
+        <VTab :value="DataBoxType.hadith" variant="elevated" rounded="sm">
           {{ $t('hadith') }}
         </VTab>
-        <VTab :value="2" variant="elevated" rounded="sm">
+        <VTab :value="DataBoxType.quran" variant="elevated" rounded="sm">
           {{ $t('ayah') }}
         </VTab>
-        <VTab :value="3" variant="elevated" rounded="sm">
+        <VTab :value="DataBoxType.vocabulary" variant="elevated" rounded="sm">
           {{ $t('word') }}
         </VTab>
       </VTabs>
@@ -198,7 +199,7 @@ const dataTabValue = ref(null)
               <div v-show="!loadingdata" ref="loadmorestart" />
 
               <MCSearchResultTabBox
-                v-for="(item, index) in resultdataItems" :key="item.id"
+                v-for="(item, index) in resultdataItems" :key="item.id" :box-type="dataTabValue"
                 :dataitems="item" :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id"
                 @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded"
               />

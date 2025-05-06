@@ -1,5 +1,7 @@
 import { isNull, isUndefined } from '@sindresorhus/is'
 import type { FacetType, ISimpleSelectableDTO } from './baseModels'
+import { AutoGenerateHighlightText } from '@/decorators/stringTools'
+import { joinWithDots } from '@/utils/stringUtils'
 
 export function convertFacetItemToFacetTree(items: IFacetItem[]): IFacetTreeItem[] {
   const map = new Map<string, IFacetTreeItem>()
@@ -85,4 +87,44 @@ export class SearchResultTabBoxItemModel implements ISearchResultTabBoxItem {
   id: number = 0
   title: string = ''
   content: ISimpleSelectableDTO<number>[] = []
+}
+
+export interface IqaelItem {
+  id: number
+  roleId: number
+  title: string
+  roleTitle: string
+}
+export interface IHadithSearchResultItem {
+  highLight: string[]
+  readonly highlightText: string
+  id: number
+  qaelTitleList: string
+  noorLibLink: string
+  qaelList: IqaelItem[]
+  bookTitle: string
+  bookTitleShort: string
+  pageNum: number
+  sourceId: number
+  vol: number
+}
+export class HadithSearchResultItemModel implements IHadithSearchResultItem {
+  highLight: string[] = []
+  get highlightText(): string {
+    return joinWithDots(this.highLight, {
+      separator: ' ... ',
+      maxItems: 30,
+      ellipsisText: '',
+    })
+  }
+
+  id: number = 0
+  qaelTitleList: string = ''
+  noorLibLink: string = ''
+  qaelList: IqaelItem[] = []
+  bookTitle: string = ''
+  bookTitleShort: string = ''
+  pageNum: number = 0
+  sourceId: number = 0
+  vol: number = 0
 }

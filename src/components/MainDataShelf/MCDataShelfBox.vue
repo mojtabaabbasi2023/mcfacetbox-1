@@ -327,7 +327,7 @@ defineExpose({ increaseOrder, decreaseOrder })
             <VDivider v-if="((databoxItem?.footNotes && databoxItem?.footNotes.length) ?? 0) > 0" />
             <div v-for="(item, index) in databoxItem?.footNotes" :key="item.id" class="d-flex flex-column">
               <div>
-                <span class="footenote-index">{{ item.index === undefined ? index + 1 : item.index }} -</span>
+                <span class="footenote-index">{{ item.order === undefined ? index + 1 : item.order }} -</span>
                 <span class="no-select foot-note">{{ item.title }}</span>
                 <!--
                   <VBtn icon size="small" variant="text" @click.left="deletefootnote">

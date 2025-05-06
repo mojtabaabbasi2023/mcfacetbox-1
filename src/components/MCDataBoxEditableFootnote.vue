@@ -6,6 +6,7 @@ interface Props {
   text: string
   index: number
   id: string
+  order: number
 }
 interface Emit {
   (e: 'update:text', text: string): void
@@ -62,7 +63,7 @@ const editfootnote = () => {
       </VChip>
     -->
     <div v-if="!(props.editing ?? false)">
-      <span class="footenote-index">{{ props.index }} -</span>
+      <span class="footenote-index">{{ props.order }} -</span>
       <span class="no-select foot-note" @dblclick="editfootnote">{{ props.text }}</span>
       <VBtn icon size="small" variant="text" @click.left="deletefootnote">
         <VIcon icon="tabler-trash" color="error" size="16" />

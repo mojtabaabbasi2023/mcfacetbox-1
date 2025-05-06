@@ -201,6 +201,12 @@ export enum InfiniteScrollStatus {
   empty = 'empty',
   ok = 'ok',
 }
+export enum DataBoxType {
+  hadith = 1,
+  quran = 2,
+  vocabulary = 3,
+  text = 4,
+}
 
 export enum FacetType {
   flat = 1,

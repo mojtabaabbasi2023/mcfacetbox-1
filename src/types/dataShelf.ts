@@ -1,4 +1,5 @@
 import type { ISimpleDTO, baseItemState } from './baseModels'
+import { DataBoxType } from './baseModels'
 
 // NOTE - بازای هر تغییری در محتوای جعبه داده باید یک نسخه ثبت گردد و قابلیت آندو داشته باشد
 export interface IDataShelfBoxView {
@@ -10,7 +11,7 @@ export interface IDataShelfBoxView {
   treeId: number
 
   // NOTE - مشخص کننده، حدیث، متن، آیه و یا لغت
-  excerptType: ISimpleDTO<number>
+  excerptType: ISimpleDTO<DataBoxType>
 
   order: number
 
@@ -46,6 +47,7 @@ export interface IDataShelfBoxNew {
   description: string
   footNotes: IFootNote[]
   labels: number[]
+  sourceId: string
 }
 
 export class DataShelfBoxModelNew implements IDataShelfBoxNew {
@@ -56,7 +58,9 @@ export class DataShelfBoxModelNew implements IDataShelfBoxNew {
   description: string = ''
   footNotes: IFootNote[] = []
   labels: number[] = []
-  constructor(id: number, treeId: number, nodeId: number, content: string, description: string = '', footNotes: IFootNote[] = [], labels: number[] = []) {
+  sourceId: string = ''
+
+  constructor(id: number, treeId: number, nodeId: number, content: string, description: string = '', footNotes: IFootNote[] = [], labels: number[] = [], sourceId: string = '') {
     this.id = id
     this.treeId = treeId
     this.nodeId = nodeId
@@ -64,6 +68,7 @@ export class DataShelfBoxModelNew implements IDataShelfBoxNew {
     this.description = description
     this.footNotes = footNotes
     this.labels = labels
+    this.sourceId = sourceId
   }
 }
 
@@ -108,7 +113,7 @@ export class DataShelfBoxModelView implements IDataShelfBoxView {
   content: string = ''
   node?: ISimpleDTO<number> | undefined = { id: 0, title: '' }
   treeId: number = 0
-  excerptType: ISimpleDTO<number> = { id: 0, title: '' }
+  excerptType: ISimpleDTO<DataBoxType> = { id: DataBoxType.text, title: '' }
   order: number = 0
   footNotes: IFootNote[] = []
   pinnedItem?: number | undefined = 0
@@ -155,4 +160,6 @@ export class DataShelfBoxModelView implements IDataShelfBoxView {
 
 export interface IFootNote extends ISimpleDTO<string>, baseItemState {
   index?: number
+  order: number
+  isReference: boolean
 }

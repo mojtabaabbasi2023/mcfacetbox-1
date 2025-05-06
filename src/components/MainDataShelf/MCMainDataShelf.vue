@@ -7,7 +7,7 @@ import { useTree } from '@/store/treeStore'
 import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
 import { MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxView } from '@/types/dataShelf'
-import { DataShelfBoxModelView, DataShelfRouteQueryParams } from '@/types/dataShelf'
+import { DataShelfRouteQueryParams } from '@/types/dataShelf'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 import type { IFacetBox } from '@/types/SearchResult'
 
@@ -94,18 +94,18 @@ async function checkRoute() {
     if (!isNumericString(gtd))
       return
     apiQueryParamtData.resetDynamicFields()
-
+    currentNodeId.value = 0
+    apiQueryParamtData.nodeId = 0
     currentTreeId.value = useToNumber(gtd).value
     apiQueryParamtData.treeId = currentTreeId.value
+
     if (route.query.snd) {
       const snd = atob(route.query.snd.toString())
       if (isNumericString(snd)) {
         currentNodeId.value = useToNumber(snd).value
         apiQueryParamtData.nodeId = currentNodeId.value
       }
-      else { return }
     }
-    else { return }
 
     const temprouteQueryParam = new DataShelfRouteQueryParams()
     if (route.query.dp) {
@@ -203,7 +203,8 @@ function updateRouteIfNeeded(params: Record<string, any>) {
 }
 watch(shelfState.lastState, async () => {
   try {
-    refreshDataShelf()
+    if (currentNodeId.value === shelfState.connectednodeid.value)
+      refreshDataShelf()
   }
   catch (error) {
   }
@@ -220,10 +221,9 @@ onFetchResponse(() => {
     facetboxItems.value = [...result.facets]
 
     resultdataItems.value = [...result.items]
-    console.log('shelfresult', resultdataItems.value[0].footNotes)
 
-    if (isUndefined(resultdataItems.value))
-      toast.error(t('alert.probleminGetExcerpt'))
+    // if (isUndefined(resultdataItems.value))
+    //   toast.error(t('alert.probleminGetExcerpt'))
 
     //   if ((result.items.length ?? 0) <= 0)
     //     toast.info(t('alert.resultNotFound'))

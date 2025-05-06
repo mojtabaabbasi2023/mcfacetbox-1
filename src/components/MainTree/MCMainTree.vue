@@ -46,6 +46,7 @@ const activeDraggableItem = ref<ISimpleTreeActionable | null>(null)
 
 const editableNode = ref()
 const activeSearch = ref(false)
+const showDisconnectedDatabox = ref(false)
 const dialogAddNewNodeVisible = ref(false)
 const dialogMergeNodeVisible = ref(false)
 const dialogTransferNodeVisible = ref(false)
@@ -103,10 +104,29 @@ watch(searchResultSelectedNodes, () => {
   activatedNode.value.push(...searchResultSelectedNodes.value)
   gotoNode(searchResultSelectedNodes.value[0], false)
 })
-watch(route, newval => {
+watch(route, () => {
   checkTreeRoute(true)
 }, { immediate: true })
 
+const selectTreeNode = (item: ISimpleTreeActionable) => {
+  const newQuery = { ...route.query }
+
+  Object.keys(newQuery).forEach(key => {
+    delete newQuery[key]
+  })
+
+  //   router.push({ name: 'rs', query: { gtd: btoa(currentTreeId.value.toString()), snd: btoa(item.id.toString()) } })
+  newQuery.gtd = btoa(currentTreeId.value.toString())
+  if (item.id > 0)
+    newQuery.snd = btoa(item.id.toString())
+
+  router.push({ query: newQuery })
+}
+
+watch(showDisconnectedDatabox, newval => {
+  if (newval)
+    selectTreeNode(new SimpleTreeAcionableModel(0))
+})
 function checkTreeRoute(deselectAll: boolean) {
   if (!route.query.gtd) {
     emit('showSelectTree')
@@ -120,21 +140,28 @@ function checkTreeRoute(deselectAll: boolean) {
 
     return
   }
-  if (currentTreeId.value === useToNumber(gtd).value && route.query.snd) {
-    const snd = atob(route.query.snd.toString())
-    if (isNumericString(snd) && selectedNode.id.toString() !== snd && treeIndex[snd]) {
+
+  if (currentTreeId.value === useToNumber(gtd).value) {
+    const snd = route.query.snd ? atob(route.query.snd.toString()) : '0'
+
+    // && selectedNode.id.toString() !== snd
+    if (isNumericString(snd)) {
       if (selectedNode.id > 0)
         treeIndex[selectedNode.id].selected = false
       else if (deselectAll)
         deselectAllTreeNodes()
-
-      //   treeNodeDeselectAll(projectList)
-      //   item.selected = true
-      //   selectNode(item)
-      selectNode(treeIndex[snd])
-      gotoNode(useToNumber(snd).value)
+      if (snd === '0') {
+        showDisconnectedDatabox.value = true
+        selectNode(new SimpleTreeAcionableModel())
+      }
+      else {
+        showDisconnectedDatabox.value = false
+        selectNode(treeIndex[snd])
+        gotoNode(useToNumber(snd).value)
+      }
     }
   }
+
   currentTreeId.value = useToNumber(gtd).value
 }
 function selectSearchTree() {
@@ -145,19 +172,6 @@ function updateTreeIndex(dataItems: ISimpleTree[]) {
 
   // به‌روزرسانی مقادیر در treeIndex
   Object.assign(treeIndex, { ...newTreeIndex })
-}
-
-const selectTreeNode = (item: ISimpleTreeActionable) => {
-  const newQuery = { ...route.query }
-
-  Object.keys(newQuery).forEach(key => {
-    delete newQuery[key]
-  })
-
-  //   router.push({ name: 'rs', query: { gtd: btoa(currentTreeId.value.toString()), snd: btoa(item.id.toString()) } })
-  newQuery.gtd = btoa(currentTreeId.value.toString())
-  newQuery.snd = btoa(item.id.toString())
-  router.push({ query: newQuery })
 }
 
 const openParents = (nodeItems: ISimpleTree[], id: number) => {
@@ -214,7 +228,9 @@ async function nodeEditProgress(nodeitem: ISimpleTreeActionable) {
     nodeitem.loading = nodeitem.editing = false
     setTimeout(() => {
       treeIndex[nodeitem.id].title = nodeTempTitleForEdit.value
-      selectedNode.title = nodeTempTitleForEdit.value
+      if (selectedNode.id > 0)
+        selectedNode.title = nodeTempTitleForEdit.value
+
       treeview.value.$el.focus()
     }, 1000)
   }
@@ -631,18 +647,18 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
             </VTooltip>
           </VBtn>
           <!-- <VBtn icon="tabler-select" size="small" variant="text" /> -->
-          <!--
-            <VBtn size="small" variant="text">
-            <VIcon icon="tabler-trash-x" size="22" />
+
+          <VBtn size="small" :variant="showDisconnectedDatabox ? 'elevated' : 'text'" @click="showDisconnectedDatabox = !showDisconnectedDatabox">
+            <VIcon icon="tabler-arrow-capsule" size="22" />
 
             <VTooltip
-            activator="parent"
-            location="top center"
+              activator="parent"
+              location="top center"
             >
-            {{ $t('delete') }}
+              {{ $t('showdisconnectedfish') }}
             </VTooltip>
-            </VBtn>
-          -->
+          </VBtn>
+
           <VBtn size="small" variant="text">
             <VIcon icon="tabler-eraser" size="22" />
 
@@ -752,8 +768,16 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
           </div>
         </template>
       </VTreeview>
+      <!--
+        <div v-if="treeData.length > 0" class="tree-title">
+        <span>{{ $t('reservenode') }}</span>
+        </div>
+      -->
     </div>
-    <VBtn v-if="selectedNode.id > 0" class="selected-node pr-1 pl-1 pb-1" variant="text" @click="gotoNode(selectedNode.id)">
+    <VBtn
+      v-if="selectedNode.id
+        > 0" class="selected-node pr-1 pl-1 pb-1" variant="text" @click="gotoNode(selectedNode.id)"
+    >
       <p>
         {{ $t('tree.selectednode') }}: <span>
           {{ selectedNode.title }}

@@ -19,6 +19,8 @@
   'hadith': 'حدیث',
   'ayah': 'آیه',
   'word': 'لغت',
+  "showdisconnectedfish":"نمایش فیش های غیر متصل",
+  "reservenode":"گره رزرو",
   "footnotecount":"تعداد پاورقی",
   "labels":"برچسب ها",
   "contenttype":"نوع محتوا",
@@ -87,7 +89,7 @@
     'addeditsubtitle': 'اطلاعات مورد نظر برای درخت را وارد نمایید',
     "selectyourtree":"درخت مورد نظر برای پژوهش را انتخاب نمایید",
     'autorizedbook': 'کتب مجاز',
-    'nodes': 'گرهها',
+    'nodes': 'گره ها',
     'selectednode':'گره انتخاب شده',
     'selectnode':'انتخاب گره',
     'newnode':'گره جدید',
@@ -103,7 +105,7 @@
     'childnode':'گره فرزند',
     "treecleaning":"پاکسازی درخت",
     "loadingnodedetail":"بارگذاری اطلاعات گره",
-    "mergenode":"ادغام گرهها",
+    "mergenode":"ادغام گره ها",
     "adddestinationnode":"گره مقصد را انتخاب کنید"
   },
   'book': {
@@ -158,6 +160,7 @@
     'connecttoselectednode': 'اتصال به گره انتخاب شده',
     'connecttocustomnode': 'اتصال به گره دلخواه',
     'connecttoreserve': 'اتصال به گره رزرو',
+    "connecttotree":"اتصال به درخت",
     'copy': 'کپی'
   },
   'httpstatuscodes':{
