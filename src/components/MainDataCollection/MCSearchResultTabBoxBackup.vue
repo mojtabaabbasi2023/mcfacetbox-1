@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ContextMenu from '@imengyu/vue3-context-menu'
 import { isUndefined } from '@sindresorhus/is'
-import type { IHadithItem } from '@/types/SearchResult'
+import type { ISearchResultTabBox } from '@/types/SearchResult'
 import type { ISimpleDTO, ISimpleTreeActionable } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import { DataShelfBoxModelNew, type IDataShelfBoxNew } from '@/types/dataShelf'
@@ -15,7 +15,7 @@ const tempSelectedTabBoxItem = reactive<DataShelfBoxModelNew>(new DataShelfBoxMo
 const dialogSelectNodeVisible = ref(false)
 const loadinglocal = ref(false)
 interface Props {
-  dataitem: IHadithItem
+  dataitems: ISearchResultTabBox
   selectedTreeId: number
   selectedNode: ISimpleTreeActionable
   boxType: DataBoxType
@@ -104,7 +104,7 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
         }),
         label: t('datagathering.connecttotree'),
         onClick: () => {
-          addContentToNode({ content: selectedItem.title, description: '', labels: [], nodeId: 0, treeId: props.selectedTreeId, footNotes: [], id: 0, sourceId: '0' })
+          addContentToNode({ content: selectedItem.title, description: '', labels: [], nodeId: 0, treeId: props.selectedTreeId, footNotes: [], id: 0 })
         },
       },
       {
@@ -135,32 +135,63 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
 </script>
 
 <template>
-  <VCard v-if="props.dataitem.content.length > 0" v-no-context-menu class="mc-search-result">
+  <VCard v-if="props.dataitems.content.length > 0" v-no-context-menu class="mc-search-result">
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
-    <VCard variant="text">
-      <VCardText>
-        <MCDialogSelectNode
-          v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="tempSelectedTabBoxItem"
-          :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, tempSelectedTabBoxItem.content))"
-        />
-        <VRow
-          v-for="(textData, j) in items" :key="j" no-gutters class="justify-start align-start box"
-          @contextmenu="onContextMenu($event, { id: j, title: textData.raw.text })"
-        >
-          <VCheckbox
-            v-if="(isUndefined(textData.raw.selectable) && item.content.length > 1) || (textData.raw.selectable)"
-            v-model="textData.raw.selected" density="compact"
-          />
+    <VTabsWindow v-model="tabdatamodel">
+      <VTabsWindowItem v-for="item in props.dataitems.content" :key="item.id" :value="item.id">
+        <VCard variant="text">
+          <VCardText>
+            <MCDialogSelectNode
+              v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="tempSelectedTabBoxItem"
+              :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, tempSelectedTabBoxItem.content))"
+            />
+            <VDataIterator :items="item.content" :items-per-page="1">
+              <template #default="{ items }">
+                <VRow
+                  v-for="(textData, j) in items" :key="j" no-gutters class="justify-start align-start box"
+                  @contextmenu="onContextMenu($event, { id: j, title: textData.raw.text })"
+                >
+                  <VCheckbox
+                    v-if="(isUndefined(textData.raw.selectable) && item.content.length > 1) || (textData.raw.selectable)"
+                    v-model="textData.raw.selected" density="compact"
+                  />
 
-          <VCol>
-            <p class="text">
-              {{ textData.raw.text }}
-            </p>
-            <!-- <div class="foot-note">این قسمت محل پاورقی</div> -->
-          </VCol>
-        </VRow>
-      </VCardText>
-    </VCard>
+                  <VCol>
+                    <p class="text">
+                      {{ textData.raw.text }}
+                    </p>
+                    <!-- <div class="foot-note">این قسمت محل پاورقی</div> -->
+                  </VCol>
+                </VRow>
+              </template>
+
+              <template #footer="{ page, pageCount, prevPage, nextPage }">
+                <VFooter v-if="item.content.length > 1">
+                  <div class="d-flex justify-end w-100">
+                    <span class="ml-2">{{ page }} {{ $t('of') }} {{ pageCount }}</span>
+                    <VBtn
+                      variant="plain" :disabled="page === 1" class="me-2" icon="mdi-chevron-right"
+                      size="xsmall"
+                      @click="prevPage"
+                    />
+                    <VBtn
+                      variant="plain" :disabled="page === pageCount" icon="mdi-chevron-left" size="xsmall"
+                      @click="nextPage"
+                    />
+                  </div>
+                </VFooter>
+              </template>
+            </VDataIterator>
+          </VCardText>
+        </VCard>
+      </VTabsWindowItem>
+    </VTabsWindow>
+    <VTabs v-model="tabdatamodel" align-tabs="start" density="compact" class="border-t-sm">
+      <VTab
+        v-for="item in props.dataitems.content" :key="item.id" :text="item.title" :value="item.id"
+        variant="elevated" size="small" elevation="5"
+      />
+    </VTabs>
   </VCard>
 </template>
 

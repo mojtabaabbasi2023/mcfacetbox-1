@@ -1,4 +1,5 @@
 import { isNull, isUndefined } from '@sindresorhus/is'
+import { z } from 'zod'
 import type { FacetType, ISimpleSelectableDTO } from './baseModels'
 import { AutoGenerateHighlightText } from '@/decorators/stringTools'
 import { joinWithDots } from '@/utils/stringUtils'
@@ -127,4 +128,37 @@ export class HadithSearchResultItemModel implements IHadithSearchResultItem {
   pageNum: number = 0
   sourceId: number = 0
   vol: number = 0
+  constructor(highlight: string[] = [], id: number = 0, qaelTitleList: string = '', noorLibLink: string = '', qaelList: IqaelItem[] = [], bookTitle: string = '', bookTitleShort: string = '', sourceId: number = 0, pageNum: number = 0, vol: number = 0) {
+    this.highLight = highlight
+    this.id = id
+    this.qaelTitleList = qaelTitleList
+    this.noorLibLink = noorLibLink
+    this.qaelList = qaelList
+    this.bookTitle = bookTitle
+    this.bookTitleShort = bookTitleShort
+    this.pageNum = pageNum
+    this.sourceId = sourceId
+    this.vol = vol
+  }
 }
+
+// export const qaelSearchResultItemSchema = z.object({
+//   id: z.number(),
+//   roleId: z.number(),
+//   title: z.string(),
+//   roleTitle: z.string(),
+// })
+
+// export const hadithSearchResultItemSchema = z.object({
+//   highLight: z.array(z.string()),
+//   id: z.number(),
+//   qaelTitleList: z.string(),
+//   noorLibLink: z.string(),
+
+//   qaelList: z.object(qaelSearchResultItemSchema),
+//   bookTitle: z.string(),
+//   bookTitleShort: z.string(),
+//   pageNum: z.number(),
+//   sourceId: z.number(),
+//   vol: z.number(),
+// })

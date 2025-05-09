@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
-import { isNumericString, isUndefined } from '@sindresorhus/is'
+import { isNumericString } from '@sindresorhus/is'
 import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useTree } from '@/store/treeStore'
@@ -217,7 +217,6 @@ onFetchResponse(() => {
     resetData()
 
     totalItems.value = result.totalCount
-    resultdataItems.value.splice(0)
     facetboxItems.value = [...result.facets]
 
     resultdataItems.value = [...result.items]
@@ -249,10 +248,10 @@ onFetchError(error => {
     if (result && result.error && result.error.code)
       toast.error(result.error.message)
     else
-      toast.error(t('alert.probleminGetExcerpt'))
+      toast.error(t('alert.probleminSearch'))
   }
   catch {
-    toast.error(t('alert.probleminLoadExcerpt'))
+    toast.error(t('alert.probleminLoadSearchResult'))
   }
 
   // loading.value = true

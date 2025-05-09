@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ContextMenu from '@imengyu/vue3-context-menu'
 import { isUndefined } from '@sindresorhus/is'
-import type { ISearchResultTabBox } from '@/types/SearchResult'
+import type { IHadithItem, IHadithSearchResultItem } from '@/types/SearchResult'
 import type { ISimpleDTO, ISimpleTreeActionable } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import { DataShelfBoxModelNew, type IDataShelfBoxNew } from '@/types/dataShelf'
@@ -15,7 +15,9 @@ const tempSelectedTabBoxItem = reactive<DataShelfBoxModelNew>(new DataShelfBoxMo
 const dialogSelectNodeVisible = ref(false)
 const loadinglocal = ref(false)
 interface Props {
-  dataitems: ISearchResultTabBox
+  dataitemHadith?: IHadithSearchResultItem
+  dataitemQuran?: any
+  dataitemVocab?: any
   selectedTreeId: number
   selectedNode: ISimpleTreeActionable
   boxType: DataBoxType
@@ -54,11 +56,27 @@ async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
   loadinglocal.value = false
 }
 
+const selectedHighlight = computed(() => {
+  if (props.dataitemHadith && props.dataitemHadith.id > 0)
+    return props.dataitemHadith.highlightText
+
+  else if (props.dataitemQuran && props.dataitemQuran.id > 0)
+    return props.dataitemQuran.highlightText
+})
+
+const selectedId = computed(() => {
+  if (props.dataitemHadith && props.dataitemHadith.id > 0)
+    return props.dataitemHadith.id
+
+  else if (props.dataitemQuran && props.dataitemQuran.id > 0)
+    return props.dataitemQuran.id
+})
+
 // interface Emit {
 //   (e: 'close'): void // ایونت جدید close اضافه شد
 //   (e: 'open'): void // ایونت جدید close اضافه شد
 // }
-const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
+const onContextMenu = (e: MouseEvent) => {
   // prevent the browser's default menu
   e.preventDefault()
 
@@ -77,7 +95,7 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
         }),
         label: t('datagathering.connecttoselectednode'),
         onClick: () => {
-          addContentToNode({ content: selectedItem.title, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 9, footNotes: [], id: 0, sourceId: props.dataitems.id })
+          addContentToNode({ content: selectedHighlight.value, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 9, footNotes: [], id: 0, sourceId: selectedId.value })
         },
       },
       {
@@ -90,7 +108,7 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
           },
         }),
         onClick: () => {
-          tempSelectedTabBoxItem.content = selectedItem.title
+        //   tempSelectedTabBoxItem.content = selectedItem.title
           dialogSelectNodeVisible.value = true
         },
       },
@@ -104,7 +122,7 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
         }),
         label: t('datagathering.connecttotree'),
         onClick: () => {
-          addContentToNode({ content: selectedItem.title, description: '', labels: [], nodeId: 0, treeId: props.selectedTreeId, footNotes: [], id: 0 })
+          addContentToNode({ content: selectedHighlight.value, description: '', labels: [], nodeId: 0, treeId: props.selectedTreeId, footNotes: [], id: 0, sourceId: selectedId.value })
         },
       },
       {
@@ -135,68 +153,146 @@ const onContextMenu = (e: MouseEvent, selectedItem: ISimpleDTO<number>) => {
 </script>
 
 <template>
-  <VCard v-if="props.dataitems.content.length > 0" v-no-context-menu class="mc-search-result">
+  <VCard v-no-context-menu class="mc-search-result">
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
-    <VTabsWindow v-model="tabdatamodel">
-      <VTabsWindowItem v-for="item in props.dataitems.content" :key="item.id" :value="item.id">
-        <VCard variant="text">
-          <VCardText>
-            <MCDialogSelectNode
-              v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="tempSelectedTabBoxItem"
-              :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, tempSelectedTabBoxItem.content))"
-            />
-            <VDataIterator :items="item.content" :items-per-page="1">
-              <template #default="{ items }">
-                <VRow
-                  v-for="(textData, j) in items" :key="j" no-gutters class="justify-start align-start box"
-                  @contextmenu="onContextMenu($event, { id: j, title: textData.raw.text })"
-                >
-                  <VCheckbox
-                    v-if="(isUndefined(textData.raw.selectable) && item.content.length > 1) || (textData.raw.selectable)"
-                    v-model="textData.raw.selected" density="compact"
-                  />
-
-                  <VCol>
-                    <p class="text">
-                      {{ textData.raw.text }}
-                    </p>
-                    <!-- <div class="foot-note">این قسمت محل پاورقی</div> -->
-                  </VCol>
-                </VRow>
-              </template>
-
-              <template #footer="{ page, pageCount, prevPage, nextPage }">
-                <VFooter v-if="item.content.length > 1">
-                  <div class="d-flex justify-end w-100">
-                    <span class="ml-2">{{ page }} {{ $t('of') }} {{ pageCount }}</span>
-                    <VBtn
-                      variant="plain" :disabled="page === 1" class="me-2" icon="mdi-chevron-right"
-                      size="xsmall"
-                      @click="prevPage"
-                    />
-                    <VBtn
-                      variant="plain" :disabled="page === pageCount" icon="mdi-chevron-left" size="xsmall"
-                      @click="nextPage"
-                    />
-                  </div>
-                </VFooter>
-              </template>
-            </VDataIterator>
-          </VCardText>
-        </VCard>
-      </VTabsWindowItem>
-    </VTabsWindow>
-    <VTabs v-model="tabdatamodel" align-tabs="start" density="compact" class="border-t-sm">
-      <VTab
-        v-for="item in props.dataitems.content" :key="item.id" :text="item.title" :value="item.id"
-        variant="elevated" size="small" elevation="5"
+    <!-- <VCard variant="text"> -->
+    <VCardText style="height: auto;" @contextmenu="onContextMenu($event)">
+      <MCDialogSelectNode
+        v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="selectedHighlight"
+        :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, selectedHighlight, '', [], [], selectedId))"
       />
-    </VTabs>
+      <VRow>
+        <VCol>
+          <div v-if="props.dataitemHadith && props.dataitemHadith.id > 0" class="flex">
+            <div v-if="props.dataitemHadith.qaelList.length > 1">
+              <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitemHadith.qaelTitleList }}</span>
+            </div>
+            <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitemHadith.bookTitle}, ${`${$t('volume')} ${props.dataitemHadith.vol}`}, ${`${$t('pagenum')} ${props.dataitemHadith.pageNum}`}` }} </span></div>
+          </div>
+        </VCol>
+      </VRow>
+      <VRow no-gutters class="justify-start align-start box">
+        <!--
+          <VCheckbox
+          v-if="(isUndefined(textData.raw.selectable) && item.content.length > 1) || (textData.raw.selectable)"
+          v-model="textData.raw.selected" density="compact"
+          />
+        -->
+
+        <VCol md="12">
+          <div v-if="props.dataitemHadith" class="text" v-html="props.dataitemHadith.highlightText" />
+          <!-- <div class="foot-note">این قسمت محل پاورقی</div> -->
+        </VCol>
+      </VRow>
+    </VCardText>
+    <!-- </VCard> -->
   </VCard>
 </template>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .v-btn--disabled {
   opacity: 0.25;
 }
+@keyframes hadithCardGlow {
+  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+.mc-search-result:hover {
+  animation: hadithCardGlow 1.5s ease-out;
+  border: 1px solid #4CAF50;
+  transform: scale(1.01);
+}
+
+/* افکت نور پس‌زمینه */
+.mc-search-result:hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.mc-search-result:hover::after {
+  opacity: 1;
+}
+
+/* تغییر رنگ متن حدیث هنگام هاور */
+.mc-search-result:hover .text {
+  color: #222;
+}
+/* استایل اصلی کارت */
+.mc-search-result {
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  width: 100%;
+  transition: all 0.4s ease;
+}
+
+/* بخش اطلاعات (قالبین و آدرس) */
+.flex {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  padding: 4px 4px 2px;
+}
+
+.searchDataBoxInfoText {
+  color: #555;
+  font-size: .8rem;
+  line-height: 1.6;
+  display: inline;
+}
+// .mc-search-result:hover {
+//   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+//   transform: translateY(-2px);
+// }
+/* متن حدیث */
+.box {
+  padding: 0 5px 2px;
+}
+
+.text {
+  font-size: 1.6rem;
+  line-height: 2.1;
+  color: #333;
+  padding: 4px 5px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-right: 3px solid #4CAF50;
+  margin: 0;
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+
+}
+
+/* هایلایت کلمات جستجو شده */
+.text em {
+  font-style: normal;
+  background-color: #FFF9C4;
+  padding: 0 3px;
+  border-radius: 3px;
+  color: #D32F2F;
+  font-weight: 500;
+}
+
+em {
+  background-color: #fff9c4; /* پس‌زمینه زرد روشن */
+  color: #d32f2f; /* رنگ متن قرمز تیره */
+  font-style: normal; /* غیرایتالیک */
+  padding: 0.2em 0.4em; /* فاصله داخلی */
+  border-radius: 4px; /* لبه‌های گرد */
+  font-weight: bold; /* متن پررنگ */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* سایه ملایم */
+  }
 </style>

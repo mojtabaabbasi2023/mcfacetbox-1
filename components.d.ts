@@ -373,6 +373,7 @@ declare module 'vue' {
     MCSearchApiAutoComplete: typeof import('./src/components/MCSearchApiAutoComplete.vue')['default']
     MCSearchApiTree: typeof import('./src/components/MCSearchApiTree.vue')['default']
     MCSearchResultTabBox: typeof import('./src/components/MainDataCollection/MCSearchResultTabBox.vue')['default']
+    MCSearchResultTabBoxBackup: typeof import('./src/components/MainDataCollection/MCSearchResultTabBoxBackup.vue')['default']
     MCTablePagination: typeof import('./src/components/MCTablePagination.vue')['default']
     MCWindow: typeof import('./src/components/MCWindow.vue')['default']
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']

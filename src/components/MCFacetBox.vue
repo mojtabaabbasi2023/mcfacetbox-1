@@ -64,8 +64,6 @@ onMounted(() => {
       selectedTreeFacetItems.value = [...props.selectedItems].map(item => useToNumber(item).value)
   }
   else { // Flat list
-    console.log('onmounte', props.selectedItems)
-
     if (JSON.stringify(selectedFacetItems.value) !== JSON.stringify(props.selectedItems))
       selectedTreeFacetItems.value = [...props.selectedItems].map(item => useToNumber(item).value)
   }
