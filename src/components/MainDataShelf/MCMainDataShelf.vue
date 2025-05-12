@@ -245,10 +245,12 @@ onFetchError(error => {
   try {
     const result = resultData.value as IRootServiceError
 
-    if (result && result.error && result.error.code)
+    console.log('result', result)
+
+    if (result && result.error && result.error.message)
       toast.error(result.error.message)
     else
-      toast.error(t('alert.probleminSearch'))
+      toast.error(t('alert.probleminGetExcerpt'))
   }
   catch {
     toast.error(t('alert.probleminLoadSearchResult'))

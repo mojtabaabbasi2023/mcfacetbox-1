@@ -734,17 +734,23 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
                   <div :class="`w-100 ${hasDividerDraggableBefore ? 'draggablebox' : ''}`" style="height: 5px;" />
                 </div>
                 <div
-                  :class="`d-flex ${(activeDraggableItem && activeDraggableItem.id === item.id && (!hasDividerDraggableBefore && !hasDividerDraggableAfter)) ? 'draggablebox' : ''}`" @mouseleave="treeItemMouseLeave($event, item)"
+                  :class="`d-flex justify-space-between ${(activeDraggableItem && activeDraggableItem.id === item.id && (!hasDividerDraggableBefore && !hasDividerDraggableAfter)) ? 'draggablebox' : ''}`" @mouseleave="treeItemMouseLeave($event, item)"
                   @mouseenter="treeItemMouseEnter($event, item)" @mouseup="treeItemMouseUp($event, item)" @mousedown="treeItemMouseDown($event, item)"
                 >
-                  <VIcon v-if="item.hasDescription" size="16" icon="tabler-message" class="ml-1" />
-                  <span v-if="!(item.editing ?? false)">{{ item.title }}</span>
-                  <VTextField
-                    v-else ref="editableNode" v-model:model-value="nodeTempTitleForEdit" :color="item.failed ? 'error' : 'primary'" autofocus :placeholder="item.title"
-                    :loading="item.loading"
-                    :focused="!(item.loading ?? false)" :readonly="item.loading ?? false"
-                    @blur="nodeEditCancel(item)" @keydown="handleEditableNodeKeydown($event, item)"
-                  />
+                  <div>
+                    <span v-if="!(item.editing ?? false)">{{ item.title }}</span>
+                    <VTextField
+                      v-else ref="editableNode" v-model:model-value="nodeTempTitleForEdit" :color="item.failed ? 'error' : 'primary'" autofocus :placeholder="item.title"
+                      :loading="item.loading"
+                      :focused="!(item.loading ?? false)" :readonly="item.loading ?? false"
+                      @blur="nodeEditCancel(item)" @keydown="handleEditableNodeKeydown($event, item)"
+                    />
+                  </div>
+                  <div>
+                    <VBtn v-if="item.hasDescription" size="xsmall" variant="plain" @click="addcomment(item)">
+                      <VIcon size="16" icon="tabler-message" />
+                    </VBtn>
+                  </div>
                 </div>
                 <div
                   v-if="(activeDraggableItem && activeDraggableItem.id === item.id && isLastNode(item))"

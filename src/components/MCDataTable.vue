@@ -96,7 +96,7 @@ onFetchResponse(() => {
 onFetchError(() => {
   try {
     const result = resultData.value as IRootServiceError
-    if (result && result.error && result.error.code)
+    if (result && result.error && result.error.message)
       toast.error(result.error.message)
     else
       toast.error(t('alert.probleminGetInformation'))

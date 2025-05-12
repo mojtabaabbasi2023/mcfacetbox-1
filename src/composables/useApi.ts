@@ -63,7 +63,7 @@ export const useApi = createFetch({
       if (response && response.status === 403) {
         const result = parsedData as IRootServiceError
         try {
-          if (result.error.code && result.error.code === 'Encyclopedia.ErrorCode:010017') {
+          if (result.error.code && result.error.message === 'Encyclopedia.ErrorCode:010017') {
             setTimeout(() => {
               const loginState = useLoginState()
 
@@ -142,7 +142,7 @@ export const useApiFake = createFetch({
       if (response && response.status === 403) {
         const result = parsedData as IRootServiceError
         try {
-          if (result.error.code && result.error.code === 'Encyclopedia.ErrorCode:010017') {
+          if (result.error.code && result.error.message === 'Encyclopedia.ErrorCode:010017') {
             setTimeout(() => {
               const loginState = useLoginState()
 
