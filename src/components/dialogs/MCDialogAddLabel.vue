@@ -4,7 +4,7 @@ import { SelectionType, SizeType } from '@/types/baseModels'
 
 interface Prop {
   isDialogVisible: boolean
-  selectedDataBoxId: number
+  selectedDataBoxId?: number
   locX: number
   locY: number
   treeId: number
@@ -64,7 +64,7 @@ const addlabels = async () => {
       ignoreResponseError: false,
     })
 
-    emit('labelAdded', props.selectedDataBoxId, selectedLabels.value.length)
+    emit('labelAdded', props.selectedDataBoxId ?? 0, selectedLabels.value.length)
     loading.value = false
   }
   catch (error) {
@@ -76,9 +76,16 @@ const addlabels = async () => {
   }
 }
 
-onMounted(() => {
-  loadExcerptLabels()
+const apiurl = computed(() => {
+  if (props.selectedDataBoxId)
+    return `app/label/simple?treeid=${props.treeId}&ExcerptId=${props.selectedDataBoxId}`
+  else
+    return `app/label/simple?treeid=${props.treeId}`
 })
+
+// onMounted(() => {
+//   loadExcerptLabels()
+// })
 </script>
 
 <template>
@@ -92,7 +99,7 @@ onMounted(() => {
       <VCardText class="pa-0">
         <MCSearchApiAutoComplete
           v-model:selected-items="selectedLabels" placeholder="datashelfbox.labeltitle" activeaction api-url-add-data="app/label" :actionedata="{ treeid: treeId }"
-          auto-focus :max-height="255" :api-url="`app/label/simple?treeid=${treeId}`" :selection-type="SelectionType.Multiple" class="pt-0"
+          auto-focus :max-height="255" :api-url="apiurl" :selection-type="SelectionType.Multiple" class="pt-0"
           :fill-search-phrase-with-selected="false" :list-item-size="SizeType.SM" load-all-list @error-has-occured="emit('errorHasOccured', $event)"
         />
       </VCardText>

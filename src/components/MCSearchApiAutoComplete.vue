@@ -64,13 +64,16 @@ const { execute: fetchData, isFetching: loadingdata, data: searchResultFirst, on
 }).get()
 
 onFetchResponse(response => {
-  response.json().then(value => {
-    searchResult.splice(0)
-    selectedItemsLocal.value.splice(0)
-    if (searchResultFirst.value)
-      searchResult.push(...searchResultFirst.value.items)
-    actionInprogress.value = true
-  })
+//   response.json().then(value => {
+  searchResult.splice(0)
+  selectedItemsLocal.value.splice(0)
+  if (searchResultFirst.value) {
+    searchResult.push(...searchResultFirst.value.items)
+    selectedItemsLocal.value.push(...searchResult.filter(a => a.selected).map(a => a.id))
+  }
+  actionInprogress.value = true
+
+//   })
 })
 
 onMounted(() => {
@@ -79,8 +82,8 @@ onMounted(() => {
 //   console.log('selecteditems', props.selectedItems)
 
   if (props.loadAllList) {
-    setTimeout(() => {
-      fetchData()
+    setTimeout(async () => {
+      await fetchData()
     }, 1000)
   }
 })

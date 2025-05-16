@@ -286,16 +286,17 @@ async function runSearch(resetToDefault: boolean) {
             <!-- </VInfiniteScroll> -->
             </VCol>
           </VRow>
-          <!--
-            <VRow v-else style="height: 200px;" class="d-flex justify-center align-center">
-            <div v-if="!loading" class="pt-5">
-            <span class="ml-3">{{ $t('$vuetify.noDataText') }}</span>
-            <IconBtn size="medium" @click="runSearch(false)">
-            <VIcon icon="tabler-refresh" size="32" />
-            </IconBtn>
-            </div>
-            </VRow>
-          -->
+          <VRow dense>
+            <VCol md="12">
+              <MCTablePagination
+                v-if="resultdataItemsHadith.length > 0"
+                v-model:page="hadithPageNumber"
+                v-model:full-size="ispaginationFullSize" v-model:items-per-page="apiQueryParamData.PageSize"
+                :divider="false"
+                class="paging-container" :total-items="totalItemsHadith === undefined ? 0 : totalItemsHadith"
+              />
+            </VCol>
+          </VRow>
         </VFadeTransition>
         <!-- </VFadeTransition> -->
       </VTabsWindowItem>
@@ -309,17 +310,6 @@ async function runSearch(resetToDefault: boolean) {
       </div>
       </VRow>
     -->
-    <VRow dense>
-      <VCol md="12">
-        <MCTablePagination
-          v-if="resultdataItemsHadith.length > 0"
-          v-model:page="hadithPageNumber"
-          v-model:full-size="ispaginationFullSize" v-model:items-per-page="apiQueryParamData.PageSize"
-          :divider="false"
-          class="paging-container" :total-items="totalItemsHadith === undefined ? 0 : totalItemsHadith"
-        />
-      </VCol>
-    </VRow>
   </VContainer>
 </template>
 
