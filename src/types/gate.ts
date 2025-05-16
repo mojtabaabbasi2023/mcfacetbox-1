@@ -1,5 +1,5 @@
-import type { ISimpleDTO, baseDataTableModel, baseItemAction, baseItemState } from './baseModels'
-import { type IUserBase, UserBaseModel, UserModel } from './users'
+import type { ISimpleDTO, baseItemState } from './baseModels'
+import { type IUserBase, UserBaseModel } from './users'
 
 // export interface GateProperties extends Record<string, any>, baseDataTableModel {
 //   id: number

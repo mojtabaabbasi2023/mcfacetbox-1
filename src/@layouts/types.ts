@@ -83,6 +83,7 @@ export interface NavLink extends NavLinkProps, Partial<AclProperties> {
   badgeContent?: string
   badgeClass?: string
   disable?: boolean
+  changeStateName?: NavLinkStateName
 }
 
 // 👉 Vertical nav group
@@ -124,4 +125,15 @@ export type Notification = {
 export interface ThemeSwitcherTheme {
   name: string
   icon: string
+}
+
+/**
+ * برای این تعریف شده است که با انتخاب یک گزینه لینک بدون باز شدن صفحه جدید یک state در سرتاسر برنامه عوض شود و یک اکشن کنترل شده انجام گردد
+ * بازای هر اکشنی که بار زدن یک منو باید انجام شود یک وضعیت باید در اینحا تعریف گردد.
+ */
+export enum NavLinkStateName {
+  None = 0,
+  datatransImport = 1,
+  datatransferExport = 2,
+  settingsContentTypeStyle = 3,
 }

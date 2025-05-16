@@ -1,9 +1,15 @@
 <script lang="ts" setup>
 import { layoutConfig } from '@layouts'
 import { can } from '@layouts/plugins/casl'
-import type { NavLink } from '@layouts/types'
+import { type NavLink, NavLinkStateName } from '@layouts/types'
 import { getComputedNavLinkToProp, getDynamicI18nProps, isNavLinkActive } from '@layouts/utils'
+import { useNavLinkSelectState } from '@/store/baseStore'
 
+const props = withDefaults(defineProps<Props>(), {
+  isSubItem: false,
+})
+
+const navlinkState = useNavLinkSelectState()
 interface Props {
   item: NavLink
 
@@ -11,9 +17,9 @@ interface Props {
   isSubItem?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  isSubItem: false,
-})
+function handleNavLinkClick(event: MouseEvent, item: NavLink) {
+  navlinkState.selectState.value = item.changeStateName ?? NavLinkStateName.None
+}
 </script>
 
 <template>
@@ -26,9 +32,10 @@ const props = withDefaults(defineProps<Props>(), {
     }]"
   >
     <Component
-      :is="item.to ? 'RouterLink' : 'a'"
+      :is="item.changeStateName ? 'div' : (item.to ? 'RouterLink' : 'a')"
       v-bind="getComputedNavLinkToProp(item)"
-      :class="{ 'router-link-active router-link-exact-active': isNavLinkActive(item, $router) }"
+      :class="{ 'router-link-active router-link-exact-active': isNavLinkActive(item, $router), 'nav-item-clickable': !!item.changeStateName }"
+      @click="handleNavLinkClick($event, item)"
     >
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
@@ -51,6 +58,29 @@ const props = withDefaults(defineProps<Props>(), {
   .nav-link a {
     display: flex;
     align-items: center;
+  }
+}
+.layout-horizontal-nav {
+  .nav-link a,
+  .nav-link .nav-item-clickable {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-item-clickable {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    &.router-link-active {
+      background-color: rgba(0, 0, 0, 0.08);
+      font-weight: 600;
+    }
   }
 }
 </style>

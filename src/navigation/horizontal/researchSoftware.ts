@@ -1,3 +1,5 @@
+import { NavLinkStateName } from '@/@layouts/types'
+
 export default [
   {
     title: 'tree.title',
@@ -18,9 +20,12 @@ export default [
     children: [
       {
         title: 'import',
+        changeStateName: NavLinkStateName.datatransImport,
       },
       {
         title: 'export',
+        changeStateName: NavLinkStateName.datatransferExport,
+
       },
     ],
   },

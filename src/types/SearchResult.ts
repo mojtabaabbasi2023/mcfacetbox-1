@@ -1,7 +1,5 @@
 import { isNull, isUndefined } from '@sindresorhus/is'
-import { z } from 'zod'
 import type { FacetType, ISimpleSelectableDTO } from './baseModels'
-import { AutoGenerateHighlightText } from '@/decorators/stringTools'
 import { joinWithDots } from '@/utils/stringUtils'
 
 export function convertFacetItemToFacetTree(items: IFacetItem[]): IFacetTreeItem[] {

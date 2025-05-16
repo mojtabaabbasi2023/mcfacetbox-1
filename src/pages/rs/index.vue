@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Pane, Splitpanes } from 'splitpanes'
+import { useToast } from 'vue-toastification'
 import MCMainDataCollection from '@/components/MainDataCollection/MCMainDataCollection.vue'
 import MCMainDataShelf from '@/components/MainDataShelf/MCMainDataShelf.vue'
 
 import 'splitpanes/dist/splitpanes.css'
 import { useSelectedTree } from '@/store/treeStore'
+import { useNavLinkSelectState } from '@/store/baseStore'
 
 const menu = ref(false)
 const isComponentSwitch = ref(false)
@@ -12,6 +14,8 @@ const topComponentOrder = ref(2)
 const bottomComponentOrder = ref(2)
 const dialogSelectTreeVisible = ref(false)
 const selectedTreeItem = useSelectedTree()
+const navlinkSelecState = useNavLinkSelectState()
+const toast = useToast()
 
 const resolveTopComponent = (order: number) => {
   if (order === 1)
@@ -19,6 +23,10 @@ const resolveTopComponent = (order: number) => {
   else
     return MCMainDataCollection
 }
+
+watch(navlinkSelecState.selectState, () => {
+  toast.success(navlinkSelecState.selectState.value.toString())
+})
 
 const resolveBottomComponent = (order: number) => {
   if (order === 1)
