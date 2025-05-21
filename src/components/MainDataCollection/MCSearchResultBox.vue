@@ -1,43 +1,35 @@
 <script setup lang="ts">
+import ContextMenu from '@imengyu/vue3-context-menu'
+import HadithView from './MCHadithViewBox.vue'
+import QuranView from './MCAyahViewBox.vue'
+import VocabView from './MCVocabViewBox.vue'
 import type { ISimpleTreeActionable } from '@/types/baseModels'
-import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
-import { DataShelfBoxModelNew, type IDataShelfBoxNew } from '@/types/dataShelf'
-import { HadithSearchResultItemModel } from '@/types/SearchResult'
-import type { IHadithSearchResultItem } from '@/types/SearchResult'
+import { DataBoxType, MessageType } from '@/types/baseModels'
+import { DataShelfBoxModelNew } from '@/types/dataShelf'
+import type { IDataShelfBoxNew } from '@/types/dataShelf'
+import type { ISearchResultItem } from '@/types/SearchResult'
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
-const { t } = useI18n({ useScope: 'global' })
-const tempSelectedTabBoxItem = reactive<DataShelfBoxModelNew>(new DataShelfBoxModelNew(0, props.selectedTreeId, 0, ''))
-
-// const { selectedNode } = useTree()
-const dialogSelectNodeVisible = ref(false)
-const loadinglocal = ref(false)
 interface Props {
-  dataitemHadith?: IHadithSearchResultItem
-  dataitemQuran?: any
-  dataitemVocab?: any
+  dataitem: ISearchResultItem // در حالت واقعی بهتر است این از یک interface عمومی مثل ISearchResultItem باشد
   selectedTreeId: number
   selectedNode: ISimpleTreeActionable
   boxType: DataBoxType
+  isExpanded?: boolean
 }
-interface Emit {
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  (e: 'maximizeSearchTabBox', selectedItem: any): void
   (e: 'messageHasOccured', message: string, type: MessageType): void
   (e: 'contentToNodeAdded', connectednodeid: number): void
-  (e: 'maximizeSearchTabBox', selectedItem: IHadithSearchResultItem): void
 }
+>()
 
-// const props = defineProps<>({
-//   dataitems: {
-//     type: SearchResultTabBoxModel,
-//     required: true,
-//     validator: value => {
-//       return value instanceof SearchResultTabBoxModel // Ensure the instance is correct
-//     },
-//   },
-// })
+const { t } = useI18n({ useScope: 'global' })
 
-const tabdatamodel = ref()
+const loadinglocal = ref(false)
+
+const dialogSelectNodeVisible = ref(false)
 async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
   loadinglocal.value = true
   try {
@@ -56,26 +48,17 @@ async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
   loadinglocal.value = false
 }
 
-const selectedHighlight = computed(() => {
-  if (props.dataitemHadith && props.dataitemHadith.id > 0)
-    return props.dataitemHadith.highlightText
-
-  else if (props.dataitemQuran && props.dataitemQuran.id > 0)
-    return props.dataitemQuran.highlightText
+const componentName = computed(() => {
+  switch (props.boxType) {
+    case DataBoxType.hadith:
+      return HadithView
+    case DataBoxType.quran:
+      return QuranView
+    case DataBoxType.vocabulary:
+      return VocabView
+  }
 })
 
-const selectedId = computed(() => {
-  if (props.dataitemHadith && props.dataitemHadith.id > 0)
-    return props.dataitemHadith.id
-
-  else if (props.dataitemQuran && props.dataitemQuran.id > 0)
-    return props.dataitemQuran.id
-})
-
-// interface Emit {
-//   (e: 'close'): void // ایونت جدید close اضافه شد
-//   (e: 'open'): void // ایونت جدید close اضافه شد
-// }
 const onContextMenu = (e: MouseEvent) => {
   // prevent the browser's default menu
   e.preventDefault()
@@ -95,7 +78,7 @@ const onContextMenu = (e: MouseEvent) => {
         }),
         label: t('datagathering.connecttoselectednode'),
         onClick: () => {
-          addContentToNode({ content: selectedHighlight.value, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 9, footNotes: [], id: 0, sourceId: selectedId.value.toString() })
+          addContentToNode({ content: props.dataitem.text, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 9, footNotes: [], id: 0, sourceId: props.dataitem.id.toString() })
         },
       },
       {
@@ -122,7 +105,7 @@ const onContextMenu = (e: MouseEvent) => {
         }),
         label: t('datagathering.connecttotree'),
         onClick: () => {
-          addContentToNode({ content: selectedHighlight.value, description: '', labels: [], nodeId: 0, treeId: props.selectedTreeId, footNotes: [], id: 0, sourceId: selectedId.value.toString() })
+          addContentToNode({ content: props.dataitem.text, description: '', labels: [], nodeId: 0, treeId: props.selectedTreeId, footNotes: [], id: 0, sourceId: props.dataitem.id.toString() })
         },
       },
       {
@@ -153,42 +136,17 @@ const onContextMenu = (e: MouseEvent) => {
 </script>
 
 <template>
-  <VCard>
-    <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
-    <!-- <VCard variant="text"> -->
-    <VBtn icon size="26" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitemHadith ?? new HadithSearchResultItemModel())">
+  <VCard v-no-context-menu class="h-100 w-100">
+    <MCDialogSelectNode
+      v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible"
+      :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, props.dataitem.text, '', [], [], props.dataitem.id.toString()))"
+    />
+    <VBtn icon size="26" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitem)">
       <VIcon icon="tabler-maximize" size="22" />
     </VBtn>
-    <VCardText style="height: auto;" @contextmenu="onContextMenu($event)">
-      <MCDialogSelectNode
-        v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="selectedHighlight"
-        :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, selectedHighlight, '', [], [], selectedId.toString()))"
-      />
-      <VRow>
-        <VCol>
-          <div v-if="props.dataitemHadith && props.dataitemHadith.id > 0" class="flex">
-            <div v-if="props.dataitemHadith.qaelList.length > 1">
-              <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitemHadith.qaelTitleList }}</span>
-            </div>
-            <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitemHadith.bookTitle}, ${`${$t('volume')} ${props.dataitemHadith.vol}`}, ${`${$t('pagenum')} ${props.dataitemHadith.pageNum}`}` }} </span></div>
-          </div>
-        </VCol>
-      </VRow>
-      <VRow no-gutters class="justify-start align-start">
-        <!--
-          <VCheckbox
-          v-if="(isUndefined(textData.raw.selectable) && item.content.length > 1) || (textData.raw.selectable)"
-          v-model="textData.raw.selected" density="compact"
-          />
-        -->
-
-        <VCol md="12">
-          <div v-if="props.dataitemHadith" class="hadithtext" v-html="props.dataitemHadith.highlightText" />
-          <!-- <div class="foot-note">این قسمت محل پاورقی</div> -->
-        </VCol>
-      </VRow>
+    <VCardText style="height: 95%;" class="w-100 py-1 px-1">
+      <component :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" @contextmenu="onContextMenu($event)" />
     </VCardText>
-    <!-- </VCard> -->
   </VCard>
 </template>
 

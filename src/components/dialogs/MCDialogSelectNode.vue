@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { MessageType } from '@/types/baseModels'
 import { SelectionType } from '@/types/baseModels'
 
 interface Prop {

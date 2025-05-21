@@ -67,26 +67,26 @@ export interface IFacetBox {
 //     key: string,
 //     facetGroups: ISimpleSelectableDTO[]
 // }
-export interface ISearchResultTabBoxItem {
-  id: number
-  title: string
-  content: ISimpleSelectableDTO<number>[]
+// export interface ISearchResultTabBoxItem {
+//   id: number
+//   title: string
+//   content: ISimpleSelectableDTO<number>[]
 
-}
-export interface ISearchResultTabBox extends Record<string, any> {
-  id: number
-  content: ISearchResultTabBoxItem[]
-}
+// }
+// export interface ISearchResultTabBox extends Record<string, any> {
+//   id: number
+//   content: ISearchResultTabBoxItem[]
+// }
 
-export class SearchResultTabBoxModel implements ISearchResultTabBox {
-  id: number = 0
-  content: SearchResultTabBoxItemModel[] = []
-}
-export class SearchResultTabBoxItemModel implements ISearchResultTabBoxItem {
-  id: number = 0
-  title: string = ''
-  content: ISimpleSelectableDTO<number>[] = []
-}
+// export class SearchResultTabBoxModel implements ISearchResultTabBox {
+//   id: number = 0
+//   content: SearchResultTabBoxItemModel[] = []
+// }
+// export class SearchResultTabBoxItemModel implements ISearchResultTabBoxItem {
+//   id: number = 0
+//   title: string = ''
+//   content: ISimpleSelectableDTO<number>[] = []
+// }
 
 export interface IqaelItem {
   id: number
@@ -94,10 +94,15 @@ export interface IqaelItem {
   title: string
   roleTitle: string
 }
-export interface IHadithSearchResultItem {
+export interface ISearchResultItem {
+  [x: string]: any
   highLight: string[]
   readonly highlightText: string
   id: number
+  text: string
+  shortText: string
+}
+export interface IHadithSearchResultItem extends ISearchResultItem {
   qaelTitleList: string
   noorLibLink: string
   qaelList: IqaelItem[]
@@ -137,6 +142,25 @@ export class HadithSearchResultItemModel implements IHadithSearchResultItem {
     this.pageNum = pageNum
     this.sourceId = sourceId
     this.vol = vol
+  }
+
+  [x: string]: any
+  text: string = ''
+  shortText: string = ''
+}
+
+export class SearchResultItemModel implements ISearchResultItem {
+  [x: string]: any
+  highLight: string[] = []
+  highlightText: string = ''
+  id: number = 0
+  text: string = ''
+  shortText: string = ''
+  constructor(highlight: string[] = [], id: number = 0, shortText = '', text = '') {
+    this.highLight = highlight
+    this.id = id
+    this.shortText = shortText
+    this.text = text
   }
 }
 

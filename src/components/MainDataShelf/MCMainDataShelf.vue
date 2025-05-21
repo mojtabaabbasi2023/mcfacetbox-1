@@ -481,7 +481,7 @@ function databoxOrderChanged(databoxItemId: number) {
         <!-- </VToolbar> -->
       </VCol>
     </VRow>
-    <VRow ref="mainDataResult" class="mc-data-scroll">
+    <VRow ref="mainDataResult" class="mc-data-scrolly">
       <MCLoading :showloading="loadingdata" :loadingsize="SizeType.MD" />
       <VCol md="12">
         <VRow v-if="resultdataItems.length > 0">

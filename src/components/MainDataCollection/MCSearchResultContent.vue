@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import ContextMenu from '@imengyu/vue3-context-menu'
 import type { ISimpleTreeActionable } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import { DataShelfBoxModelNew, type IDataShelfBoxNew } from '@/types/dataShelf'
-import { HadithSearchResultItemModel } from '@/types/SearchResult'
 import type { IHadithSearchResultItem } from '@/types/SearchResult'
 
 const props = defineProps<Props>()
@@ -24,7 +24,6 @@ interface Props {
 interface Emit {
   (e: 'messageHasOccured', message: string, type: MessageType): void
   (e: 'contentToNodeAdded', connectednodeid: number): void
-  (e: 'maximizeSearchTabBox', selectedItem: IHadithSearchResultItem): void
 }
 
 // const props = defineProps<>({
@@ -36,8 +35,7 @@ interface Emit {
 //     },
 //   },
 // })
-
-const tabdatamodel = ref()
+const dataTabValue = ref()
 async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
   loadinglocal.value = true
   try {
@@ -150,153 +148,57 @@ const onContextMenu = (e: MouseEvent) => {
     ],
   })
 }
+
+onMounted(() => {
+  loadinglocal.value = true
+})
 </script>
 
 <template>
-  <VCard>
+  <VCard v-no-context-menu style="height: 100%;">
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
     <!-- <VCard variant="text"> -->
-    <VBtn icon size="26" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitemHadith ?? new HadithSearchResultItemModel())">
-      <VIcon icon="tabler-maximize" size="22" />
-    </VBtn>
-    <VCardText style="height: auto;" @contextmenu="onContextMenu($event)">
-      <MCDialogSelectNode
-        v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="selectedHighlight"
-        :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, selectedHighlight, '', [], [], selectedId.toString()))"
-      />
-      <VRow>
-        <VCol>
-          <div v-if="props.dataitemHadith && props.dataitemHadith.id > 0" class="flex">
-            <div v-if="props.dataitemHadith.qaelList.length > 1">
-              <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitemHadith.qaelTitleList }}</span>
+    <VRow no-gutters dense class="align-center" justify="space-between">
+      <VTabs v-model="dataTabValue" density="compact" hide-slider>
+        <VTab :value="1" variant="elevated" rounded="sm">
+          {{ $t('hadith') }}
+        </VTab>
+        <VTab :value="2" variant="elevated" rounded="sm">
+          {{ $t('translate') }}
+        </VTab>
+        <VTab :value="3" variant="elevated" rounded="sm">
+          {{ $t('word') }}
+        </VTab>
+      </VTabs>
+    </VRow>
+    <VDivider />
+    <VTabsWindow ref="mainDataResult" v-model="dataTabValue" class="mc-data-scroll">
+      <VTabsWindowItem :value="3" :transition="false" />
+      <VTabsWindowItem :value="2" :transition="false" />
+      <VTabsWindowItem :value="1" :transition="false" />
+      <VCardText style="height: auto;" @contextmenu="onContextMenu($event)">
+        <MCDialogSelectNode
+          v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible" :selected-item="selectedHighlight"
+          :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, selectedHighlight, '', [], [], selectedId.toString()))"
+        />
+        <VRow>
+          <VCol>
+            <div v-if="props.dataitemHadith && props.dataitemHadith.id > 0" class="flex">
+              <div v-if="props.dataitemHadith.qaelList.length > 1">
+                <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitemHadith.qaelTitleList }}</span>
+              </div>
+              <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitemHadith.bookTitle}, ${`${$t('volume')} ${props.dataitemHadith.vol}`}, ${`${$t('pagenum')} ${props.dataitemHadith.pageNum}`}` }} </span></div>
             </div>
-            <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitemHadith.bookTitle}, ${`${$t('volume')} ${props.dataitemHadith.vol}`}, ${`${$t('pagenum')} ${props.dataitemHadith.pageNum}`}` }} </span></div>
-          </div>
-        </VCol>
-      </VRow>
-      <VRow no-gutters class="justify-start align-start">
-        <!--
-          <VCheckbox
-          v-if="(isUndefined(textData.raw.selectable) && item.content.length > 1) || (textData.raw.selectable)"
-          v-model="textData.raw.selected" density="compact"
-          />
-        -->
+          </VCol>
+        </VRow>
+        <VRow no-gutters class="justify-start align-start">
+          <VCol md="12">
+            <div v-if="props.dataitemHadith" class="hadithtext" v-html="props.dataitemHadith.highlightText" />
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VTabsWindow>
 
-        <VCol md="12">
-          <div v-if="props.dataitemHadith" class="hadithtext" v-html="props.dataitemHadith.highlightText" />
-          <!-- <div class="foot-note">این قسمت محل پاورقی</div> -->
-        </VCol>
-      </VRow>
-    </VCardText>
     <!-- </VCard> -->
   </VCard>
 </template>
-
-<style lang="scss">
-.v-btn--disabled {
-  opacity: 0.25;
-}
-@keyframes hadithCardGlow {
-  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
-  70% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-}
-
-.mc-search-result:hover {
-  animation: hadithCardGlow 1.5s ease-out;
-  border: 1px solid #4CAF50;
-  transform: scale(1.01);
-}
-
-/* افکت نور پس‌زمینه */
-.mc-search-result:hover::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.mc-search-result:hover::after {
-  opacity: 1;
-}
-
-/* تغییر رنگ متن حدیث هنگام هاور */
-.mc-search-result:hover .text {
-  color: #222;
-}
-/* استایل اصلی کارت */
-.mc-search-result {
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  margin-bottom: 16px;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
-  background-color: #ffffff;
-  width: 100%;
-  transition: all 0.4s ease;
-}
-
-/* بخش اطلاعات (قالبین و آدرس) */
-.flex {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  padding: 4px 4px 2px;
-}
-.searchDataBoxInfoTitle {
-    font-size: .7em;
-    font-weight: bold;
-}
-
-.searchDataBoxInfoText {
-  color: #555;
-  font-size: .7rem;
-  line-height: 1.3;
-  display: inline;
-}
-// .mc-search-result:hover {
-//   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-//   transform: translateY(-2px);
-// }
-/* متن حدیث */
-
-.hadithtext {
-  font-size: 1.4rem;
-  line-height: 1.6;
-  color: #333;
-  padding: 2px 5px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-right: 3px solid #4CAF50;
-  margin: 0;
-  font-family: 'Amiri', 'Traditional Arabic', serif;
-
-}
-
-/* هایلایت کلمات جستجو شده */
-.hadithtext em {
-  font-style: normal;
-  background-color: #FFF9C4;
-  padding: 0 3px;
-  border-radius: 3px;
-  color: #D32F2F;
-  font-weight: 500;
-}
-
-// .hadithtext em {
-//   background-color: #fff9c4; /* پس‌زمینه زرد روشن */
-//   color: #d32f2f; /* رنگ متن قرمز تیره */
-//   font-style: normal; /* غیرایتالیک */
-//   padding: 0.2em 0.4em; /* فاصله داخلی */
-//   border-radius: 4px; /* لبه‌های گرد */
-//   font-weight: bold; /* متن پررنگ */
-//   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* سایه ملایم */
-//   }
-</style>

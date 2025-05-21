@@ -204,9 +204,9 @@
         // }
 
         .v-tabs {
-            block-size: 0;
-            opacity: 0;
-            transition: all 0.3s ease-out 2s;
+            block-size: 40px;
+            opacity: 1;
+            // transition: all 0.3s ease-out 2s;
 
             .v-slide-group__content {
                 padding: 5px;
@@ -229,13 +229,13 @@
             }
         }
 
-        &:hover {
-            .v-tabs {
-                block-size: 40px;
-                opacity: 1;
-                transition: all ease-in 0.3s;
-            }
-        }
+        // &:hover {
+        //     .v-tabs {
+        //         block-size: 40px;
+        //         opacity: 1;
+        //         transition: all ease-in 0.3s;
+        //     }
+        // }
     }
 
     .mc-data-shelf {
@@ -525,4 +525,10 @@
         font-size: 0.9em;
         margin-block-end: 3px;
     }
+}
+
+.mc-data-scrolly {
+    block-size: calc(100% - 110px);
+    margin-block-start: 1.5px;
+    overflow-y: scroll;
 }

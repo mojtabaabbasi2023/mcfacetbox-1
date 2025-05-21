@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { VCol } from 'vuetify/lib/components/index.mjs'
 import { useToast } from 'vue-toastification'
-import { z } from 'zod'
 import MCDialogBookSelect from '../dialogs/MCDialogBookSelect.vue'
 import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
 import { DataBoxType, MessageType, QueryRequestModel, SizeType } from '@/types/baseModels'
-import { HadithSearchResultItemModel, type IFacetBox, type IHadithSearchResultItem, type ISearchResultTabBox } from '@/types/SearchResult'
+import { HadithSearchResultItemModel, SearchResultItemModel } from '@/types/SearchResult'
+import type { IFacetBox, IHadithSearchResultItem, ISearchResultItem } from '@/types/SearchResult'
 import { useSelectedTree, useTree } from '@/store/treeStore'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 
@@ -29,6 +28,8 @@ const apiQueryParamData = reactive<QueryRequestModel>(new QueryRequestModel())
 const facetboxItemsHadith = ref<IFacetBox[]>([])
 const resultdataItemsHadith = ref<IHadithSearchResultItem[]>([])
 const loading = ref(false)
+const maximizBoxOverlay = ref(false)
+const currentitem = ref<ISearchResultItem>(new SearchResultItemModel())
 
 // const loading = ref(false)
 const selectedBooks = ref<string[]>([])
@@ -200,10 +201,24 @@ async function runSearch(resetToDefault: boolean) {
   loading.value = true
   await fetchData()
 }
+
+const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
+  currentitem.value = tabBoxItem
+  maximizBoxOverlay.value = true
+}
 </script>
 
 <template>
   <VContainer class="mc-data-container">
+    <VOverlay v-model="maximizBoxOverlay" :close-on-back="false" contained class="maximizeSearchBox d-flex justify-center">
+      <template #default>
+        <VFadeTransition>
+          <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
+            <MCSearchResultBox :box-type="DataBoxType.hadith" :dataitem="currentitem" :is-expanded="maximizBoxOverlay" :selected-tree-id="selectedTreeItem.id" :selected-node="selectedNode" />
+          </div>
+        </VFadeTransition>
+      </template>
+    </VOverlay>
     <VRow dense class="align-center">
       <MCDialogBookSelect v-if="isDialogSelectBookVisible" v-model:is-dialog-visible="isDialogSelectBookVisible" />
       <VCol cols="12" md="3" />
@@ -256,53 +271,53 @@ async function runSearch(resetToDefault: boolean) {
 
     <VTabsWindow ref="mainDataResult" v-model="dataTabValue" class="mc-data-scroll">
       <VTabsWindowItem :value="DataBoxType.hadith" :transition="false">
-        <VFadeTransition>
-          <VRow v-if="resultdataItemsHadith.length > 0 && !loading" dense>
-            <VCol md="3">
-              <div v-if="facetboxItemsHadith.length > 0">
-                <MCFacetBox
-                  v-for="item in facetboxItemsHadith"
-                  :key="item.key" v-model:selected-items="selectedFacetItemsHadith[item.key]" :istree="item.isTree"
-                  :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
-                  :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
-                />
-              </div>
-            </VCol>
-            <VCol md="9">
-              <!-- <VInfiniteScroll side="end" height="500px" @load="loadMoreCollectingData"> -->
-              <div class="pl-2 py-2">
-                <!-- <template v-for="(item, index) in resultdataItems" :key="item"> -->
-                <div v-show="!loading" ref="loadmorestart" />
-
-                <MCSearchResultTabBox
-                  v-for="(item) in resultdataItemsHadith" :key="item.id" :box-type="dataTabValue"
-                  :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem-hadith="item"
-                  @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded"
-                />
-                <!-- </template> -->
-
-                <div v-show="!loading" ref="loadmoreend" />
-              </div>
-            <!-- </VInfiniteScroll> -->
-            </VCol>
-          </VRow>
-          <VRow dense>
-            <VCol md="12">
-              <MCTablePagination
-                v-if="resultdataItemsHadith.length > 0"
-                v-model:page="hadithPageNumber"
-                v-model:full-size="ispaginationFullSize" v-model:items-per-page="apiQueryParamData.PageSize"
-                :divider="false"
-                class="paging-container" :total-items="totalItemsHadith === undefined ? 0 : totalItemsHadith"
+        <!-- <VFadeTransition> -->
+        <VRow v-if="resultdataItemsHadith.length > 0 && !loading" dense>
+          <VCol md="3">
+            <div v-if="facetboxItemsHadith.length > 0">
+              <MCFacetBox
+                v-for="item in facetboxItemsHadith"
+                :key="item.key" v-model:selected-items="selectedFacetItemsHadith[item.key]" :istree="item.isTree"
+                :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
+                :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
               />
-            </VCol>
-          </VRow>
-        </VFadeTransition>
+            </div>
+          </VCol>
+          <VCol md="9">
+            <!-- <VInfiniteScroll side="end" height="500px" @load="loadMoreCollectingData"> -->
+            <div class="pl-2 py-2">
+              <!-- <template v-for="(item, index) in resultdataItems" :key="item"> -->
+              <div v-show="!loading" ref="loadmorestart" />
+
+              <MCSearchResultBox
+                v-for="(item) in resultdataItemsHadith" :key="item.id" :box-type="dataTabValue"
+                :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item"
+                @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox"
+              />
+              <!-- </template> -->
+
+              <div v-show="!loading" ref="loadmoreend" />
+            </div>
+            <!-- </VInfiniteScroll> -->
+          </VCol>
+        </VRow>
+
         <!-- </VFadeTransition> -->
       </VTabsWindowItem>
       <VTabsWindowItem :value="DataBoxType.quran" :transition="false" />
       <VTabsWindowItem :value="2" :transition="false" />
     </VTabsWindow>
+    <VRow dense>
+      <VCol md="12">
+        <MCTablePagination
+          v-if="resultdataItemsHadith.length > 0"
+          v-model:page="hadithPageNumber"
+          v-model:full-size="ispaginationFullSize" v-model:items-per-page="apiQueryParamData.PageSize"
+          :divider="false"
+          class="paging-container" :total-items="totalItemsHadith === undefined ? 0 : totalItemsHadith"
+        />
+      </VCol>
+    </VRow>
     <!--
       <VRow dense>
       <div v-show="loadingdata" class="loading-container">
@@ -313,12 +328,16 @@ async function runSearch(resetToDefault: boolean) {
   </VContainer>
 </template>
 
-<style lang="css">
+<style lang="scss">
 .v-list-item--density-compact:not(.v-list-item--nav).v-list-item--one-line {
   padding: 0 !important;
 }
 
 .v-list-item-action--start {
   margin-inline: 0 0;
+}
+.maximizeSearchBox .v-overlay__content{
+    height: 90%;
+    width: 95%;
 }
 </style>
