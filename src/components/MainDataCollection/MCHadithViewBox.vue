@@ -37,11 +37,11 @@ const dataTabValue = ref(1)
 </script>
 
 <template>
-  <VCard v-no-context-menu class="w-100 h-100 d-flex flex-column justify-start">
+  <div v-no-context-menu class="w-100 h-100 d-flex flex-column justify-start">
     <MCLoading v-if="props.loading || loadinglocal" :showloading="props.loading || loadinglocal" :loadingsize="SizeType.MD" />
     <!-- <VCard variant="text"> -->
     <VRow v-if="props.isExpanded" no-gutters dense class="align-center flex-0-0">
-      <VTabs v-model="dataTabValue" density="comfortable" hide-slider grow>
+      <VTabs v-model="dataTabValue" density="comfortable" hide-slider>
         <VTab :value="1" variant="elevated" rounded="sm">
           {{ $t('hadith') }}
         </VTab>
@@ -53,7 +53,6 @@ const dataTabValue = ref(1)
         </VTab>
       </VTabs>
     </VRow>
-    <VDivider />
     <div class="overflow-y-auto mb-2">
       <VTabsWindow v-model="dataTabValue">
         <VTabsWindowItem :value="3" :transition="false">
@@ -64,7 +63,7 @@ const dataTabValue = ref(1)
           <VCardText />
         </VTabsWindowItem>
         <VTabsWindowItem :value="1" :transition="false">
-          <VCardText class="py-1 px-1">
+          <div class="py-1 px-1">
             <VRow>
               <VCol>
                 <div class="flex">
@@ -80,7 +79,7 @@ const dataTabValue = ref(1)
                 <div v-if="props.dataitem" class="hadithtext" v-html="props.dataitem.highlightText" />
               </VCol>
             </VRow>
-          </VCardText>
+          </div>
         </VTabsWindowItem>
       </VTabsWindow>
     </div>
@@ -105,25 +104,5 @@ const dataTabValue = ref(1)
     -->
 
     <!-- </VCard> -->
-  </VCard>
+  </div>
 </template>
-
-<style lang="css">
-.hadith-card {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.scrollable-content {
-  /* flex-grow: 1; */
-  overflow-y: auto;
-  /* display: flex;
-  flex-direction: column; */
-}
-
-.hadithtext {
-  padding: 0.5rem;
-}
-</style>

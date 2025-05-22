@@ -1,3 +1,5 @@
+import { DataBoxType } from '@/types/baseModels'
+
 export const resolveActiveColor = (isActive: boolean) => {
   if (isActive)
     return 'success'
@@ -10,4 +12,11 @@ export const resolveActiveTitle = (isActive: boolean) => {
     return 'active'
   else
     return 'deactive'
+}
+
+export const createHadithURL = (resourceid: string) => {
+  return `https://hadith.inoor.ir/fa/hadith/${resourceid}`
+}
+export const createAyahUrl = (surahid: number, ayahid: number) => {
+  return `https://quran.inoor.ir/fa/ayah/${surahid}/${ayahid}`
 }

@@ -214,7 +214,7 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
       <template #default>
         <VFadeTransition>
           <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
-            <MCSearchResultBox :box-type="DataBoxType.hadith" :dataitem="currentitem" :is-expanded="maximizBoxOverlay" :selected-tree-id="selectedTreeItem.id" :selected-node="selectedNode" />
+            <MCSearchResultBox v-model:is-expanded="maximizBoxOverlay" :box-type="DataBoxType.hadith" :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id" :selected-node="selectedNode" />
           </div>
         </VFadeTransition>
       </template>
@@ -284,28 +284,22 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
             </div>
           </VCol>
           <VCol md="9">
-            <!-- <VInfiniteScroll side="end" height="500px" @load="loadMoreCollectingData"> -->
             <div class="pl-2 py-2">
-              <!-- <template v-for="(item, index) in resultdataItems" :key="item"> -->
               <div v-show="!loading" ref="loadmorestart" />
-
               <MCSearchResultBox
                 v-for="(item) in resultdataItemsHadith" :key="item.id" :box-type="dataTabValue"
                 :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item"
                 @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox"
               />
-              <!-- </template> -->
-
               <div v-show="!loading" ref="loadmoreend" />
             </div>
-            <!-- </VInfiniteScroll> -->
           </VCol>
         </VRow>
 
         <!-- </VFadeTransition> -->
       </VTabsWindowItem>
       <VTabsWindowItem :value="DataBoxType.quran" :transition="false" />
-      <VTabsWindowItem :value="2" :transition="false" />
+      <VTabsWindowItem :value="DataBoxType.vocabulary" :transition="false" />
     </VTabsWindow>
     <VRow dense>
       <VCol md="12">

@@ -41,9 +41,11 @@ declare global {
   const convertSimpleTreeToSimpleDtoArray: typeof import('./src/composables/objectUtils')['convertSimpleTreeToSimpleDtoArray']
   const convertTreeToArray: typeof import('./src/utils/objectUtils')['convertTreeToArray']
   const createApp: typeof import('vue')['createApp']
+  const createAyahUrl: typeof import('./src/utils/dataResolver')['createAyahUrl']
   const createEventHook: typeof import('@vueuse/core')['createEventHook']
   const createGenericProjection: typeof import('@vueuse/math')['createGenericProjection']
   const createGlobalState: typeof import('@vueuse/core')['createGlobalState']
+  const createHadithURL: typeof import('./src/utils/dataResolver')['createHadithURL']
   const createInjectionState: typeof import('@vueuse/core')['createInjectionState']
   const createPinia: typeof import('pinia')['createPinia']
   const createProjection: typeof import('@vueuse/math')['createProjection']
@@ -154,6 +156,7 @@ declare global {
   const resolveActiveColor: typeof import('./src/utils/dataResolver')['resolveActiveColor']
   const resolveActiveTitle: typeof import('./src/utils/dataResolver')['resolveActiveTitle']
   const resolveComponent: typeof import('vue')['resolveComponent']
+  const resolveDataURL: typeof import('./src/utils/dataResolver')['resolveDataURL']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveServiceResponseMessage: typeof import('./src/composables/useApi')['resolveServiceResponseMessage']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
@@ -434,9 +437,11 @@ declare module 'vue' {
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
     readonly convertSimpleTreeToSimpleDtoArray: UnwrapRef<typeof import('./src/composables/objectUtils')['convertSimpleTreeToSimpleDtoArray']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
+    readonly createAyahUrl: UnwrapRef<typeof import('./src/utils/dataResolver')['createAyahUrl']>
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
     readonly createGenericProjection: UnwrapRef<typeof import('@vueuse/math')['createGenericProjection']>
     readonly createGlobalState: UnwrapRef<typeof import('@vueuse/core')['createGlobalState']>
+    readonly createHadithURL: UnwrapRef<typeof import('./src/utils/dataResolver')['createHadithURL']>
     readonly createInjectionState: UnwrapRef<typeof import('@vueuse/core')['createInjectionState']>
     readonly createPinia: UnwrapRef<typeof import('pinia')['createPinia']>
     readonly createProjection: UnwrapRef<typeof import('@vueuse/math')['createProjection']>

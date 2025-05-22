@@ -22,6 +22,7 @@ const emit = defineEmits<{
   (e: 'maximizeSearchTabBox', selectedItem: any): void
   (e: 'messageHasOccured', message: string, type: MessageType): void
   (e: 'contentToNodeAdded', connectednodeid: number): void
+  (e: 'update:isExpanded', value: boolean): void
 }
 >()
 
@@ -56,6 +57,17 @@ const componentName = computed(() => {
       return QuranView
     case DataBoxType.vocabulary:
       return VocabView
+  }
+})
+
+const boxUrl = computed(() => {
+  switch (props.boxType) {
+    case DataBoxType.hadith:
+      return createHadithURL(props.dataitem.id.toString())
+    case DataBoxType.quran:
+      return ''
+    case DataBoxType.vocabulary:
+      return ''
   }
 })
 
@@ -133,17 +145,29 @@ const onContextMenu = (e: MouseEvent) => {
     ],
   })
 }
+
+function openBoxLink() {
+  window.open(boxUrl.value, '_blank')
+}
 </script>
 
 <template>
-  <VCard v-no-context-menu class="h-100 w-100">
+  <VCard v-no-context-menu class="h-100 w-100 mc-search-result" :class="{ 'not-expanded': !isExpanded }">
     <MCDialogSelectNode
       v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible"
       :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, props.dataitem.text, '', [], [], props.dataitem.id.toString()))"
     />
-    <VBtn icon size="26" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitem)">
-      <VIcon icon="tabler-maximize" size="22" />
-    </VBtn>
+    <div class="result-box-actions-container">
+      <VBtn icon size="22" variant="text" @click="openBoxLink">
+        <VIcon icon="tabler-external-link" size="18" />
+      </VBtn>
+      <VBtn v-if="!props.isExpanded" icon size="22" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitem)">
+        <VIcon icon="tabler-maximize" size="18" />
+      </VBtn>
+      <VBtn v-if="props.isExpanded" icon size="22" variant="text" @click="$emit('update:isExpanded', false)">
+        <VIcon icon="tabler-x" size="18" />
+      </VBtn>
+    </div>
     <VCardText style="height: 95%;" class="w-100 py-1 px-1">
       <component :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" @contextmenu="onContextMenu($event)" />
     </VCardText>
@@ -160,32 +184,32 @@ const onContextMenu = (e: MouseEvent) => {
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
 
-.mc-search-result:hover {
+.mc-search-result.not-expanded:hover {
   animation: hadithCardGlow 1.5s ease-out;
   border: 1px solid #4CAF50;
   transform: scale(1.01);
 }
 
 /* افکت نور پس‌زمینه */
-.mc-search-result:hover::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
+// .mc-search-result:hover::after {
+//   content: '';
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+//   background: radial-gradient(circle at center, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+//   z-index: -1;
+//   opacity: 0;
+//   transition: opacity 0.4s ease;
+// }
 
-.mc-search-result:hover::after {
+.mc-search-result.not-expanded:hover::after {
   opacity: 1;
 }
 
 /* تغییر رنگ متن حدیث هنگام هاور */
-.mc-search-result:hover .text {
+.mc-search-result.not-expanded:hover .text {
   color: #222;
 }
 /* استایل اصلی کارت */
