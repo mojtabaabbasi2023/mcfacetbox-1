@@ -70,12 +70,7 @@ function changeWindowTitle(status: boolean) {
           <Pane>
             <MCWindow :title="changeWindowTitle(isComponentSwitch)" @move="changeComponent">
               <template #default>
-                <Transition>
-                  <KeepAlive>
-                    <component :is="resolveTopComponent(topComponentOrder)" />
-                  </KeepAlive>
-                </Transition>
-                <!-- <MCMainDataCollection /> -->
+                <MCMainDataCollection />
               </template>
             </MCWindow>
           </Pane>
@@ -86,10 +81,7 @@ function changeWindowTitle(status: boolean) {
               @move="changeComponent"
             >
               <template #default>
-                <KeepAlive>
-                  <component :is="resolveBottomComponent(bottomComponentOrder)" />
-                </KeepAlive>
-                <!-- <MCMainDataShelf /> -->
+                <MCMainDataShelf />
               </template>
             </MCWindow>
           </Pane>

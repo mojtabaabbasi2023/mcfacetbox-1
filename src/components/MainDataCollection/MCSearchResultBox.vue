@@ -13,8 +13,10 @@ interface Props {
   dataitem: ISearchResultItem // در حالت واقعی بهتر است این از یک interface عمومی مثل ISearchResultItem باشد
   selectedTreeId: number
   selectedNode: ISimpleTreeActionable
+  searchPhrase?: string
   boxType: DataBoxType
   isExpanded?: boolean
+  expandable: boolean
 }
 const props = defineProps<Props>()
 
@@ -23,6 +25,7 @@ const emit = defineEmits<{
   (e: 'messageHasOccured', message: string, type: MessageType): void
   (e: 'contentToNodeAdded', connectednodeid: number): void
   (e: 'update:isExpanded', value: boolean): void
+  (e: 'dataitemhaschanged', value: ISearchResultItem): void
 }
 >()
 
@@ -163,15 +166,15 @@ function openBoxLink() {
       <VBtn icon size="22" variant="text" @click="openBoxLink">
         <VIcon icon="tabler-external-link" size="18" />
       </VBtn>
-      <VBtn v-if="!props.isExpanded" icon size="22" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitem)">
+      <VBtn v-if="!props.isExpanded && props.expandable" icon size="22" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitem)">
         <VIcon icon="tabler-maximize" size="18" />
       </VBtn>
-      <VBtn v-if="props.isExpanded" icon size="22" variant="text" @click="$emit('update:isExpanded', false)">
+      <VBtn v-if="props.isExpanded && props.expandable" icon size="22" variant="text" @click="$emit('update:isExpanded', false)">
         <VIcon icon="tabler-x" size="18" />
       </VBtn>
     </div>
     <VCardText style="height: 95%;" class="w-100 py-1 px-1">
-      <component :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" @contextmenu="onContextMenu($event)" />
+      <component :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" :search-phrase="props.searchPhrase" @contextmenu="onContextMenu($event)" @dataitemchanged="(value) => $emit('dataitemhaschanged', value)" />
     </VCardText>
   </VCard>
 </template>
@@ -189,7 +192,7 @@ function openBoxLink() {
 .mc-search-result.not-expanded:hover {
   animation: hadithCardGlow 1.5s ease-out;
   border: 1px solid #4CAF50;
-  transform: scale(1.01);
+//   transform: scale(1.01);
 }
 
 /* افکت نور پس‌زمینه */

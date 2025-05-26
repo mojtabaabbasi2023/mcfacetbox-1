@@ -285,6 +285,8 @@
   'Product': 'محصول',
   'Category': 'دسته‌بندی',
   'Order': 'سفارش',
+  "more":"بیشتر...",
+  "less":"کمتر...",
   'Details': 'جزئیات',
   'Customer': 'مشتری',
   'Manage Review': 'مدیریت بررسی',

@@ -102,6 +102,17 @@ export interface ISearchResultItem {
   text: string
   shortText: string
 }
+export interface IHadithTranslateItem {
+  id: number
+  hadithId: number
+  text: string
+  shortText: string
+  noorLibLink: string
+  sourceMainTitle: string
+  sourceShortTitle: string
+  authorTitle: string
+  authorId: number
+}
 export interface IHadithSearchResultItem extends ISearchResultItem {
   qaelTitleList: string
   noorLibLink: string
@@ -111,17 +122,22 @@ export interface IHadithSearchResultItem extends ISearchResultItem {
   pageNum: number
   sourceId: number
   vol: number
+  translateCount: number
+  explanationCount: number
+  translateList: IHadithTranslateItem[]
+  hadithRelatedCount: number
 }
 export class HadithSearchResultItemModel implements IHadithSearchResultItem {
   highLight: string[] = []
   get highlightText(): string {
     return joinWithDots(this.highLight, {
-      separator: ' ... ',
+      separator: '',
       maxItems: 30,
       ellipsisText: '',
     })
   }
 
+  [x: string]: any
   id: number = 0
   qaelTitleList: string = ''
   noorLibLink: string = ''
@@ -131,6 +147,12 @@ export class HadithSearchResultItemModel implements IHadithSearchResultItem {
   pageNum: number = 0
   sourceId: number = 0
   vol: number = 0
+  translateCount: number = 0
+  explanationCount: number = 0
+  translateList: IHadithTranslateItem[] = []
+  hadithRelatedCount: number = 0
+  text: string = ''
+  shortText: string = ''
   constructor(highlight: string[] = [], id: number = 0, qaelTitleList: string = '', noorLibLink: string = '', qaelList: IqaelItem[] = [], bookTitle: string = '', bookTitleShort: string = '', sourceId: number = 0, pageNum: number = 0, vol: number = 0) {
     this.highLight = highlight
     this.id = id
@@ -143,12 +165,23 @@ export class HadithSearchResultItemModel implements IHadithSearchResultItem {
     this.sourceId = sourceId
     this.vol = vol
   }
-
-  [x: string]: any
+}
+export class HadithTranslateItemModel implements IHadithTranslateItem {
+  id: number = 0
+  hadithId: number = 0
   text: string = ''
   shortText: string = ''
+  noorLibLink: string = ''
+  sourceMainTitle: string = ''
+  sourceShortTitle: string = ''
+  authorTitle: string = ''
+  authorId: number = 0
+  constructor(id: number = 0, hadithId: number = 0, text: string = '') {
+    this.id = id
+    this.hadithId = hadithId
+    this.text = text
+  }
 }
-
 export class SearchResultItemModel implements ISearchResultItem {
   [x: string]: any
   highLight: string[] = []

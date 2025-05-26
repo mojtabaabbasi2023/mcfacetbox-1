@@ -736,7 +736,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
                   :class="`d-flex justify-space-between ${(activeDraggableItem && activeDraggableItem.id === item.id && (!hasDividerDraggableBefore && !hasDividerDraggableAfter)) ? 'draggablebox' : ''}`" @mouseleave="treeItemMouseLeave($event, item)"
                   @mouseenter="treeItemMouseEnter($event, item)" @mouseup="treeItemMouseUp($event, item)" @mousedown="treeItemMouseDown($event, item)"
                 >
-                  <div>
+                  <div style="width: 95%;">
                     <span v-if="!(item.editing ?? false)">{{ item.title }}</span>
                     <VTextField
                       v-else ref="editableNode" v-model:model-value="nodeTempTitleForEdit" :color="item.failed ? 'error' : 'primary'" autofocus :placeholder="item.title"

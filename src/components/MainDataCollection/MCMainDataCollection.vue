@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
 import MCDialogBookSelect from '../dialogs/MCDialogBookSelect.vue'
-import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
+import type { GridResultFacet } from '@/types/baseModels'
 import { DataBoxType, MessageType, QueryRequestModel, SizeType } from '@/types/baseModels'
 import { HadithSearchResultItemModel, SearchResultItemModel } from '@/types/SearchResult'
-import type { IFacetBox, IHadithSearchResultItem, ISearchResultItem, ITabSearchStateResult } from '@/types/SearchResult'
+import type { ISearchResultItem, ITabSearchStateResult } from '@/types/SearchResult'
 import { useSelectedTree, useTree } from '@/store/treeStore'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 
 // const hadithPageNumber = ref(1)
 // const totalItemsHadith = ref(0)
-const sortBy = ref()
-const orderBy = ref()
 const { selectedNode } = useTree()
 const selectedTreeItem = useSelectedTree()
 const shelfState = useDataShelfStateChanged()
@@ -219,9 +217,13 @@ function resetData() {
   resultDataOnState[dataTabValue.value].facets.splice(0)
 }
 
-async function runSearch(resetToDefault: boolean) {
-  console.log('runsearch', resetToDefault)
+function searchResultItemChaneged(searchresultItem: ISearchResultItem) {
+  const index = resultDataOnState[dataTabValue.value].results.findIndex(item => item.id === searchresultItem.id)
 
+  if (index !== -1)
+    resultDataOnState[dataTabValue.value].results[index].text = searchresultItem.text
+}
+async function runSearch(resetToDefault: boolean) {
   if (searchPhrase.value.length < 2)
     return
   const contentType = dataTabValue.value
@@ -231,6 +233,7 @@ async function runSearch(resetToDefault: boolean) {
     if (apiQueryParamData.Filter !== searchPhrase.value)
       apiQueryParamData.resetDynamicFields()
     apiQueryParamData.SearchIn = 1
+    apiQueryParamData.IsFullText = false
     apiQueryParamData.Filter = searchPhrase.value
     apiQueryParamData.PageNumber = 1
     resultDataOnState[contentType].page = 1
@@ -302,7 +305,11 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
       <template #default>
         <VFadeTransition>
           <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
-            <MCSearchResultBox v-model:is-expanded="maximizBoxOverlay" :box-type="DataBoxType.hadith" :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id" :selected-node="selectedNode" />
+            <MCSearchResultBox
+              v-model:is-expanded="maximizBoxOverlay" :box-type="DataBoxType.hadith" :search-phrase="searchPhrase" expandable :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id"
+              :selected-node="selectedNode"
+              @dataitemhaschanged="(value) => { currentitem = value }"
+            />
           </div>
         </VFadeTransition>
       </template>
@@ -375,9 +382,9 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
             <div class="pl-2 py-2">
               <div v-show="!resultDataOnState[dataTabValue].loading" ref="loadmorestart" />
               <MCSearchResultBox
-                v-for="(item) in resultDataOnState[dataTabValue].results" :key="item.id" :box-type="dataTabValue"
-                :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item"
-                @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox"
+                v-for="(item) in resultDataOnState[dataTabValue].results" :key="item.id" :box-type="dataTabValue" expandable
+                :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
+                @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
               />
               <div v-show="!resultDataOnState[dataTabValue].loading" ref="loadmoreend" />
             </div>
@@ -419,7 +426,7 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
   margin-inline: 0 0;
 }
 .maximizeSearchBox .v-overlay__content{
-    height: 90%;
+    height: 95%;
     width: 95%;
 }
 </style>

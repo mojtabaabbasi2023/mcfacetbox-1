@@ -9,7 +9,7 @@ export function joinWithDots(
   options?: JoinWithDotsOptions,
 ): string {
   const {
-    separator = ' ... ',
+    separator = '',
     maxItems,
     ellipsisText = ' [...]',
   } = options || {}
