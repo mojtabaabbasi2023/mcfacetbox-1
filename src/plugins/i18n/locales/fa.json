@@ -33,6 +33,7 @@
   "thereisnoitem":"موردی وجود ندارد",
   "before":"قبل از",
   "after":"بعد از ",
+
   'projectcount':"تعداد پروژه ها",
   'gate': {
     'pageTitle': 'درگاه ها',
@@ -329,6 +330,8 @@
 
     'specificNodeAdded':"گره (0) اضافه شد",
     "specificItemDeleted":"آیا مورد '(0)' حذف شود؟",
+    "contentisduplicate":"'(0)' مورد نظر در گره موجود میباشد، آیا میخواهید مجدد اضافه شود؟",
+
 
     'tryagainmin':"چند دقیقه دیگر تلاش کنید",
     "youmustselectoneperm":"باید حتما یک دسترسی را انتخاب کنید",

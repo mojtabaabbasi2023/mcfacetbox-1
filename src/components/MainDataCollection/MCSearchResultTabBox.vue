@@ -49,7 +49,7 @@ async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
     emit('contentToNodeAdded', datashelfbox.nodeId)
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('messageHasOccured', error.message, MessageType.error)
     else emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error)
   }

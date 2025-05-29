@@ -111,7 +111,7 @@ const changeOrder = async (orderNumber: number): Promise<boolean> => {
   }
   catch (error) {
     loadinglocal.value = false
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emits('handlemessage', error.message, MessageType.error)
     emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
 
@@ -139,7 +139,7 @@ const connecttoselectedNode = async (nodeid: number) => {
   catch (error) {
     loadinglocal.value = false
 
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emits('handlemessage', error.message, MessageType.error)
     else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
   }
@@ -232,7 +232,7 @@ const addcomment = async () => {
     })
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emits('handlemessage', error.message, MessageType.error)
     emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
     haserror = true

@@ -58,7 +58,7 @@ async function roleAdd() {
     })
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
@@ -81,7 +81,7 @@ async function roleEdit() {
     })
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }

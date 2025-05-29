@@ -11,8 +11,8 @@ import type { ISearchResultItem } from '@/types/SearchResult'
 
 interface Props {
   dataitem: ISearchResultItem // در حالت واقعی بهتر است این از یک interface عمومی مثل ISearchResultItem باشد
-  selectedTreeId: number
-  selectedNode: ISimpleTreeActionable
+  selectedTreeId?: number
+  selectedNode?: ISimpleTreeActionable
   searchPhrase?: string
   boxType: DataBoxType
   isExpanded?: boolean
@@ -29,25 +29,44 @@ const emit = defineEmits<{
 }
 >()
 
+const currentDataboxTypeToConnectToNode = ref(DataBoxType.text)
+const currentContentToConnectToNode = reactive(new DataShelfBoxModelNew(0, props.selectedTreeId ?? 0, props.selectedNode?.id ?? 0, ''))
 const { t } = useI18n({ useScope: 'global' })
 
 const loadinglocal = ref(false)
 
 const dialogSelectNodeVisible = ref(false)
-async function addContentToNode(datashelfbox: IDataShelfBoxNew) {
+async function addContentToNode(datashelfbox: IDataShelfBoxNew, duplicate: boolean) {
   loadinglocal.value = true
+
   try {
-    await $api(`app/excerpt/${DataBoxType[props.boxType]}`, {
+    await $api(`app/excerpt/${DataBoxType[currentDataboxTypeToConnectToNode.value]}`, {
       method: 'POST',
-      body: JSON.stringify(datashelfbox),
+      body: JSON.stringify({ ignoreDuplicate: duplicate, ...datashelfbox }),
       ignoreResponseError: false,
     })
+
     emit('contentToNodeAdded', datashelfbox.nodeId)
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
-      emit('messageHasOccured', error.message, MessageType.error)
-    else emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error)
+    if (error instanceof CustomFetchError && error.code !== '0') {
+      if (error.code === 'Encyclopedia.ErrorCode:010004') {
+        const title = formatString(t('alert.contentisduplicate'), t(DataBoxType[currentDataboxTypeToConnectToNode.value]))
+
+        const result = await confirmSwal(
+          title,
+          '',
+          t('$vuetify.confirmEdit.ok'),
+          t('$vuetify.confirmEdit.cancel'),
+          true, 'warning',
+          async () => {
+            await addContentToNode(datashelfbox, true)
+          },
+        )
+      }
+      else { emit('messageHasOccured', error.message, MessageType.error) }
+    }
+    else { emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error) }
   }
   loadinglocal.value = false
 }
@@ -74,16 +93,18 @@ const boxUrl = computed(() => {
   }
 })
 
-const onContextMenu = (e: MouseEvent) => {
-  // prevent the browser's default menu
-  e.preventDefault()
+function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentdata: IDataShelfBoxNew) {
+  currentDataboxTypeToConnectToNode.value = connectedboxType
+  contentdata.treeId = props.selectedTreeId ?? 0
+  contentdata.nodeId = props.selectedNode?.id ?? 0
 
+  //   { content: props.dataitem.text, description: '', labels: [], nodeId: props.selectedNode?.id ?? 0, treeId: 9, footNotes: [], id: 0, sourceId: props.dataitem.id.toString() }
   ContextMenu.showContextMenu({
     x: e.x,
     y: e.y,
     items: [
       {
-        disabled: props.selectedNode.id <= 0,
+        disabled: !props.selectedNode || props.selectedNode.id <= 0,
         icon: h('i', {
           class: 'tabler-plug-connected icon iconfont',
           style: {
@@ -93,7 +114,7 @@ const onContextMenu = (e: MouseEvent) => {
         }),
         label: t('datagathering.connecttoselectednode'),
         onClick: () => {
-          addContentToNode({ content: props.dataitem.text, description: '', labels: [], nodeId: props.selectedNode.id, treeId: 9, footNotes: [], id: 0, sourceId: props.dataitem.id.toString() })
+          addContentToNode(contentdata, false)
         },
       },
       {
@@ -107,6 +128,8 @@ const onContextMenu = (e: MouseEvent) => {
         }),
         onClick: () => {
         //   tempSelectedTabBoxItem.content = selectedItem.title
+          currentContentToConnectToNode.sourceId = contentdata.sourceId
+          currentContentToConnectToNode.content = contentdata.content
           dialogSelectNodeVisible.value = true
         },
       },
@@ -120,7 +143,8 @@ const onContextMenu = (e: MouseEvent) => {
         }),
         label: t('datagathering.connecttotree'),
         onClick: () => {
-          addContentToNode({ content: props.dataitem.text, description: '', labels: [], nodeId: 0, treeId: props.selectedTreeId, footNotes: [], id: 0, sourceId: props.dataitem.id.toString() })
+          contentdata.nodeId = 0
+          addContentToNode(contentdata, false)
         },
       },
       {
@@ -133,7 +157,7 @@ const onContextMenu = (e: MouseEvent) => {
           },
         }),
         onClick: () => {
-          alert('You click a menu item')
+        //   alert('You click a menu item')
         },
       },
 
@@ -160,7 +184,7 @@ function openBoxLink() {
 
     <MCDialogSelectNode
       v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible"
-      :selected-tree-id="props.selectedTreeId" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId, nodeid, props.dataitem.text, '', [], [], props.dataitem.id.toString()))"
+      :selected-tree-id="props.selectedTreeId ?? 0" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId ?? 0, nodeid, currentContentToConnectToNode.content, '', [], [], currentContentToConnectToNode.sourceId), false)"
     />
     <div class="result-box-actions-container">
       <VBtn icon size="22" variant="text" @click="openBoxLink">
@@ -174,7 +198,7 @@ function openBoxLink() {
       </VBtn>
     </div>
     <VCardText style="height: 95%;" class="w-100 py-1 px-1">
-      <component :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" :search-phrase="props.searchPhrase" @contextmenu="onContextMenu($event)" @dataitemchanged="(value) => $emit('dataitemhaschanged', value)" />
+      <component :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" :search-phrase="props.searchPhrase" @oncontextmenuselect="(event, contenttype, contentdata) => openContextMenu(event, contenttype, contentdata)" @dataitemchanged="(value) => $emit('dataitemhaschanged', value)" />
     </VCardText>
   </VCard>
 </template>

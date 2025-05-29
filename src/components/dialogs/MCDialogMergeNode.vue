@@ -59,7 +59,7 @@ const mergenode = async () => {
   }
   catch (error) {
     loading.value = false
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('nodeMergeFailed', error.message)
     else emit('nodeMergeFailed', t('alert.probleminnodeaddrefreshpage'))
   }

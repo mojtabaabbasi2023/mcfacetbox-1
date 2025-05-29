@@ -61,7 +61,7 @@ const transferNodeLocal = async () => {
   }
   catch (error) {
     loading.value = false
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('nodeTransferFaild', error.message)
     else emit('nodeTransferFaild', t('alert.probleminnodeaddrefreshpage'))
   }

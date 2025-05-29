@@ -70,7 +70,7 @@ const addNewNode = async () => {
   catch (error) {
     loading.value = false
 
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('nodeAddedFailed', error.message)
     else emit('nodeAddedFailed', t('alert.probleminnodeaddrefreshpage'))
   }

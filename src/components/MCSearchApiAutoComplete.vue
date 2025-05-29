@@ -110,7 +110,7 @@ async function addSearchData() {
     console.log('error', error)
 
     actionloading.value = false
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('errorHasOccured', error.message)
     else emit('errorHasOccured', t('httpstatuscodes.0'))
   }

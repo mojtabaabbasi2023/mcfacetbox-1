@@ -3,9 +3,9 @@ import { useLoginState } from '@/store/baseStore'
 import { LoginState } from '@/types/baseModels'
 
 export class CustomFetchError extends FetchError {
-  public code: number
+  public code: string
   public response?: Response
-  constructor(code: number, message: string) {
+  constructor(code: string, message: string) {
     super(message)
     this.code = code
     this.name = 'CustomError'
@@ -29,9 +29,9 @@ export const handleFetchError = async (responseData: any, statusCode: number) =>
     }, 4000)
   }
   if (responseData && responseData.error && responseData.error.message)
-    throw new CustomFetchError(2, responseData.error.message)
+    throw new CustomFetchError(responseData.error.code, responseData.error.message)
   else
-    throw new CustomFetchError(0, 'Error Not Handled')
+    throw new CustomFetchError('0', 'Error Not Handled')
 
   // else
   //   throw new CustomFetchError(response.status, 'Error Was Handled', response)

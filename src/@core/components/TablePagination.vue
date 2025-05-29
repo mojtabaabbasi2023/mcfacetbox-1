@@ -1,9 +1,11 @@
 <script setup lang="ts">
+type Density = 'compact' | 'comfortable' | 'default'
 interface Props {
   page: number
   itemsPerPage: number
   totalItems: number
   divider?: boolean
+  density?: Density
 }
 
 interface Emit {
@@ -29,6 +31,7 @@ const updatePage = (value: number) => {
       </p>
 
       <VPagination
+        :density="`${!props.density ? 'comfortable' : props.density}`"
         :model-value="page" active-color="primary" :length="Math.ceil(totalItems / itemsPerPage)"
         :total-visible="$vuetify.display.xs ? 1 : Math.min(Math.ceil(totalItems / itemsPerPage), 5)"
         @update:model-value="updatePage"

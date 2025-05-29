@@ -93,16 +93,17 @@ watch(() => apiQueryParamData.PageSize, async (newval, oldval) => {
 watch(() => resultDataOnState[dataTabValue.value].page, async newval => {
   if ((newval !== apiQueryParamData.PageNumber)) {
     apiQueryParamData.PageNumber = newval
-    console.log('pagenumber', resultDataOnState[dataTabValue.value].page, newval)
+
+    // console.log('pagenumber', resultDataOnState[dataTabValue.value].page, newval)
 
     await runSearch(false)
   }
 })
 watch(resultDataOnState[dataTabValue.value].selectedFacets, async newval => {
   let facetChange = false
-  console.log('selectedfacet', resultDataOnState[dataTabValue.value])
+
+  //   console.log('selectedfacet', resultDataOnState[dataTabValue.value])
   Object.keys(newval).forEach(key => {
-    // console.log('facetboxx', !apiQueryParamData[key], JSON.stringify(apiQueryParamData[key]) !== JSON.stringify(newval[key]), JSON.stringify(apiQueryParamData[key]), JSON.stringify(newval[key]))
     if (!apiQueryParamData[key] || JSON.stringify(apiQueryParamData[key]) !== JSON.stringify(newval[key])) {
       apiQueryParamData[key] = newval[key]
       facetChange = true
@@ -219,7 +220,6 @@ function resetData() {
 
 function searchResultItemChaneged(searchresultItem: ISearchResultItem) {
   const index = resultDataOnState[dataTabValue.value].results.findIndex(item => item.id === searchresultItem.id)
-
   if (index !== -1)
     resultDataOnState[dataTabValue.value].results[index].text = searchresultItem.text
 }
@@ -252,9 +252,11 @@ async function runSearch(resetToDefault: boolean) {
     resultDataOnState[contentType].totalItems = resultCastedData.totalCount
     if (resultCastedData.items.length > 0) {
       resultDataOnState[contentType].results = resultCastedData.items.map(item => {
+        console.log('itemid', item.id)
+
         switch (contentType) {
           case DataBoxType.hadith:
-          return new HadithSearchResultItemModel(item.highLight, item.id, item.qaelTitleList, item.noorLibLink, item.qaelList, item.bookTitle, item.bookTitleShort, item.sourceId, item.pageNum, item.vol)
+          return new HadithSearchResultItemModel(item.highLight, item.id, item.text ?? '', item.shortText ?? '', item.qaelTitleList, item.noorLibLink, item.qaelList, item.bookTitle, item.bookTitleShort, item.pageNum, item.sourceId, item.vol)
         case DataBoxType.quran:
           return new HadithSearchResultItemModel()
         case DataBoxType.vocabulary:
@@ -265,6 +267,8 @@ async function runSearch(resetToDefault: boolean) {
       })
       resultDataOnState[contentType].facets = resultCastedData.facets || []
     }
+    console.log('resultdata', resultDataOnState[contentType].results)
+
     resultDataOnState[contentType].loading = false
   }
   catch (error) {
@@ -279,21 +283,11 @@ async function runSearch(resetToDefault: boolean) {
     //   toast.error(t('alert.probleminGetExcerpt'))
     toast.error(t('alert.probleminSearch'))
   }
-
-//   if (resetToDefault) {
-//     /** مقادیر فست ها و صفحه بندی را به حالت اولیه برمیگرداند */
-//     if (apiQueryParamData.Filter !== searchPhrase.value)
-//       apiQueryParamData.resetDynamicFields()
-//     apiQueryParamData.SearchIn = 1
-//     apiQueryParamData.Filter = searchPhrase.value
-//     apiQueryParamData.PageNumber = 1
-//     hadithPageNumber.value = 1
-//   }
-//   loading.value = true
-//   await fetchData()
 }
 
 const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
+  console.log('tabboxitem', tabBoxItem)
+
   currentitem.value = tabBoxItem
   maximizBoxOverlay.value = true
 }
@@ -303,15 +297,13 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
   <VContainer class="mc-data-container">
     <VOverlay v-model="maximizBoxOverlay" :close-on-back="false" contained class="maximizeSearchBox d-flex justify-center">
       <template #default>
-        <VFadeTransition>
-          <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
-            <MCSearchResultBox
-              v-model:is-expanded="maximizBoxOverlay" :box-type="DataBoxType.hadith" :search-phrase="searchPhrase" expandable :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id"
-              :selected-node="selectedNode"
-              @dataitemhaschanged="(value) => { currentitem = value }"
-            />
-          </div>
-        </VFadeTransition>
+        <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
+          <MCSearchResultBox
+            v-model:is-expanded="maximizBoxOverlay" :box-type="DataBoxType.hadith" :search-phrase="searchPhrase" expandable :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id"
+            :selected-node="selectedNode" @content-to-node-added="contentToNodeAdded"
+            @dataitemhaschanged="(value) => { currentitem = value }"
+          />
+        </div>
       </template>
     </VOverlay>
     <VRow dense class="align-center">
@@ -407,13 +399,6 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
         />
       </VCol>
     </VRow>
-    <!--
-      <VRow dense>
-      <div v-show="loadingdata" class="loading-container">
-      <VProgressCircular size="20" width="2" indeterminate />
-      </div>
-      </VRow>
-    -->
   </VContainer>
 </template>
 

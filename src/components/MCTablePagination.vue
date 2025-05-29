@@ -79,7 +79,6 @@ function paginationMouseEnter() {
             {{ paginationMeta({ page, itemsPerPage }, totalItems, $t("Show"), $t("to"), $t("of"), $t("entries")) }}
           </p>
           <VPagination
-
             :model-value="page" active-color="primary" :length="Math.ceil(totalItems / itemsPerPage)"
             :total-visible="$vuetify.display.xs ? 1 : Math.min(Math.ceil(totalItems / itemsPerPage), 3)"
             @update:model-value="updatePage"
@@ -95,7 +94,6 @@ function paginationMouseEnter() {
                 { value: 25, title: '25' },
                 { value: 50, title: '50' },
                 { value: 100, title: '100' },
-                { value: -1, title: 'همه' },
               ]"
               style="inline-size: 5.5rem;"
               @update:model-value="updatePageSize"

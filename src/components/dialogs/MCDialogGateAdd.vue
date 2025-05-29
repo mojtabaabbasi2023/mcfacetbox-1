@@ -53,7 +53,7 @@ async function gateAdd() {
     })
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }
@@ -75,7 +75,7 @@ async function gateEdit() {
     })
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       toast.error(error.message)
     else toast.error(t('httpstatuscodes.0'))
   }

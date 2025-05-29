@@ -63,7 +63,7 @@ async function getDataBoxItem() {
     console.log('error', error)
 
     opening.value = false
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emits('handlemessage', error.message, MessageType.error)
     else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
     emits('update:isDialogVisible', false)
@@ -96,7 +96,7 @@ const acceptchanged = async () => {
   catch (error) {
     isloading.value = false
 
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emits('handlemessage', error.message, MessageType.error)
     else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
   }

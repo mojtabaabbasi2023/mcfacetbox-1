@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { MessageType, SizeType } from '@/types/baseModels'
-import { HadithSearchResultItemModel, HadithTranslateItemModel } from '@/types/SearchResult'
-import type { IHadithSearchResultItem, IHadithTranslateItem } from '@/types/SearchResult'
+import type { GridResultFacet } from '@/types/baseModels'
+import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
+import { type IDataShelfBoxNew } from '@/types/dataShelf'
+import { HadithSearchResultItemModel } from '@/types/SearchResult'
+import { DataShelfBoxModelNew } from '@/types/dataShelf'
+
+import type { IHadithSearchResultItem, IHadithTranslateItem, ISearchResultItem } from '@/types/SearchResult'
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
@@ -13,6 +17,11 @@ const loadingMore = ref(false)
 const showfulltext = ref(false)
 const hadithItemLocal = reactive<IHadithSearchResultItem>(new HadithSearchResultItemModel())
 const translatelist = reactive<IHadithTranslateItem[]>([])
+const relatedhadith = reactive<IHadithSearchResultItem[]>([])
+const relatedHadithPage = ref(1)
+const relatedHadithPageSize = ref(5)
+const relatedHadithTotalCount = ref(0)
+const ispaginationFullSize = ref(true)
 
 // const { selectedNode } = useTree()
 interface Props {
@@ -24,6 +33,7 @@ interface Emit {
   (e: 'messageHasOccured', message: string, type: MessageType): void
   (e: 'contentToNodeAdded', connectednodeid: number): void
   (e: 'dataitemchanged', value: IHadithSearchResultItem): void
+  (e: 'oncontextmenuselect', mouseEvent: MouseEvent, contenttype: DataBoxType, boxdata: IDataShelfBoxNew): void
 }
 async function selectmorelessHadith() {
   if (showfulltext.value) {
@@ -50,7 +60,7 @@ async function loadcompletehadith() {
     showfulltext.value = true
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('messageHasOccured', error.message, MessageType.error)
     emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error)
   }
@@ -68,7 +78,30 @@ async function loadtranslate() {
   catch (error) {
     loadinglocal.value = false
 
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
+      emit('messageHasOccured', error.message, MessageType.error)
+    emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error)
+  }
+}
+async function loadrelated() {
+  loadinglocal.value = true
+  try {
+    const result = await $api <GridResultFacet<IHadithSearchResultItem>>(`app/source/hadith/${props.dataitem.id}/related?PageNumber=${relatedHadithPage.value}&PageSize=${relatedHadithPageSize.value}`, {
+      method: 'GET',
+    })
+
+    relatedhadith.splice(0)
+
+    relatedhadith.push(...result.items.map(item => {
+      return new HadithSearchResultItemModel(item.highLight, item.id, item.text, item.shortText, item.qaelTitleList, item.noorLibLink, item.qaelList, item.bookTitle, item.bookTitleShort, item.pageNum, item.sourceId, item.vol)
+    }))
+    relatedHadithTotalCount.value = result.totalCount
+    loadinglocal.value = false
+  }
+  catch (error) {
+    loadinglocal.value = false
+
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('messageHasOccured', error.message, MessageType.error)
     emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error)
   }
@@ -86,7 +119,7 @@ async function loadtranslate() {
 const dataTabValue = ref(1)
 
 onMounted(async () => {
-  if (props.isExpanded && props.dataitem.text.length < 1) {
+  if (props.isExpanded) {
     loadinglocal.value = true
     await loadcompletehadith()
     loadinglocal.value = false
@@ -98,13 +131,32 @@ watch(dataTabValue, async newval => {
       if (translatelist.length < 1)
         loadtranslate()
       break;
-
+    case 3:
+      if (relatedhadith.length < 1)
+        loadrelated()
+    break;
     default:
       break;
   }
 })
 function openBoxLink(linkPath: string) {
   window.open(linkPath, '_blank')
+}
+watch(relatedHadithPage, () => {
+  loadrelated()
+},
+)
+
+const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDataShelfBoxNew) => {
+  // prevent the browser's default menu
+  e.preventDefault()
+  emit('oncontextmenuselect', e, contentType, contentdata)
+}
+
+function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
+  const index = relatedhadith.findIndex(item => item.id === searchresultItem.id)
+  if (index !== -1)
+    relatedhadith[index].text = searchresultItem.text
 }
 
 // onMounted(() => {
@@ -133,17 +185,33 @@ function openBoxLink(linkPath: string) {
     <div class="overflow-y-auto mb-2">
       <VTabsWindow v-model="dataTabValue">
         <VTabsWindowItem :value="3" :transition="false">
-          <VCardText />
+          <div v-if="relatedhadith.length > 0" class="d-flex flex-column position-relative">
+            <div class="pl-2 py-2">
+              <MCSearchResultBox
+                v-for="(item) in relatedhadith" :key="item.id" :box-type="DataBoxType.hadith" :expandable="false"
+                :dataitem="item" :search-phrase="searchPhrase"
+                @message-has-occured="(message, type) => $emit('messageHasOccured', message, type)" @contextmenu="onContextMenu($event, DataBoxType.hadith, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], item.id.toString()))" @dataitemhaschanged="relatedHadithItemChanged"
+              />
+            </div>
+            <div class="paging-container-fixed">
+              <TablePagination
+                v-model:page="relatedHadithPage"
+                density="compact"
+                :items-per-page="relatedHadithPageSize"
+                :total-items="relatedHadithTotalCount"
+              />
+            </div>
+          </div>
         </VTabsWindowItem>
 
         <VTabsWindowItem :value="2" :transition="false">
-          <VCard v-for="(item) in translatelist" :key="item.id" class="mc-search-result">
+          <div v-for="(item) in translatelist" :key="item.id" class="mc-search-result" @contextmenu="onContextMenu($event, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'))">
             <div class="py-1 px-1">
               <VRow>
                 <VCol>
                   <div class="flex">
                     <div>
-                      <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${item.sourceMainTitle}, ${`${$t('volume')} ${props.dataitem.vol}`}, ${`${$t('pagenum')} ${props.dataitem.pageNum}`}` }} </span>
+                      <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${item.sourceMainTitle}, ${`${$t('volume')} ${item.vol}`}, ${`${$t('pagenum')} ${item.pageNum}`}` }} </span>
                       <VBtn icon size="22" variant="text" class="mx-2" @click="openBoxLink(item.noorLibLink)">
                         <VIcon icon="tabler-external-link" size="18" />
                       </VBtn>
@@ -157,14 +225,14 @@ function openBoxLink(linkPath: string) {
                 </VCol>
               </VRow>
             </div>
-          </VCard>
+          </div>
         </VTabsWindowItem>
         <VTabsWindowItem :value="1" :transition="false">
-          <div class="py-1 px-1">
+          <div class="py-1 px-1" @contextmenu="onContextMenu($event, DataBoxType.hadith, new DataShelfBoxModelNew(0, 0, 0, props.dataitem.text, '', [], [], props.dataitem.id.toString()))">
             <VRow>
               <VCol>
                 <div class="flex">
-                  <div v-if="props.dataitem.qaelList.length > 1">
+                  <div v-if="props.dataitem.qaelList && props.dataitem.qaelList.length > 1">
                     <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitem.qaelTitleList }}</span>
                   </div>
                   <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitem.bookTitle}, ${`${$t('volume')} ${props.dataitem.vol}`}, ${`${$t('pagenum')} ${props.dataitem.pageNum}`}` }} </span></div>
@@ -173,8 +241,9 @@ function openBoxLink(linkPath: string) {
             </VRow>
             <VRow no-gutters class="justify-start align-start hadithtext">
               <VCol md="12">
-                <div v-html="(props.dataitem.text.length > 1 && (showfulltext || props.isExpanded)) ? props.dataitem.text : props.dataitem.highlightText" />
-                <VBtn v-if="props.dataitem.highLight.some(item => item.includes('...')) && !showfulltext && !props.isExpanded" style="font-size: large;" variant="text" :loading="loadingMore" @click="selectmorelessHadith">
+                <div v-html="(props.dataitem.text.length > 1 && (showfulltext || props.isExpanded)) ? props.dataitem.text : ((props.dataitem.highLight && props.dataitem.highLight.length > 0) ? props.dataitem.highlightText : props.dataitem.shortText)" />
+                <!-- test: {{ (props.dataitem.highLight) ? 'true' : 'false' }} -->
+                <VBtn v-if="!props.isExpanded && !showfulltext && props.dataitem.hasShortText" style="font-size: large;" variant="text" :loading="loadingMore" @click="selectmorelessHadith">
                   {{ $t('more') }}
                 </VBtn>
                 <VBtn v-if="showfulltext && !props.isExpanded" style="font-size: large;" variant="text" :loading="loadingMore" @click="selectmorelessHadith">
@@ -186,26 +255,5 @@ function openBoxLink(linkPath: string) {
         </VTabsWindowItem>
       </VTabsWindow>
     </div>
-    <!--
-      <VCardText style="height: auto;">
-      <VRow>
-      <VCol>
-      <div class="flex">
-      <div v-if="props.dataitem.qaelList.length > 1">
-      <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitem.qaelTitleList }}</span>
-      </div>
-      <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitem.bookTitle}, ${`${$t('volume')} ${props.dataitem.vol}`}, ${`${$t('pagenum')} ${props.dataitem.pageNum}`}` }} </span></div>
-      </div>
-      </VCol>
-      </VRow>
-      <VRow no-gutters class="justify-start align-start">
-      <VCol md="12">
-      <div v-if="props.dataitem" class="hadithtext" v-html="props.dataitem.highlightText" />
-      </VCol>
-      </VRow>
-      </VCardText>
-    -->
-
-    <!-- </VCard> -->
   </div>
 </template>

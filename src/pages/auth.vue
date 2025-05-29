@@ -55,7 +55,7 @@ async function sendTokenRequest(systemKey: string) {
     }
   }
   catch (error) {
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       toast.error(error.message)
 
     //   toast.error(t(`httpstatuscodes.${error.code}`))

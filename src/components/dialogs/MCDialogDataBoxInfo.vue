@@ -36,7 +36,7 @@ async function getDataBoxItem() {
   }
   catch (error) {
     opening.value = false
-    if (error instanceof CustomFetchError && error.code > 0)
+    if (error instanceof CustomFetchError && error.code !== '0')
       emit('errorHasOccured', error.message)
     else emit('errorHasOccured', t('httpstatuscodes.0'))
     emit('update:isDialogVisible', false)
