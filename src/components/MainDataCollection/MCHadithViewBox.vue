@@ -2,11 +2,11 @@
 import type { GridResultFacet } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import { type IDataShelfBoxNew } from '@/types/dataShelf'
-import { HadithSearchResultItemModel } from '@/types/SearchResult'
+import { HadithSearchResultItemModel } from '@/types/hadithResult'
 import { DataShelfBoxModelNew } from '@/types/dataShelf'
 import { getSelectedTextWithinElement } from '@/utils/htmlUtils'
-
-import type { IHadithSearchResultItem, IHadithTranslateItem, ISearchResultItem } from '@/types/SearchResult'
+import type { ISearchResultItem } from '@/types/SearchResult'
+import type { IHadithSearchResultItem, IHadithTranslateItem } from '@/types/hadithResult'
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
@@ -16,11 +16,11 @@ const { t } = useI18n({ useScope: 'global' })
 const loadinglocal = ref(false)
 const loadingMore = ref(false)
 const showfulltext = ref(false)
-const translatelist = reactive<IHadithTranslateItem[]>([])
+const translatelist = shallowReactive<IHadithTranslateItem[]>([])
 const relatedhadith = reactive<IHadithSearchResultItem[]>([])
-const relatedHadithPage = ref(1)
-const relatedHadithPageSize = ref(5)
-const relatedHadithTotalCount = ref(0)
+const relatedHadithPage = shallowRef(1)
+const relatedHadithPageSize = shallowRef(5)
+const relatedHadithTotalCount = shallowRef(0)
 
 // const { selectedNode } = useTree()
 interface Props {
@@ -183,7 +183,7 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
     <div class="overflow-y-auto mb-2">
       <VTabsWindow v-model="dataTabValue">
         <VTabsWindowItem :value="3" :transition="false">
-          <div v-if="relatedhadith.length > 0" class="d-flex flex-column position-relative">
+          <div v-if="relatedhadith.length > 0 && dataTabValue === 3" class="d-flex flex-column position-relative">
             <div class="pl-2 py-2">
               <MCSearchResultBox
                 v-for="(item) in relatedhadith"
@@ -204,36 +204,38 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
         </VTabsWindowItem>
 
         <VTabsWindowItem :value="2" :transition="false">
-          <div v-for="(item) in translatelist" :key="item.id" class="mc-search-result">
-            <div
-              class="py-1 px-1" @contextmenu="(e) => {
-                const textContainer = e.currentTarget.querySelector('.selectable-content') || e.currentTarget;
-                onContextMenu(e, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), textContainer)
-              }"
-            >
-              <VRow>
-                <VCol>
-                  <div class="flex">
-                    <div>
-                      <span class="searchDataBoxInfoTitle no-select"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${item.sourceMainTitle}, ${`${$t('volume')} ${item.vol}`}, ${`${$t('pagenum')} ${item.pageNum}`}` }} </span>
-                      <VBtn icon size="22" variant="text" class="mx-2" @click="openBoxLink(item.noorLibLink)">
-                        <VIcon icon="tabler-external-link" size="18" />
-                      </VBtn>
+          <div v-if="dataTabValue === 2">
+            <div v-for="(item) in translatelist" :key="item.id" class="mc-search-result">
+              <div
+                class="py-1 px-1" @contextmenu="(e) => {
+                  const textContainer = e.currentTarget.querySelector('.selectable-content') || e.currentTarget;
+                  onContextMenu(e, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), textContainer)
+                }"
+              >
+                <VRow>
+                  <VCol>
+                    <div class="flex">
+                      <div>
+                        <span class="searchDataBoxInfoTitle no-select"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${item.sourceMainTitle}, ${`${$t('volume')} ${item.vol}`}, ${`${$t('pagenum')} ${item.pageNum}`}` }} </span>
+                        <VBtn icon size="22" variant="text" class="mx-2" @click="openBoxLink(item.noorLibLink)">
+                          <VIcon icon="tabler-external-link" size="18" />
+                        </VBtn>
+                      </div>
                     </div>
-                  </div>
-                </VCol>
-              </VRow>
-              <!-- @contextmenu="onContextMenu($event, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), ($event.currentTarget as HTMLElement))" -->
-              <VRow no-gutters class="justify-start align-start">
-                <VCol md="12">
-                  <div class="selectable-content" v-html="item.text" />
-                </VCol>
-              </VRow>
+                  </VCol>
+                </VRow>
+                <!-- @contextmenu="onContextMenu($event, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), ($event.currentTarget as HTMLElement))" -->
+                <VRow no-gutters class="justify-start align-start">
+                  <VCol md="12">
+                    <div class="selectable-content" v-html="item.text" />
+                  </VCol>
+                </VRow>
+              </div>
             </div>
           </div>
         </VTabsWindowItem>
         <VTabsWindowItem :value="1" :transition="false">
-          <div class="py-1 px-1">
+          <div v-if="dataTabValue === 1" class="py-1 px-1">
             <VRow>
               <VCol>
                 <div class="flex no-select">

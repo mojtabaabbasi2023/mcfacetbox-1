@@ -1,5 +1,5 @@
 import { isNull, isUndefined } from '@sindresorhus/is'
-import type { FacetType, ISimpleSelectableDTO } from './baseModels'
+import type { FacetType } from './baseModels'
 import { joinWithDots } from '@/utils/stringUtils'
 
 export function convertFacetItemToFacetTree(items: IFacetItem[]): IFacetTreeItem[] {
@@ -88,13 +88,6 @@ export interface IFacetBox {
 //   content: ISimpleSelectableDTO<number>[] = []
 // }
 
-export interface IqaelItem {
-  id: number
-  roleId: number
-  title: string
-  roleTitle: string
-}
-
 export interface ISearchResultItem {
   [x: string]: any
   highLight: string[]
@@ -103,38 +96,6 @@ export interface ISearchResultItem {
   text: string
   shortText: string
   readonly hasShortText: boolean
-}
-
-/**
- * Represents a hadith translation item
- */
-export interface IHadithTranslateItem extends ISearchResultItem {
-  hadithId: number
-  noorLibLink: string
-  sourceMainTitle: string
-  sourceShortTitle: string
-  authorTitle: string
-  authorId: number
-  vol: number
-  pageNum: number
-}
-
-/**
- * Represents a hadith search result item with additional metadata
- */
-export interface IHadithSearchResultItem extends ISearchResultItem {
-  qaelTitleList: string
-  noorLibLink: string
-  qaelList: IqaelItem[]
-  bookTitle: string
-  bookTitleShort: string
-  pageNum: number
-  sourceId: number
-  vol: number
-  translateCount: number
-  explanationCount: number
-  translateList: IHadithTranslateItem[]
-  hadithRelatedCount: number
 }
 
 /**
@@ -171,146 +132,6 @@ export class SearchResultItemModel implements ISearchResultItem {
   }
 }
 
-/**
- * Model for hadith search results
- */
-export class HadithSearchResultItemModel
-  extends SearchResultItemModel
-  implements IHadithSearchResultItem {
-  qaelTitleList: string = ''
-  noorLibLink: string = ''
-  qaelList: IqaelItem[] = []
-  bookTitle: string = ''
-  bookTitleShort: string = ''
-  pageNum: number = 0
-  sourceId: number = 0
-  vol: number = 0
-  translateCount: number = 0
-  explanationCount: number = 0
-  translateList: IHadithTranslateItem[] = []
-  hadithRelatedCount: number = 0
-
-  constructor(
-    highLight: string[] = [],
-    id: number = 0,
-    text: string = '',
-    shortText: string = '',
-    qaelTitleList: string = '',
-    noorLibLink: string = '',
-    qaelList: IqaelItem[] = [],
-    bookTitle: string = '',
-    bookTitleShort: string = '',
-    pageNum: number = 0,
-    sourceId: number = 0,
-    vol: number = 0,
-  ) {
-    super(highLight, id, text, shortText)
-    this.qaelTitleList = qaelTitleList
-    this.noorLibLink = noorLibLink
-    this.qaelList = qaelList
-    this.bookTitle = bookTitle
-    this.bookTitleShort = bookTitleShort
-    this.pageNum = pageNum
-    this.sourceId = sourceId
-    this.vol = vol
-  }
-}
-
-// export class HadithSearchResultItemModel implements IHadithSearchResultItem {
-//   highLight: string[] = []
-//   get highlightText(): string {
-//     return joinWithDots(this.highLight, {
-//       separator: '',
-//       maxItems: 30,
-//       ellipsisText: '',
-//     })
-//   }
-
-//   get hasShortText(): boolean {
-//     return !!((this.highLight && this.highLight.some(item => item.includes('...'))) || this.shortText.length > 0)
-//   }
-
-//   [x: string]: any
-//   id: number = 0
-//   qaelTitleList: string = ''
-//   noorLibLink: string = ''
-//   qaelList: IqaelItem[] = []
-//   bookTitle: string = ''
-//   bookTitleShort: string = ''
-//   pageNum: number = 0
-//   sourceId: number = 0
-//   vol: number = 0
-//   translateCount: number = 0
-//   explanationCount: number = 0
-//   translateList: IHadithTranslateItem[] = []
-//   hadithRelatedCount: number = 0
-//   text: string = ''
-//   shortText: string = ''
-//   constructor(highlight: string[] = [], id: number = 0, qaelTitleList: string = '', noorLibLink: string = '', qaelList: IqaelItem[] = [], bookTitle: string = '', bookTitleShort: string = '', sourceId: number = 0, pageNum: number = 0, vol: number = 0) {
-//     this.highLight = highlight
-//     this.id = id
-//     this.qaelTitleList = qaelTitleList
-//     this.noorLibLink = noorLibLink
-//     this.qaelList = qaelList
-//     this.bookTitle = bookTitle
-//     this.bookTitleShort = bookTitleShort
-//     this.pageNum = pageNum
-//     this.sourceId = sourceId
-//     this.vol = vol
-//   }
-// }
-export class HadithTranslateItemModel
-  extends SearchResultItemModel
-  implements IHadithTranslateItem {
-  hadithId: number = 0
-  noorLibLink: string = ''
-  sourceMainTitle: string = ''
-  sourceShortTitle: string = ''
-  authorTitle: string = ''
-  authorId: number = 0
-
-  constructor(
-    highLight: string[] = [],
-    id: number = 0,
-    text: string = '',
-    shortText: string = '',
-    hadithId: number = 0,
-    noorLibLink: string = '',
-    sourceMainTitle: string = '',
-    sourceShortTitle: string = '',
-    authorTitle: string = '',
-    authorId: number = 0,
-  ) {
-    super(highLight, id, text, shortText)
-    this.hadithId = hadithId
-    this.noorLibLink = noorLibLink
-    this.sourceMainTitle = sourceMainTitle
-    this.sourceShortTitle = sourceShortTitle
-    this.authorTitle = authorTitle
-    this.authorId = authorId
-  }
-
-  [x: string]: any
-  vol: number = 0
-  pageNum: number = 0
-}
-
-// export class SearchResultItemModel implements ISearchResultItem {
-//   [x: string]: any
-//   highLight: string[] = []
-//   highlightText: string = ''
-//   id: number = 0
-//   text: string = ''
-//   shortText: string = ''
-//   constructor(highlight: string[] = [], id: number = 0, shortText = '', text = '') {
-//     this.highLight = highlight
-//     this.id = id
-//     this.shortText = shortText
-//     this.text = text
-//   }
-
-//   hasShortText: boolean = false
-// }
 export interface ITabSearchStateResult {
   page: number
   totalItems: number
@@ -319,24 +140,3 @@ export interface ITabSearchStateResult {
   results: ISearchResultItem[]
   loading: boolean
 }
-
-// export const qaelSearchResultItemSchema = z.object({
-//   id: z.number(),
-//   roleId: z.number(),
-//   title: z.string(),
-//   roleTitle: z.string(),
-// })
-
-// export const hadithSearchResultItemSchema = z.object({
-//   highLight: z.array(z.string()),
-//   id: z.number(),
-//   qaelTitleList: z.string(),
-//   noorLibLink: z.string(),
-
-//   qaelList: z.object(qaelSearchResultItemSchema),
-//   bookTitle: z.string(),
-//   bookTitleShort: z.string(),
-//   pageNum: z.number(),
-//   sourceId: z.number(),
-//   vol: z.number(),
-// })

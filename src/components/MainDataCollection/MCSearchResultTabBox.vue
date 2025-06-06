@@ -2,8 +2,8 @@
 import type { ISimpleTreeActionable } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import { DataShelfBoxModelNew, type IDataShelfBoxNew } from '@/types/dataShelf'
-import { HadithSearchResultItemModel } from '@/types/SearchResult'
-import type { IHadithSearchResultItem } from '@/types/SearchResult'
+import { HadithSearchResultItemModel } from '@/types/hadithResult'
+import type { IHadithSearchResultItem } from '@/types/hadithResult'
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
@@ -250,17 +250,7 @@ const onContextMenu = (e: MouseEvent) => {
   gap: 6px;
   padding: 4px 4px 2px;
 }
-.searchDataBoxInfoTitle {
-    font-size: .7em;
-    font-weight: bold;
-}
 
-.searchDataBoxInfoText {
-  color: #555;
-  font-size: .7rem;
-  line-height: 1.3;
-  display: inline;
-}
 // .mc-search-result:hover {
 //   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 //   transform: translateY(-2px);

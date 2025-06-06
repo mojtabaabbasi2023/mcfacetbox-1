@@ -191,7 +191,12 @@ function openBoxLink() {
 </script>
 
 <template>
-  <VCard v-no-context-menu class="h-100 w-100 mc-search-result" :class="{ 'not-expanded': !isExpanded }" @mouseenter="showTools = true" @mouseleave="showTools = false">
+  <VCard
+    v-no-context-menu class="h-100 w-100 mc-search-result" :class="[
+      { 'not-expanded': !isExpanded },
+      boxType === DataBoxType.hadith ? 'hadith-card' : 'quran-card',
+    ]" @mouseenter="showTools = true" @mouseleave="showTools = false"
+  >
     <MCLoading v-if="loadinglocal" :showloading="loadinglocal" :loadingsize="SizeType.MD" />
 
     <MCDialogSelectNode
@@ -239,41 +244,18 @@ function openBoxLink() {
 .v-btn--disabled {
   opacity: 0.25;
 }
-@keyframes hadithCardGlow {
+/* انیمیشن گلوی مشترک */
+@keyframes cardGlowHadith {
   0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
   70% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
-
-.mc-search-result.not-expanded:hover {
-  animation: hadithCardGlow 1.5s ease-out;
-  border: 1px solid #4CAF50;
-//   transform: scale(1.01);
+@keyframes cardGlowQuran {
+  0% { box-shadow: 0 0 0 0 rgba(33, 150, 243,.4); }
+   70% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
-
-/* افکت نور پس‌زمینه */
-// .mc-search-result:hover::after {
-//   content: '';
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   bottom: 0;
-//   background: radial-gradient(circle at center, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
-//   z-index: -1;
-//   opacity: 0;
-//   transition: opacity 0.4s ease;
-// }
-
-.mc-search-result.not-expanded:hover::after {
-  opacity: 1;
-}
-
-/* تغییر رنگ متن حدیث هنگام هاور */
-.mc-search-result.not-expanded:hover .text {
-  color: #222;
-}
-/* استایل اصلی کارت */
+/* استایل‌های مشترک برای هر دو نوع کارت */
 .mc-search-result {
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -281,35 +263,43 @@ function openBoxLink() {
   margin-bottom: 16px;
   overflow: hidden;
   border: 1px solid #e0e0e0;
-  background-color: #ffffff;
   width: 100%;
   transition: all 0.4s ease;
 }
 
-/* بخش اطلاعات (قالبین و آدرس) */
-.flex {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  padding: 4px 4px 2px;
-}
-.searchDataBoxInfoTitle {
-    font-size: .7em;
-    font-weight: bold;
+/* استایل مخصوص کارت‌های حدیث (سبز) */
+.mc-search-result.hadith-card {
+
+  border-color: #c8e6c9; /* سبز روشن */
+
+  &.not-expanded:hover {
+    animation: cardGlowHadith 1.5s ease-out;
+    border: 1px solid #4CAF50; /* سبز اصلی */
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  }
+
+  .hadithtext {
+    border-right: 3px solid #4CAF50; /* سبز اصلی */
+    background-color: #f5faf5; /* سبز بسیار روشن */
+  }
 }
 
-.searchDataBoxInfoText {
-  color: #555;
-  font-size: .7rem;
-  line-height: 1.3;
-  display: inline;
-}
-// .mc-search-result:hover {
-//   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-//   transform: translateY(-2px);
-// }
-/* متن حدیث */
+/* استایل مخصوص کارت‌های آیه (آبی) */
+.mc-search-result.quran-card {
 
+  border-color: #bbdefb; /* آبی روشن */
+
+  &.not-expanded:hover {
+    animation: cardGlowQuran 1.5s ease-out;
+    border: 1px solid rgb(33, 150, 243); /* آبی اصلی */
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+  }
+
+  .hadithtext {
+    border-right: 3px solid #2196F3; /* آبی اصلی */
+   background-color: #f5f9ff; /* آبی بسیار روشن */
+  }
+}
 .hadithtext {
   font-size: 1.4rem;
   line-height: 1.6;
@@ -317,13 +307,10 @@ function openBoxLink() {
   padding: 2px 5px;
   background-color: #f8f9fa;
   border-radius: 6px;
-  border-right: 3px solid #4CAF50;
   margin: 0;
   font-family: 'Amiri', 'Traditional Arabic', serif;
-
 }
 
-/* هایلایت کلمات جستجو شده */
 .hadithtext em {
   font-style: normal;
   background-color: #FFF9C4;
@@ -332,14 +319,4 @@ function openBoxLink() {
   color: #D32F2F;
   font-weight: 500;
 }
-
-// .hadithtext em {
-//   background-color: #fff9c4; /* پس‌زمینه زرد روشن */
-//   color: #d32f2f; /* رنگ متن قرمز تیره */
-//   font-style: normal; /* غیرایتالیک */
-//   padding: 0.2em 0.4em; /* فاصله داخلی */
-//   border-radius: 4px; /* لبه‌های گرد */
-//   font-weight: bold; /* متن پررنگ */
-//   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* سایه ملایم */
-//   }
 </style>
