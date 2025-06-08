@@ -19,9 +19,12 @@ const selectedTreeItem = useSelectedTree()
 const shelfState = useDataShelfStateChanged()
 const ispaginationFullSize = ref(false)
 const { t } = useI18n({ useScope: 'global' })
-const loadmorestart = ref(null)
-const loadmoreend = ref(null)
-const mainDataResult = ref(null)
+const loadmorestarthadith = shallowRef(null)
+const loadmoreendhadith = shallowRef(null)
+const loadmorestartquran = shallowRef(null)
+const loadmoreendquran = shallowRef(null)
+const mainDataResultHadith = shallowRef(null)
+const mainDataResultQuran = shallowRef(null)
 const dataTabValue = ref<DataBoxType>(DataBoxType.hadith)
 const toast = useToast()
 const isDialogSelectBookVisible = ref(false)
@@ -68,16 +71,17 @@ const resultDataOnState = reactive<Record<DataBoxType, ITabSearchStateResult>>({
 })
 
 // const loading = ref(false)
-const maximizBoxOverlay = ref(false)
+const maximizBoxOverlay = shallowRef(false)
 const currentitem = ref<ISearchResultItem>(new SearchResultItemModel())
 
 // const loading = ref(false)
 const selectedBooks = ref<string[]>([])
 
 const { stop } = useIntersectionObserver(
-  [loadmorestart, loadmoreend],
-  ([entrystart, entryend], observerElement) => {
-    if ((entrystart?.isIntersecting || entryend?.isIntersecting) && (resultDataOnState[dataTabValue.value].results.length <= resultDataOnState[dataTabValue.value].totalItems))
+  [loadmorestarthadith, loadmoreendhadith, loadmoreendquran, loadmorestartquran],
+  ([entrystarthadith, entryendhadith, entrystartquran, entryendquran], observerElement) => {
+    if ((entrystarthadith?.isIntersecting || entryendhadith?.isIntersecting || entrystartquran?.isIntersecting || entryendquran?.isIntersecting)
+    && (resultDataOnState[dataTabValue.value].results.length <= resultDataOnState[dataTabValue.value].totalItems))
       ispaginationFullSize.value = true
   },
 )
@@ -109,22 +113,31 @@ const { stop } = useIntersectionObserver(
 //   }
 // }
 
-const { isScrolling: isscrolling, arrivedState: scrollarriveState } = useScroll(mainDataResult)
+/**
+ * !SECTION
+ * تعریف نمونه های تشخیص اسکرول، این تعریف ها بازای هر تب اینجا باشد
+ */
+const { isScrolling: isscrollingHadith, arrivedState: scrollarriveStateHadith } = useScroll(mainDataResultHadith)
+const { isScrolling: isscrollingQuran, arrivedState: scrollarriveStateQuran } = useScroll(mainDataResultQuran)
 
-// const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi(createUrl(`app/source/${DataBoxType[dataTabValue.value]}`, {
-//   query: apiQueryParamData,
-// }), { immediate: false })
-
-watch(isscrolling, () => {
-  //   if (!isscrolling.value && (scrollarriveState.bottom || scrollarriveState.top) && !ispaginationFullSize.value)
-  //     ispaginationFullSize.value = true
-  //   else
-  if (isscrolling && !(scrollarriveState.bottom || scrollarriveState.top))
+/**
+ * !SECTION
+ * واچ های مرتب با تشخیص اسکرول تب ها، بهتر است یکجا باشد
+ */
+watch(isscrollingHadith, () => {
+  if (isscrollingHadith && !(scrollarriveStateHadith.bottom || scrollarriveStateHadith.top))
     ispaginationFullSize.value = false
 })
+watch(isscrollingQuran, () => {
+  if (isscrollingQuran && !(scrollarriveStateQuran.bottom || scrollarriveStateQuran.top))
+    ispaginationFullSize.value = false
+})
+
 watch(() => apiQueryParamData[dataTabValue.value].PageSize, async (newval, oldval) => {
   if (newval === oldval)
     return
+  console.log('datatabpagesize', dataTabValue.value)
+
   await runSearch(false)
 })
 watch(() => resultDataOnState[dataTabValue.value].page, async newval => {
@@ -132,6 +145,7 @@ watch(() => resultDataOnState[dataTabValue.value].page, async newval => {
     apiQueryParamData[dataTabValue.value].PageNumber = newval
 
     // console.log('pagenumber', resultDataOnState[dataTabValue.value].page, newval)
+    console.log('datatabpage', dataTabValue.value)
 
     await runSearch(false)
   }
@@ -139,7 +153,7 @@ watch(() => resultDataOnState[dataTabValue.value].page, async newval => {
 watch(resultDataOnState[dataTabValue.value].selectedFacets, async newval => {
   let facetChange = false
 
-  //   console.log('selectedfacet', resultDataOnState[dataTabValue.value])
+  console.log('selectedfacet', resultDataOnState[dataTabValue.value])
   Object.keys(newval).forEach(key => {
     if (!apiQueryParamData[dataTabValue.value][key] || JSON.stringify(apiQueryParamData[dataTabValue.value][key]) !== JSON.stringify(newval[key])) {
       apiQueryParamData[dataTabValue.value][key] = newval[key]
@@ -240,6 +254,7 @@ async function runSearch(resetToDefault: boolean) {
         }
       })
       resultDataOnState[contentType].facets = resultCastedData.facets || []
+      console.log('fillfacets', contentType, resultDataOnState[contentType].facets)
     }
     resultDataOnState[contentType].loading = false
   }
@@ -324,11 +339,11 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
     </VRow>
     <VDivider />
     <MCLoading :showloading="resultDataOnState[dataTabValue].loading" :loadingsize="SizeType.MD" />
-
-    <VTabsWindow ref="mainDataResult" v-model="dataTabValue" class="mc-data-scroll">
-      <VTabsWindowItem :value="DataBoxType.hadith" :transition="false">
+    <!-- class="mc-data-scroll" -->
+    <VTabsWindow v-model="dataTabValue" class="h-100">
+      <VTabsWindowItem :value="DataBoxType.hadith" :transition="false" class="h-100">
         <VFadeTransition>
-          <div v-if="dataTabValue === DataBoxType.hadith">
+          <div v-if="dataTabValue === DataBoxType.hadith" ref="mainDataResultHadith" class="mc-data-scrolly">
             <VRow v-if="resultDataOnState[DataBoxType.hadith].results.length > 0 && !resultDataOnState[DataBoxType.hadith].loading" dense>
               <VCol md="3">
                 <div v-if="resultDataOnState[DataBoxType.hadith].facets.length > 0">
@@ -342,49 +357,50 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
               </VCol>
               <VCol md="9">
                 <div class="pl-2 py-2">
-                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmorestart" />
+                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmorestarthadith" />
                   <MCSearchResultBox
                     v-for="item in resultDataOnState[DataBoxType.hadith].results"
                     :key="item.id" :box-type="DataBoxType.hadith" expandable
                     :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
                     @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
                   />
-                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmoreend" />
+                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmoreendhadith" />
                 </div>
               </VCol>
             </VRow>
           </div>
         </VFadeTransition>
       </VTabsWindowItem>
-      <VTabsWindowItem :value="DataBoxType.quran" :transition="false" />
-      <VFadeTransition>
-        <div v-if="dataTabValue === DataBoxType.quran">
-          <VRow v-if="resultDataOnState[DataBoxType.quran].results.length > 0 && !resultDataOnState[DataBoxType.quran].loading" dense>
-            <VCol md="3">
-              <div v-if="resultDataOnState[DataBoxType.quran].facets.length > 0">
-                <MCFacetBox
-                  v-for="item in resultDataOnState[DataBoxType.quran].facets"
-                  :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.quran].selectedFacets[item.key]" :istree="item.isTree"
-                  :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
-                  :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
-                />
-              </div>
-            </VCol>
-            <VCol md="9">
-              <div class="pl-2 py-2">
-                <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmorestart" />
-                <MCSearchResultBox
-                  v-for="item in resultDataOnState[DataBoxType.quran].results"
-                  :key="item.id" :box-type="DataBoxType.quran" expandable
-                  :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
-                  @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
-                />
-                <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmoreend" />
-              </div>
-            </VCol>
-          </VRow>
-        </div>
-      </VFadeTransition>
+      <VTabsWindowItem :value="DataBoxType.quran" :transition="false" class="h-100">
+        <VFadeTransition>
+          <div v-if="dataTabValue === DataBoxType.quran" ref="mainDataResultQuran" class="mc-data-scrolly">
+            <VRow v-if="resultDataOnState[DataBoxType.quran].results.length > 0 && !resultDataOnState[DataBoxType.quran].loading" dense>
+              <VCol md="3">
+                <div v-if="resultDataOnState[DataBoxType.quran].facets.length > 0">
+                  <MCFacetBox
+                    v-for="item in resultDataOnState[DataBoxType.quran].facets"
+                    :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.quran].selectedFacets[item.key]" :istree="item.isTree"
+                    :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
+                    :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
+                  />
+                </div>
+              </VCol>
+              <VCol md="9">
+                <div class="pl-2 py-2">
+                  <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmorestartquran" />
+                  <MCSearchResultBox
+                    v-for="item in resultDataOnState[DataBoxType.quran].results"
+                    :key="item.id" :box-type="DataBoxType.quran" expandable
+                    :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
+                    @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
+                  />
+                  <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmoreendquran" />
+                </div>
+              </VCol>
+            </VRow>
+          </div>
+        </VFadeTransition>
+      </VTabsWindowItem>
       <VTabsWindowItem :value="DataBoxType.vocabulary" :transition="false" />
     </VTabsWindow>
     <VRow dense>

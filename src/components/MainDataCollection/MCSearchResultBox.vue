@@ -203,39 +203,42 @@ function openBoxLink() {
       v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible"
       :selected-tree-id="props.selectedTreeId ?? 0" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId ?? 0, nodeid, currentContentToConnectToNode.content, '', [], [], currentContentToConnectToNode.sourceId), false)"
     />
-    <VFadeTransition>
-      <div v-if="showTools" class="result-box-actions-container">
-        <VBtn icon size="22" variant="text" @click="openBoxLink">
-          <VIcon icon="tabler-external-link" size="18" />
-          <VTooltip
-            activator="parent"
-            location="top center"
-          >
-            {{ $t('openlink') }}
-          </VTooltip>
-        </VBtn>
-        <VBtn v-if="!props.isExpanded && props.expandable" icon size="22" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitem)">
-          <VIcon icon="tabler-maximize" size="18" />
-          <VTooltip
-            activator="parent"
-            location="top center"
-          >
-            {{ $t('showdetails') }}
-          </VTooltip>
-        </VBtn>
-        <VBtn v-if="props.isExpanded && props.expandable" icon size="22" variant="text" @click="$emit('update:isExpanded', false)">
-          <VIcon icon="tabler-x" size="18" />
-          <VTooltip
-            activator="parent"
-            location="top center"
-          >
-            {{ $t('$vuetify.close') }}
-          </VTooltip>
-        </VBtn>
-      </div>
-    </VFadeTransition>
+    <!-- <VFadeTransition> -->
+    <div v-if="showTools" class="result-box-actions-container">
+      <VBtn icon size="22" variant="text" @click="openBoxLink">
+        <VIcon icon="tabler-external-link" size="18" />
+        <VTooltip
+          activator="parent"
+          location="top center"
+        >
+          {{ $t('openlink') }}
+        </VTooltip>
+      </VBtn>
+      <VBtn v-if="!props.isExpanded && props.expandable" icon size="22" variant="text" @click="$emit('maximizeSearchTabBox', props.dataitem)">
+        <VIcon icon="tabler-maximize" size="18" />
+        <VTooltip
+          activator="parent"
+          location="top center"
+        >
+          {{ $t('showdetails') }}
+        </VTooltip>
+      </VBtn>
+      <VBtn v-if="props.isExpanded && props.expandable" icon size="22" variant="text" @click="$emit('update:isExpanded', false)">
+        <VIcon icon="tabler-x" size="18" />
+        <VTooltip
+          activator="parent"
+          location="top center"
+        >
+          {{ $t('$vuetify.close') }}
+        </VTooltip>
+      </VBtn>
+    </div>
+    <!-- </VFadeTransition> -->
     <VCardText style="height: 95%;" class="w-100 py-1 px-1">
-      <component :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" :search-phrase="props.searchPhrase" @oncontextmenuselect="(event, contenttype, contentdata, element) => openContextMenu(event, contenttype, contentdata, element)" @dataitemchanged="(value) => $emit('dataitemhaschanged', value)" />
+      <component
+        :is="componentName" :dataitem="props.dataitem" :is-expanded="props.isExpanded ?? false" :show-tools="showTools" :search-phrase="props.searchPhrase" @oncontextmenuselect="(event, contenttype, contentdata, element) => openContextMenu(event, contenttype, contentdata, element)"
+        @dataitemchanged="(value) => $emit('dataitemhaschanged', value)"
+      />
     </VCardText>
   </VCard>
 </template>
@@ -301,6 +304,7 @@ function openBoxLink() {
   }
 }
 .hadithtext {
+
   font-size: 1.4rem;
   line-height: 1.6;
   color: #333;

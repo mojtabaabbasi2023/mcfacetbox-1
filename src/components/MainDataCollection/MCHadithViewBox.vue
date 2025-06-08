@@ -19,7 +19,7 @@ const showfulltext = ref(false)
 const translatelist = shallowReactive<IHadithTranslateItem[]>([])
 const relatedhadith = reactive<IHadithSearchResultItem[]>([])
 const relatedHadithPage = shallowRef(1)
-const relatedHadithPageSize = shallowRef(5)
+const relatedHadithPageSize = shallowRef(10)
 const relatedHadithTotalCount = shallowRef(0)
 
 // const { selectedNode } = useTree()
@@ -27,6 +27,7 @@ interface Props {
   dataitem: IHadithSearchResultItem
   isExpanded: boolean
   searchPhrase: string
+  showTools: boolean
 }
 interface Emit {
   (e: 'messageHasOccured', message: string, type: MessageType): void
@@ -238,8 +239,8 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
           <div v-if="dataTabValue === 1" class="py-1 px-1">
             <VRow>
               <VCol>
-                <div class="flex no-select">
-                  <div v-if="props.dataitem.qaelList && props.dataitem.qaelList.length > 1">
+                <div class="d-flex no-select">
+                  <div v-if="props.dataitem.qaelList && props.dataitem.qaelList.length > 1" class="pl-2">
                     <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitem.qaelTitleList }}</span>
                   </div>
                   <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitem.bookTitle}, ${`${$t('volume')} ${props.dataitem.vol}`}, ${`${$t('pagenum')} ${props.dataitem.pageNum}`}` }} </span></div>
@@ -248,22 +249,24 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
             </VRow>
             <!-- @contextmenu="onContextMenu($event, DataBoxType.hadith, new DataShelfBoxModelNew(0, 0, 0, props.dataitem.text, '', [], [], props.dataitem.id.toString()), ($event.currentTarget as HTMLElement))" -->
             <VRow
-              no-gutters class="justify-start align-start hadithtext"
+              no-gutters class="d-flex justify-start align-start hadithtext"
 
               @contextmenu="(e) => {
                 const textContainer = e.currentTarget.querySelector('.selectable-content') || e.currentTarget;
                 onContextMenu(e, DataBoxType.hadith, new DataShelfBoxModelNew(0, 0, 0, props.dataitem.text, '', [], [], props.dataitem.id.toString()), textContainer)
               }"
             >
-              <VCol md="12">
+              <VCol md="12" class="d-flex flex-column hadith-container">
                 <div class="selectable-content" v-html="(props.dataitem.text.length > 1 && (showfulltext || props.isExpanded)) ? props.dataitem.text : ((props.dataitem.highLight && props.dataitem.highLight.length > 0) ? props.dataitem.highlightText : props.dataitem.shortText)" />
                 <!-- test: {{ (props.dataitem.highLight) ? 'true' : 'false' }} -->
-                <VBtn v-if="!props.isExpanded && !showfulltext && props.dataitem.hasShortText" class="no-select" style="font-size: large;" variant="text" :loading="loadingMore" @click="selectmorelessHadith">
-                  {{ $t('more') }}
-                </VBtn>
-                <VBtn v-if="showfulltext && !props.isExpanded" class="no-select" style="font-size: large;" variant="text" :loading="loadingMore" @click="selectmorelessHadith">
-                  {{ $t('less') }}
-                </VBtn>
+                <div class="button-container">
+                  <VBtn v-if="!props.isExpanded && !showfulltext && props.dataitem.hasShortText" class="no-select h-100 action-btn" style="font-size: large;" variant="text" :loading="loadingMore" @click="selectmorelessHadith">
+                    {{ $t('more') }}
+                  </VBtn>
+                  <VBtn v-if="showfulltext && !props.isExpanded" class="no-select action-btn" style="font-size: large;" variant="text" :loading="loadingMore" @click="selectmorelessHadith">
+                    {{ $t('less') }}
+                  </VBtn>
+                </div>
               </VCol>
             </VRow>
           </div>
