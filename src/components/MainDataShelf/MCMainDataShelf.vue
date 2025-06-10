@@ -210,64 +210,6 @@ watch(shelfState.lastState, async () => {
   catch (error) {
   }
 })
-
-// onFetchResponse(() => {
-// //   response.json().then(value => {
-//   try {
-//     const result = resultData.value as GridResultFacet<IDataShelfBoxView>
-
-//     resetData()
-
-//     totalItems.value = result.totalCount
-//     setTimeout(() => {
-//       facetboxItems.value.push(...result.facets)
-
-//       resultdataItems.value = [...result.items]
-
-//       //   activefilter.value = !activefilter.value
-
-//     //   activefilter.value = !activefilter.value
-//     }, 1000)
-
-//     // if (isUndefined(resultdataItems.value))
-//     //   toast.error(t('alert.probleminGetExcerpt'))
-
-//     //   if ((result.items.length ?? 0) <= 0)
-//     //     toast.info(t('alert.resultNotFound'))
-//   }
-//   catch (error) {
-//     toast.error(t('alert.probleminLoadExcerpt'))
-//   }
-
-//   // loading.value = true
-// //   })
-// })
-
-// onFetchError(error => {
-//   if (isNullOrUndefined(error) || error.name === 'AbortError')
-//     return
-
-//   //   console.log('responseerror', error.name)
-
-//   //   error.json().then(value => {
-//   try {
-//     const result = resultData.value as IRootServiceError
-
-//     console.log('result', result)
-
-//     if (result && result.error && result.error.message)
-//       toast.error(result.error.message)
-//     else
-//       toast.error(t('alert.probleminGetExcerpt'))
-//   }
-//   catch {
-//     toast.error(t('alert.probleminLoadSearchResult'))
-//   }
-
-//   // loading.value = true
-// //   })
-// })
-
 async function refreshDataShelf(changescroll: boolean) {
   loadingdata.value = true
   try {
@@ -286,7 +228,7 @@ async function refreshDataShelf(changescroll: boolean) {
         facetboxItems.value.push(...resultCastedData.facets)
         resultdataItems.value.push(...resultCastedData.items)
         nextTick(() => {
-          if (changescroll)
+          if (changescroll && mainDataResult.value)
             mainDataResult.value.$el.scrollTop = lastscrolltopposition.value
         })
       }, 1000)
@@ -322,43 +264,42 @@ function changeselectAllState() {
   else
     selectAll.value.state = SelectAllState.Select
 }
-function deleteSelectedItem() {
-//   const serviceError = shallowRef()
+async function deleteSelectedItem() {
+  const serviceError = shallowRef()
 
-  //   const result = await confirmSwal(
-  //     t('datashelfbox.deleteselecteditem'),
-  //     '',
-  //     t('$vuetify.confirmEdit.ok'),
-  //     t('$vuetify.confirmEdit.cancel'),
-  //     true, 'warning',
-  //     async () => {
-  //       try {
-  //         await $api(('app/excerpt/').replace('//', '/') + databoxItem.value.id, {
-  //           method: 'DELETE',
-  //         })
-  //       }
-  //       catch (error) {
-  //         serviceError.value = error
-  //       }
+  const result = await confirmSwal(
+    t('datashelfbox.deleteselecteditem'),
+    '',
+    t('$vuetify.confirmEdit.ok'),
+    t('$vuetify.confirmEdit.cancel'),
+    true, 'warning',
+    async () => {
+      try {
+        await $api(('app/excerpt/'), {
+          method: 'DELETE',
+          body: JSON.stringify(resultdataItemsSort.value.filter(item => item.selected === true).map(a => a.id)),
+        })
+      }
+      catch (error) {
+        serviceError.value = error
+      }
 
-  //       return { serviceError }
-  //     },
-  //   )
+      return { serviceError }
+    },
+  )
 
-  //   if (result.isConfirmed) {
-  //     const err = serviceError.value
-  //     if (err) {
-  //       if (err instanceof CustomFetchError && err.message)
-  //         emits('handlemessage', serviceError.value.message, MessageType.error)
-  //       else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
-  //     }
-  //     else {
-  //       emits('handlemessage', t('alert.deleteDataSuccess'), MessageType.success)
-  //       emits('refreshdatashelf')
-  //     }
-  //   }
-
-// resultdataItemsSort.value.find(item => item.selected === true)
+  if (result.isConfirmed) {
+    const err = serviceError.value
+    if (err) {
+      if (err instanceof CustomFetchError && err.message)
+        handleDataBoxMessages(serviceError.value.message, MessageType.error)
+      else handleDataBoxMessages(t('httpstatuscodes.0'), MessageType.error)
+    }
+    else {
+      handleDataBoxMessages(t('alert.deleteDataSuccess'), MessageType.success)
+      refreshDataShelf(true)
+    }
+  }
 }
 
 // برای کار کردن با متدهای داخلی حعبه های داده انتخاب شده آنها را در یک لیست ذخیره می کنیم
@@ -468,7 +409,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.treemode') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text">
+            <VBtn icon size="small" variant="text" @click="deleteSelectedItem">
               <VIcon icon="tabler-trash-x" size="22" />
               <VTooltip
                 activator="parent"
