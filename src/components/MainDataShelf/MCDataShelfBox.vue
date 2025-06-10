@@ -340,6 +340,7 @@ const isSelected = computed({
 })
 
 defineExpose({ increaseOrder, decreaseOrder })
+
 watch(dialogAddLabelVisible, () => {
   selectedbox.value = dialogAddLabelVisible.value
 }, { deep: false })

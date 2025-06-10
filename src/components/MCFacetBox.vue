@@ -25,8 +25,8 @@ const treeItems = computed(() =>
   convertFacetItemToFacetTree(props.dataitems),
 )
 
-const selectedTreeFacetItems = ref<number[]>([])
-const selectedFacetItems = ref<number[]>([])
+const selectedTreeFacetItems = ref<string | number[]>([])
+const selectedFacetItems = ref<string | number[]>([])
 
 const switchState = ref<boolean>(props.dataitems[0].key === 'true')
 const searchText = ref('')

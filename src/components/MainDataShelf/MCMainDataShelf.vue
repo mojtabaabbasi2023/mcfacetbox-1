@@ -4,7 +4,7 @@ import { isNumericString } from '@sindresorhus/is'
 import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useTree } from '@/store/treeStore'
-import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
+import type { GridResultFacet } from '@/types/baseModels'
 import { MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxView } from '@/types/dataShelf'
 import { DataShelfRouteQueryParams } from '@/types/dataShelf'
@@ -19,12 +19,11 @@ interface IMCDataShelfBoxREF {
   element: any
   dataBoxId: number
 }
-const loadmorestart = ref(null)
-const loadmoreend = ref(null)
+const loadmorestart = shallowRef(null)
+const loadmoreend = shallowRef(null)
 const mainDataResult = ref(null)
-const activefilter = ref(false)
-
-const totalItems = ref(0)
+const activefilter = shallowRef(false)
+const totalItems = shallowRef(0)
 const currentNodeId = ref(0)
 const currentTreeId = ref(0)
 const searchQuery = ref('')
@@ -32,15 +31,17 @@ const selectAll = ref<ISelectAllState>({ state: SelectAllState.Deselect, count: 
 const resultdataItems = ref<IDataShelfBoxView[]>([])
 const facetboxItems = ref<IFacetBox[]>([])
 const databoxrefs = ref<IMCDataShelfBoxREF[]>([])
-const increasebtn = ref<VBtn>()
-const decreasebtn = ref<VBtn>()
+const increasebtn = shallowRef<VBtn>()
+const decreasebtn = shallowRef<VBtn>()
 const apiQueryParamtData = reactive<QueryRequestModel>(new QueryRequestModel())
 const routeQueryParamData = reactive<DataShelfRouteQueryParams>(new DataShelfRouteQueryParams())
 const isDialogDataShelfBoxEdit = ref(false)
-const facettimeout: ReturnType<typeof setTimeout> | null = null
-const facetinterval = ref(3000)
+
+// const facettimeout: ReturnType<typeof setTimeout> | null = null
+// const facetinterval = ref(3000)
 const { t } = useI18n({ useScope: 'global' })
-const loadingdata = ref(false)
+const loadingdata = shallowRef(false)
+const lastscrolltopposition = shallowRef(0)
 
 // const loadmore = ref(null)
 const toast = useToast()
@@ -48,7 +49,7 @@ const { selectedNode } = useTree()
 const shelfState = useDataShelfStateChanged()
 const route = useRoute()
 const router = useRouter()
-const ispaginationFullSize = ref(false)
+const ispaginationFullSize = shallowRef(false)
 
 // const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi(createUrl('app/excerpt', {
 //   query: apiQueryParamtData,
@@ -62,13 +63,16 @@ const { stop } = useIntersectionObserver(
   },
 )
 
-const { isScrolling: isscrolling, arrivedState: scrollarriveState } = useScroll(mainDataResult)
+const { y, isScrolling: isscrolling, arrivedState: scrollarriveState } = useScroll(mainDataResult)
 
 watch(isscrolling, () => {
   if (isscrolling && !(scrollarriveState.bottom || scrollarriveState.top))
     ispaginationFullSize.value = false
 })
-
+watch(y, newval => {
+  if (newval > 0)
+    lastscrolltopposition.value = y.value
+})
 watch(route, () => {
   checkRoute()
 }, { immediate: true })
@@ -131,7 +135,7 @@ async function checkRoute() {
 
     // console.log('facetbeforechange', routeQueryParamData.selectedFacetItems)
 
-    refreshDataShelf()
+    refreshDataShelf(false)
   }
   catch (error) {
     console.log('checkrouteeroor', error)
@@ -201,7 +205,7 @@ function updateRouteIfNeeded(params: Record<string, any>) {
 watch(shelfState.lastState, async () => {
   try {
     if (currentNodeId.value === shelfState.connectednodeid.value)
-      refreshDataShelf()
+      refreshDataShelf(true)
   }
   catch (error) {
   }
@@ -264,7 +268,7 @@ watch(shelfState.lastState, async () => {
 // //   })
 // })
 
-async function refreshDataShelf() {
+async function refreshDataShelf(changescroll: boolean) {
   loadingdata.value = true
   try {
     const { data } = await useApi(createUrl('app/excerpt', {
@@ -280,8 +284,11 @@ async function refreshDataShelf() {
       setTimeout(() => {
         loadingdata.value = false
         facetboxItems.value.push(...resultCastedData.facets)
-
-        resultdataItems.value = [...resultCastedData.items]
+        resultdataItems.value.push(...resultCastedData.items)
+        nextTick(() => {
+          if (changescroll)
+            mainDataResult.value.$el.scrollTop = lastscrolltopposition.value
+        })
       }, 1000)
     }
     else { loadingdata.value = false }
@@ -470,19 +477,6 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.deleteselecteditem') }}
               </VTooltip>
             </VBtn>
-
-            <!--
-              <VBtn icon size="small" variant="text">
-              <VIcon icon="tabler-filters" size="22" />
-              <VTooltip
-              activator="parent"
-              location="top center"
-              >
-              {{ $t('datashelfbox.allnode') }}
-              </VTooltip>
-              </VBtn>
-            -->
-
             <VBtn icon size="small" variant="text" @click="isDialogDataShelfBoxEdit = true">
               <VIcon icon="tabler-pencil-plus" size="22" />
               <VTooltip
@@ -492,7 +486,7 @@ function databoxOrderChanged(databoxItemId: number) {
                 {{ $t('datashelfbox.add') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="refreshDataShelf">
+            <VBtn icon size="small" variant="text" @click="refreshDataShelf(false)">
               <VIcon icon="tabler-refresh" size="22" />
               <VTooltip
                 activator="parent"
@@ -561,12 +555,8 @@ function databoxOrderChanged(databoxItemId: number) {
                   :next-item-order="i + 1"
                   :prev-item-priority="i > 0 ? resultdataItemsSort[i - 1].priority : -1"
                   :next-item-priority="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].priority : -1"
-                  @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf"
+                  @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf(true)"
                 />
-                <!--
-                  :prev-item-order="i > 0 ? resultdataItemsSort[i - 1].order : -100"
-                  :next-item-order="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].order : -100"
-                -->
                 <div v-show="!loadingdata" ref="loadmoreend" />
               </div>
             </VCol>
@@ -575,9 +565,6 @@ function databoxOrderChanged(databoxItemId: number) {
             <p>{{ $t('datashelfbox.fishnotexist') }}</p>
           </div>
         </VFadeTransition>
-        <!-- <VRow > -->
-
-        <!-- </VRow> -->
       </VCol>
     </VRow>
 
@@ -593,7 +580,7 @@ function databoxOrderChanged(databoxItemId: number) {
       </VCol>
     </VRow>
     <MCDialogDataShelfBoxEdit
-      v-if="isDialogDataShelfBoxEdit" v-model:is-dialog-visible="isDialogDataShelfBoxEdit" :treeid="currentTreeId" :nodeid="currentNodeId" :datashelfboxid="0" @insertdatabox-item="refreshDataShelf"
+      v-if="isDialogDataShelfBoxEdit" v-model:is-dialog-visible="isDialogDataShelfBoxEdit" :treeid="currentTreeId" :nodeid="currentNodeId" :datashelfboxid="0" @insertdatabox-item="refreshDataShelf(true)"
       @handlemessage="handleDataBoxMessages"
     />
   </VContainer>
