@@ -56,8 +56,11 @@ async function loadcompletehadith() {
       method: 'GET',
     })
 
-    emit('dataitemchanged', result)
-    showfulltext.value = true
+    console.log('result', result)
+    if (result.id) {
+      emit('dataitemchanged', result)
+      showfulltext.value = true
+    }
   }
   catch (error) {
     if (error instanceof CustomFetchError && error.code !== '0')
@@ -174,10 +177,10 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
           {{ $t('hadith') }}
         </VTab>
         <VTab :value="2" variant="elevated" rounded="sm">
-          {{ $t('translate') }}<span class="pr-1">({{ props.dataitem.translateCount.toString() }})</span>
+          {{ $t('translate') }}<span class="pr-1">({{ props.dataitem.translateCount ?? 0 }})</span>
         </VTab>
         <VTab :value="3" variant="elevated" rounded="sm">
-          {{ $t('relatedhadith') }}<span class="pr-1">({{ props.dataitem.hadithRelatedCount.toString() }})</span>
+          {{ $t('relatedhadith') }}<span class="pr-1">({{ props.dataitem.hadithRelatedCount ?? 0 }})</span>
         </VTab>
       </VTabs>
     </VRow>
@@ -243,7 +246,9 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
                   <div v-if="props.dataitem.qaelList && props.dataitem.qaelList.length > 1" class="pl-2">
                     <span class="searchDataBoxInfoTitle"> {{ $t('qael') }}: </span><span class="searchDataBoxInfoText">{{ props.dataitem.qaelTitleList }}</span>
                   </div>
-                  <div>  <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitem.bookTitle}, ${`${$t('volume')} ${props.dataitem.vol}`}, ${`${$t('pagenum')} ${props.dataitem.pageNum}`}` }} </span></div>
+                  <div v-if="props.dataitem.bookTitle && props.dataitem.bookTitle.length > 1">
+                    <span class="searchDataBoxInfoTitle"> {{ $t('address') }}: </span><span class="searchDataBoxInfoText">{{ `${props.dataitem.bookTitle}, ${`${$t('volume')} ${props.dataitem.vol}`}, ${`${$t('pagenum')} ${props.dataitem.pageNum}`}` }} </span>
+                  </div>
                 </div>
               </VCol>
             </VRow>

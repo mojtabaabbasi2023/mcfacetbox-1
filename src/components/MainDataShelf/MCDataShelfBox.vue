@@ -4,6 +4,7 @@ import { VFadeTransition } from 'vuetify/lib/components/index.mjs'
 import { DataShelfBoxModelView } from '@/types/dataShelf'
 import type { IDataShelfBoxView, IOrderChangedResponse } from '@/types/dataShelf'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
+import { type ISearchResultItem, SearchResultItemModel } from '@/types/SearchResult'
 
 const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number;nextItemPriority: number;prevItemPriority: number }>()
 const emits = defineEmits<Emits>()
@@ -38,7 +39,7 @@ interface Emits {
   (e: 'selectedchanged', isSelected: boolean, databoxitem: IDataShelfBoxView): void
   (e: 'orderchanged', itemId: number): void
   (e: 'refreshdatashelf'): void
-
+  (e: 'showrelateddata', selectedItem: ISearchResultItem, datatype: DataBoxType): void
   (e: 'handlemessage', message: string, type: MessageType): void
 
 }
@@ -365,6 +366,11 @@ const increaseOrder = async () => {
   }
 }
 
+function showrelatedData() {
+  console.log('showrelateddata', new SearchResultItemModel([], databoxItem.value.sourceId, '', ''))
+
+  emits('showrelateddata', new SearchResultItemModel([], databoxItem.value.sourceId, databoxItem.value.content, ''), databoxItem.value.excerptType.id)
+}
 function labelhasbeenadded(nodeid: number, labelcount: number) {
   databoxItem.value.labelCount = labelcount
   emits('handlemessage', t('datashelfbox.labeladded'), MessageType.success)
@@ -550,7 +556,7 @@ watch(isDialogDataShelfBoxEdit, () => {
           </VTooltip>
         </VBtn>
 
-        <VBtn v-if="databoxItem.excerptType.id === DataBoxType.quran || databoxItem.excerptType.id === DataBoxType.hadith" icon size="25" variant="text" @click="">
+        <VBtn v-if="databoxItem.excerptType.id === DataBoxType.quran || databoxItem.excerptType.id === DataBoxType.hadith" icon size="25" variant="text" @click="showrelatedData">
           <VIcon icon="tabler-circles-relation" size="20" />
           <VTooltip
             activator="parent"

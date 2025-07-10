@@ -41,7 +41,7 @@ export class AyahSearchResultItemModel
   implements IAyahSearchResultItem {
   constructor(
     highLight: string[] = [],
-    id: number = 0,
+    id: number | string = 0,
     ayahNumber: number = 0,
     link: string = '',
     shortText: string = '',

@@ -5,11 +5,12 @@ import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useTree } from '@/store/treeStore'
 import type { GridResultFacet } from '@/types/baseModels'
-import { MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
+import { DataBoxType, MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxView } from '@/types/dataShelf'
 import { DataShelfRouteQueryParams } from '@/types/dataShelf'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
-import { FacetBoxModel, type IFacetBox } from '@/types/SearchResult'
+import { FacetBoxModel, SearchResultItemModel } from '@/types/SearchResult'
+import type { IFacetBox, ISearchResultItem } from '@/types/SearchResult'
 
 interface ISelectAllState {
   state: SelectAllState
@@ -43,7 +44,13 @@ const { t } = useI18n({ useScope: 'global' })
 const loadingdata = shallowRef(false)
 const lastscrolltopposition = shallowRef(0)
 
-// const loadmore = ref(null)
+/**
+ * متغیرهای مرتبط با نمایش قسمت داده های مرتبط
+ */
+const relatedData_Overlay = shallowRef(false)
+const relatedData_Type = shallowRef<DataBoxType>(DataBoxType.hadith)
+const relatedData_CurrentItem = ref<ISearchResultItem>(new SearchResultItemModel())
+
 const toast = useToast()
 const { selectedNode } = useTree()
 const shelfState = useDataShelfStateChanged()
@@ -76,6 +83,53 @@ watch(y, newval => {
 watch(route, () => {
   checkRoute()
 }, { immediate: true })
+
+const resultdataItemsSort = computed(() => {
+  return resultdataItems.value.sort((a, b) => b.priority - a.priority)
+})
+
+watch(selectAll.value, () => {
+  switch (selectAll.value.state) {
+  case SelectAllState.Select:
+  case SelectAllState.Deselect:
+    resultdataItemsSort.value.forEach(dataItem => {
+      dataItem.selected = selectAll.value.state === SelectAllState.Select
+    })
+    break;
+  default:
+    break;
+  }
+  selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
+})
+watch(() => routeQueryParamData.pageNumber, (newVal, oldVal) => {
+  if (newVal === oldVal)
+    return // از تغییرات مشابه جلوگیری می‌کنیم
+
+  updateRouteIfNeeded({ dp: newVal })
+})
+watch(() => routeQueryParamData.pageSize, (newVal, oldVal) => {
+  if (newVal === oldVal)
+    return
+
+  // اگر اندازه صفحه تغییر کرده باشد شماره صفحه باید 1 باشد
+  updateRouteIfNeeded({ dps: newVal, dp: 1 })
+})
+watch(() => routeQueryParamData.rawFacets, (newVal, oldVal) => {
+  if (newVal === oldVal)
+    return
+
+  // اگر فیلترها تغییر کرده باشند صفحه باید یک شود
+  updateRouteIfNeeded({ df: newVal, dp: 1 })
+})
+watch(shelfState.lastState, async () => {
+  try {
+    if (currentNodeId.value === shelfState.connectednodeid.value)
+      refreshDataShelf(true)
+  }
+  catch (error) {
+  }
+})
+
 async function checkRoute() {
   /**
    * 1- بررسی وجود شناسه درخت و رمز گشایی آن
@@ -141,54 +195,6 @@ async function checkRoute() {
     console.log('checkrouteeroor', error)
   }
 }
-
-const resultdataItemsSort = computed(() => {
-  return resultdataItems.value.sort((a, b) => b.priority - a.priority)
-})
-
-function resetData() {
-//   Object.keys(facetQuery.value).forEach(key => {
-//     delete facetQuery.value[key]
-//   })
-  selectAll.value.state = SelectAllState.Deselect
-  selectAll.value.count = 0
-  resultdataItems.value = []
-  facetboxItems.value.splice(0)
-  currentNodeId.value = selectedNode.id
-}
-watch(selectAll.value, () => {
-  switch (selectAll.value.state) {
-  case SelectAllState.Select:
-  case SelectAllState.Deselect:
-    resultdataItemsSort.value.forEach(dataItem => {
-      dataItem.selected = selectAll.value.state === SelectAllState.Select
-    })
-    break;
-  default:
-    break;
-  }
-  selectAll.value.count = resultdataItemsSort.value.filter(item => item.selected).length
-})
-watch(() => routeQueryParamData.pageNumber, (newVal, oldVal) => {
-  if (newVal === oldVal)
-    return // از تغییرات مشابه جلوگیری می‌کنیم
-
-  updateRouteIfNeeded({ dp: newVal })
-})
-watch(() => routeQueryParamData.pageSize, (newVal, oldVal) => {
-  if (newVal === oldVal)
-    return
-
-  // اگر اندازه صفحه تغییر کرده باشد شماره صفحه باید 1 باشد
-  updateRouteIfNeeded({ dps: newVal, dp: 1 })
-})
-watch(() => routeQueryParamData.rawFacets, (newVal, oldVal) => {
-  if (newVal === oldVal)
-    return
-
-  // اگر فیلترها تغییر کرده باشند صفحه باید یک شود
-  updateRouteIfNeeded({ df: newVal, dp: 1 })
-})
 function updateRouteIfNeeded(params: Record<string, any>) {
   const newQuery = { ...route.query }
 
@@ -202,14 +208,17 @@ function updateRouteIfNeeded(params: Record<string, any>) {
 
   router.replace({ query: newQuery })
 }
-watch(shelfState.lastState, async () => {
-  try {
-    if (currentNodeId.value === shelfState.connectednodeid.value)
-      refreshDataShelf(true)
-  }
-  catch (error) {
-  }
-})
+
+function resetData() {
+//   Object.keys(facetQuery.value).forEach(key => {
+//     delete facetQuery.value[key]
+//   })
+  selectAll.value.state = SelectAllState.Deselect
+  selectAll.value.count = 0
+  resultdataItems.value = []
+  facetboxItems.value.splice(0)
+  currentNodeId.value = selectedNode.id
+}
 async function refreshDataShelf(changescroll: boolean) {
   loadingdata.value = true
   try {
@@ -227,7 +236,8 @@ async function refreshDataShelf(changescroll: boolean) {
         loadingdata.value = false
 
         facetboxItems.value.push(...resultCastedData.facets.map(f => new FacetBoxModel(f)))
-        console.log('facetboxitems', facetboxItems.value)
+
+        // console.log('facetboxitems', facetboxItems.value)
 
         resultdataItems.value.push(...resultCastedData.items)
         nextTick(() => {
@@ -367,10 +377,33 @@ function databoxOrderChanged(databoxItemId: number) {
   if (itemIndex === resultdataItemsSort.value.length - 1 && increasebtn.value)
     increasebtn.value.$el.classList.add('orderdisable')
 }
+
+function contentToNodeAdded(connectednodeid: number) {
+  toast.success(t('datashelfbox.yourfishadded'))
+  shelfState.connectednodeid.value = connectednodeid
+  shelfState.lastState.value = !shelfState.lastState.value
+}
+function showrelatedData(selectedItem: ISearchResultItem, datatype: DataBoxType) {
+  console.log('selecteditem', datatype)
+  relatedData_Type.value = datatype
+  relatedData_CurrentItem.value = selectedItem
+  relatedData_Overlay.value = true
+}
 </script>
 
 <template>
   <VContainer class="mc-data-container mc-data-shelf">
+    <VOverlay v-model="relatedData_Overlay" :close-on-back="false" contained class="maximizeSearchBox d-flex justify-center">
+      <template #default>
+        <div v-if="relatedData_Overlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
+          <MCSearchResultBox
+            v-model:is-expanded="relatedData_Overlay" search-phrase="" :box-type="relatedData_Type" expandable :dataitem="relatedData_CurrentItem" :selected-tree-id="currentTreeId"
+            :selected-node="selectedNode" @content-to-node-added="contentToNodeAdded"
+            @dataitemhaschanged="(value) => { relatedData_CurrentItem = value }"
+          />
+        </div>
+      </template>
+    </VOverlay>
     <VRow no-gutters>
       <VCol class="">
         <VRow no-gutters class="btn-box data-shelf-toolbar d-flex align-center justify-space-between">
@@ -500,6 +533,7 @@ function databoxOrderChanged(databoxItemId: number) {
                   :prev-item-priority="i > 0 ? resultdataItemsSort[i - 1].priority : -1"
                   :next-item-priority="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].priority : -1"
                   @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf(true)"
+                  @showrelateddata="showrelatedData"
                 />
                 <div v-show="!loadingdata" ref="loadmoreend" />
               </div>

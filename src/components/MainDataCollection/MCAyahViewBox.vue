@@ -59,8 +59,10 @@ async function loadcompleteayah() {
       method: 'GET',
     })
 
-    emit('dataitemchanged', result)
-    showfulltext.value = true
+    if (result.id) {
+      emit('dataitemchanged', result)
+      showfulltext.value = true
+    }
   }
   catch (error) {
     if (error instanceof CustomFetchError && error.code !== '0')
@@ -258,7 +260,7 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
         </VTabsWindowItem>
         <VTabsWindowItem :value="1" :transition="false">
           <div v-if="dataTabValue === 1" class="py-1 px-1">
-            <VRow>
+            <VRow v-if="props.dataitem.surahTitle">
               <VCol>
                 <div class="flex no-select">
                   <div> <span class="searchDataBoxInfoText">{{ `${props.dataitem.surahTitle}, ${`${$t('ayah')} ${props.dataitem.ayahNumber}`}` }} </span></div>

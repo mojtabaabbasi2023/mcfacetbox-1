@@ -60,7 +60,7 @@ export class HadithSearchResultItemModel
 
   constructor(
     highLight: string[] = [],
-    id: number = 0,
+    id: number | string = 0,
     text: string = '',
     shortText: string = '',
     qaelTitleList: string = '',

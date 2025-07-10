@@ -114,7 +114,7 @@ export interface ISearchResultItem {
   [x: string]: any
   highLight: string[]
   readonly highlightText: string
-  id: number
+  id: number | string
   text: string
   shortText: string
   readonly hasShortText: boolean
@@ -125,13 +125,13 @@ export interface ISearchResultItem {
  */
 export class SearchResultItemModel implements ISearchResultItem {
   highLight: string[] = []
-  id: number = 0
+  id: number | string = 0
   text: string = ''
   shortText: string = ''
 
   constructor(
     highLight: string[] = [],
-    id: number = 0,
+    id: number | string = 0,
     text: string = '',
     shortText: string = '',
   ) {

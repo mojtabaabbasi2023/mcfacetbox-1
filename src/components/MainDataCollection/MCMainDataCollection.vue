@@ -254,7 +254,6 @@ async function runSearch(resetToDefault: boolean) {
         }
       })
       resultDataOnState[contentType].facets = resultCastedData.facets.map(f => new FacetBoxModel(f)) || []
-      console.log('fillfacets', contentType, resultDataOnState[contentType].facets)
     }
     resultDataOnState[contentType].loading = false
   }
