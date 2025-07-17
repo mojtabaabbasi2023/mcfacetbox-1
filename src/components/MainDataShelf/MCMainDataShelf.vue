@@ -58,6 +58,10 @@ const route = useRoute()
 const router = useRouter()
 const ispaginationFullSize = ref(false)
 
+watch(ispaginationFullSize, newval => {
+  console.log('update-ispaginationFullSize', newval)
+})
+
 // const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi(createUrl('app/excerpt', {
 //   query: apiQueryParamtData,
 // }), { immediate: false, refetch: false })
@@ -213,6 +217,7 @@ function resetData() {
 //   Object.keys(facetQuery.value).forEach(key => {
 //     delete facetQuery.value[key]
 //   })
+  ispaginationFullSize.value = false
   selectAll.value.state = SelectAllState.Deselect
   selectAll.value.count = 0
   resultdataItems.value = []
@@ -250,7 +255,7 @@ async function refreshDataShelf(changescroll: boolean) {
   }
   catch (error) {
     loadingdata.value = false
-    toast.error(t('alert.probleminSearch'))
+    toast.error(t('alert.probleminLoadExcerpt'))
   }
 
 //   await fetchData()

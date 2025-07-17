@@ -165,6 +165,7 @@ declare global {
   const resolveDataURL: typeof import('./src/utils/dataResolver')['resolveDataURL']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveServiceResponseMessage: typeof import('./src/composables/useApi')['resolveServiceResponseMessage']
+  const resolveSupervisionStatus: typeof import('./src/utils/dataResolver')['resolveSupervisionStatus']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
   const resolveVuetifyTheme: typeof import('./src/@core/utils/vuetify')['resolveVuetifyTheme']
   const searchItems: typeof import('./src/composables/objectUtils')['searchItems']
@@ -555,6 +556,7 @@ declare module 'vue' {
     readonly resolveActiveTitle: UnwrapRef<typeof import('./src/utils/dataResolver')['resolveActiveTitle']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
+    readonly resolveSupervisionStatus: UnwrapRef<typeof import('./src/utils/dataResolver')['resolveSupervisionStatus']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
     readonly resolveVuetifyTheme: UnwrapRef<typeof import('./src/@core/utils/vuetify')['resolveVuetifyTheme']>
     readonly searchItems: UnwrapRef<typeof import('./src/composables/objectUtils')['searchItems']>

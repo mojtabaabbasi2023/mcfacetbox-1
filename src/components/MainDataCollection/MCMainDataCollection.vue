@@ -201,6 +201,7 @@ function handleSearchKeydown(event: KeyboardEvent) {
 }
 function resetData() {
   // apiQueryParamData.resetDynamicFields()
+  ispaginationFullSize.value = false
   resultDataOnState[dataTabValue.value].results.splice(0)
   resultDataOnState[dataTabValue.value].facets.splice(0)
 }

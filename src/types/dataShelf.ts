@@ -1,5 +1,5 @@
 import type { ISimpleDTO, baseItemState } from './baseModels'
-import { DataBoxType } from './baseModels'
+import { DataBoxType, SupervisionStatus } from './baseModels'
 
 // NOTE - بازای هر تغییری در محتوای جعبه داده باید یک نسخه ثبت گردد و قابلیت آندو داشته باشد
 export interface IDataShelfBoxView {
@@ -12,7 +12,7 @@ export interface IDataShelfBoxView {
 
   // NOTE - مشخص کننده، حدیث، متن، آیه و یا لغت
   excerptType: ISimpleDTO<DataBoxType>
-
+  state: ISimpleDTO<SupervisionStatus>
   order: number
   priority: number
 
@@ -109,6 +109,7 @@ export class DataShelfRouteQueryParams {
   }
 }
 export class DataShelfBoxModelView implements IDataShelfBoxView {
+  supervisionState: ISimpleDTO<SupervisionStatus> = { id: SupervisionStatus.primary, title: '' }
   linkId?: number | undefined = 0
   hasLink: boolean = false
   priority: number = 0

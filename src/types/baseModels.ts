@@ -213,3 +213,11 @@ export enum FacetType {
   tree = 2,
   switch = 3,
 }
+
+export enum SupervisionStatus {
+  primary = 1,
+  ready = 2,
+  review = 3,
+  correct = 4,
+  accept = 5,
+}

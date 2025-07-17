@@ -152,7 +152,7 @@ function searchinfacet(e: any) {
       density="compact" active-strategy="single-independent"
     />
     <div v-else class="d-flex align-center justify-space-between">
-      <span>
+      <span class="mx-2">
         {{ `${dataitems[0].title}(${dataitems[0].count})` }}
       </span>
       <VSwitch v-model="switchState" class="pl-2" @update:model-value="chagenSwitchValue" />

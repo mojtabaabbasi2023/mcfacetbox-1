@@ -20,6 +20,7 @@ const showPaging = ref(false)
 const showNumber = ref(true)
 
 watch(() => props.fullSize, newval => {
+//   console.log('newvla', props.fullSize, showPaging.value)
   if (newval === false) {
     setTimeout(() => {
       showPaging.value = newval
@@ -32,8 +33,6 @@ watch(() => props.fullSize, newval => {
   }
   showNumber.value = !newval
   setTimeout(() => {
-    // console.log('newvla', props.fullSize, showPaging.value)
-
     showPaging.value = newval
   }, 500)
 })
@@ -43,8 +42,6 @@ const updatePage = (value: number) => {
 }
 
 const updatePageSize = (value: number) => {
-  console.log('itemperpage', value)
-
   emit('update:itemsPerPage', value)
 }
 
