@@ -3,7 +3,7 @@ import ContextMenu from '@imengyu/vue3-context-menu'
 import { VFadeTransition } from 'vuetify/lib/components/index.mjs'
 import { DataShelfBoxModelView } from '@/types/dataShelf'
 import { resolveSupervisionStatus } from '@/utils/dataResolver'
-import type { IDataShelfBoxView, IOrderChangedResponse } from '@/types/dataShelf'
+import type { IDataShelfBoxView, IOrderChangedResponse, LinkDetailModel, UnlinkDataModel } from '@/types/dataShelf'
 import { DataBoxType, MessageType, SizeType, SupervisionStatus } from '@/types/baseModels'
 import { type ISearchResultItem, SearchResultItemModel } from '@/types/SearchResult'
 import { useDataShelfPriorityChanged } from '@/store/databoxStore'
@@ -27,7 +27,7 @@ const selectedbox = shallowRef(false)
 
 // const toast = useToast()
 const databox = ref()
-const highlightClass = ref(['mc-data-shelf-box', 'w-100'])
+const highlightClass = ref(['mc-data-shelf-box'])
 const loadinglocal = ref(false)
 const btnlabel = ref()
 
@@ -44,6 +44,8 @@ interface Emits {
   (e: 'refreshdatashelf'): void
   (e: 'showrelateddata', selectedItem: ISearchResultItem, datatype: DataBoxType): void
   (e: 'handlemessage', message: string, type: MessageType): void
+  (e: 'linkdatabox', linkdata: LinkDetailModel[]): void
+  (e: 'unlinkdatabox', unlinkdata: UnlinkDataModel): void
 
 }
 
@@ -87,7 +89,7 @@ const focuToElementAfterMove = () => {
   databox.value.focus()
   highlightClass.value.push('fade-highlight')
   setTimeout(() => {
-    highlightClass.value.splice(2, 1)
+    highlightClass.value.splice(1, 1)
   }, 500) // زمان هم‌زمان با مدت انیمیشن
   emits('orderchanged', databoxItem.value?.id ?? 0)
 }
@@ -248,13 +250,14 @@ const linkdatabox = async () => {
   try {
     loadinglocal.value = true
 
-    await $api(`app/excerpt/${databoxItem.value.id}/link`, {
+    const result = await $api<LinkDetailModel[]>(`app/excerpt/${databoxItem.value.id}/link`, {
       method: 'PUT',
       ignoreResponseError: false,
     })
 
-    loadinglocal.value = false
+    emits('linkdatabox', result)
     databoxItem.value.hasLink = true
+    loadinglocal.value = false
   }
   catch (error) {
     loadinglocal.value = false
@@ -270,13 +273,14 @@ const unlinkdatabox = async () => {
   try {
     loadinglocal.value = true
 
-    await $api(`app/excerpt/${databoxItem.value.id}/unlink`, {
+    const result = await $api<UnlinkDataModel>(`app/excerpt/${databoxItem.value.id}/unlink`, {
       method: 'PUT',
       ignoreResponseError: false,
     })
 
-    loadinglocal.value = false
+    emits('unlinkdatabox', result)
     databoxItem.value.hasLink = false
+    loadinglocal.value = false
   }
   catch (error) {
     loadinglocal.value = false
@@ -409,6 +413,10 @@ const isSelected = computed({
 
 })
 
+const itemsHasLink = computed(() => {
+  return databoxItem.value.hasLink || databoxItem.value.linkId
+})
+
 defineExpose({ increaseOrder, decreaseOrder })
 watch(priorityChangedData.items, newval => {
   console.log('newval', priorityChangedData)
@@ -444,14 +452,14 @@ watch(isDialogDataShelfBoxEdit, () => {
 </script>
 
 <template>
-  <!-- <div class="d-flex position-relative" > -->
   <div
-    ref="databox" :class="[highlightClass]" :style="{ 'overflow': 'visible !important', 'margin-block-end': databoxItem.hasLink ? '5px' : '10px' }" @mouseenter="showTools = true"
+    ref="databox" :class="[highlightClass]"
+    :style="{ 'overflow': 'visible !important', 'margin-block-end': databoxItem.hasLink ? '3px' : '10px', 'margin-right': itemsHasLink ? '10px' : '0px', 'background-color': itemsHasLink ? 'rgba(var(--v-shadow-key-umbra-color), 0.10)' : '' }" @mouseenter="showTools = true"
     @mouseleave="showTools = false" @contextmenu="onContextMenu"
   >
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
 
-    <VCardText :class="`${selectedbox ? 'selectedbox h-auto' : 'h-auto'}`">
+    <div :class="`${selectedbox ? 'selectedbox h-auto shelf-box-body' : 'h-auto shelf-box-body'}`">
       <VRow no-gutters class="justify-start align-start box">
         <span>{{ props.itemIndex + 1 }}</span>
         <VCheckbox v-model="isSelected" density="compact" />
@@ -472,19 +480,21 @@ watch(isDialogDataShelfBoxEdit, () => {
         </VCol>
         <!-- position-absolute px-2 d-flex flex-column top-0 left-0 -->
       </VRow>
-    </VCardText>
-    <VBtn
-      v-if="databoxItem.hasLink" class="box-unpin-item" icon size="25" color="error" variant="text"
-      @click="unlinkdatabox"
-    >
-      <VIcon icon="tabler-link-minus" size="20" />
-      <VTooltip
-        activator="parent"
-        location="top center"
+    </div>
+    <div>
+      <VBtn
+        v-if="databoxItem.hasLink" icon size="25" color="error"
+        variant="text" class="box-unpin-item" @click="unlinkdatabox"
       >
-        {{ $t('datashelfbox.unlink') }}
-      </VTooltip>
-    </VBtn>
+        <VIcon icon="tabler-link-minus" size="20" />
+        <VTooltip
+          activator="parent"
+          location="top center"
+        >
+          {{ $t('datashelfbox.unlink') }}
+        </VTooltip>
+      </VBtn>
+    </div>
     <VFabTransition>
       <div v-if="showTools" class="box-state-container">
         <VTooltip location="right center">

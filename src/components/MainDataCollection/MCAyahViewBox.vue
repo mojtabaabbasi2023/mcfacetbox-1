@@ -55,7 +55,7 @@ async function selectmorelessHadith() {
 }
 async function loadcompleteayah() {
   try {
-    const result = await $api <AyahSearchResultItemModel>(`app/source/quran/${props.dataitem.id}${(props.searchPhrase && props.searchPhrase.length > 1) ? `?searchPhrase=${props.searchPhrase}` : ''}`, {
+    const result = await $api <AyahSearchResultItemModel>(`app/source/quran/${props.dataitem.id}`, {
       method: 'GET',
     })
 
@@ -116,13 +116,13 @@ async function loadrelated() {
 }
 const dataTabValue = ref(1)
 
-// onMounted(async () => {
-//   if (props.isExpanded) {
-//     loadinglocal.value = true
-//     await loadcompleteayah()
-//     loadinglocal.value = false
-//   }
-// })
+onMounted(async () => {
+  if (props.isExpanded) {
+    loadinglocal.value = true
+    await loadcompleteayah()
+    loadinglocal.value = false
+  }
+})
 watch(dataTabValue, async newval => {
   switch (newval) {
     case 2:

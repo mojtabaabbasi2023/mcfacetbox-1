@@ -145,8 +145,11 @@
 
         position: relative;
         z-index: 1;
+        width: 99%;
+        height: 100%;
 
-        .v-card-text {
+        .shelf-box-body {
+            position: relative;
             padding: 8px;
             block-size: 105px;
 
@@ -196,10 +199,10 @@
             position: absolute;
             bottom: -15px;
             right: 0px;
-            z-index: 2;
+            z-index: 10000;
             background-color: white; // برای تضاد بهتر
-            // border: 1px solid rgba(0, 0, 0, 0.1); // حاشیه اختیاری
-            // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); // سایه برای اثر "شناور"
+            border: 1px solid rgba(0, 0, 0, 0.1); // حاشیه اختیاری
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); // سایه برای اثر "شناور"
         }
 
 

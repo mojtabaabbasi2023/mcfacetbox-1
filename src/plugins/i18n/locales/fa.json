@@ -40,15 +40,15 @@
 
   'projectcount':"تعداد پروژه ها",
   'gate': {
-    'pageTitle': 'درگاه ها',
-    'title': 'عنوان درگاه',
-    'addedit': 'افزودن / ویرایش درگاه',
-    'delete': 'حذف درگاه',
-    'add': 'افزودن درگاه',
-    'management': 'مدیریت درگاه',
-    'searchTitle': 'جستجوی درگاه',
-    'addeditsubtitle': 'اطلاعات مورد نظر برای درگاه را وارد نمایید',
-    "select":"انتخاب درگاه"
+    'pageTitle': 'سازمان ها',
+    'title': 'عنوان سازمان',
+    'addedit': 'افزودن / ویرایش سازمان',
+    'delete': 'حذف سازمان',
+    'add': 'افزودن سازمان',
+    'management': 'مدیریت سازمان',
+    'searchTitle': 'جستجوی سازمان',
+    'addeditsubtitle': 'اطلاعات مورد نظر برای سازمان را وارد نمایید',
+    "select":"انتخاب سازمان"
   },
   "supervision":{
     "ready":"تایید برای نظارت",
@@ -72,8 +72,8 @@
     'addeditsubtitle': 'اطلاعات مورد نظر برای کاربر را وارد نمایید'
   },
   'role': {
-    'trees': 'درخت ها',
-    'treeselect': 'انتخاب درخت',
+    'trees': 'پروژه ها',
+    'treeselect': 'انتخاب پروژه',
     'permissionselect': 'انتخاب دسترسی',
     'pageTitle': 'نقش ها',
     'add': 'افزودن نقش',
@@ -93,17 +93,18 @@
     'management': 'مدیریت پروژه ها',
     'addeditsubtitle': 'اطلاعات مورد نظر برای پروژه را وارد نمایید'
   },
+  //بدلیل تغییر ماهیت درخت به پروژه تمام عناوین درخت به پروژه تغییر میابد و فعلا عنوان tree را دست نزدیم تا دچار باگ نشویم
   'tree': {
-    'title': 'درخت',
-    'changeTree': 'تغییر درخت',
-    "select":"انتخاب درخت",
-    'pageTitle': 'درخت ها',
-    'add': 'افزودن درخت',
-    'addedit': 'افزودن / ویرایش درخت',
-    'delete': 'حذف درخت',
-    'management': 'مدیریت درخت ها',
-    'addeditsubtitle': 'اطلاعات مورد نظر برای درخت را وارد نمایید',
-    "selectyourtree":"درخت مورد نظر برای پژوهش را انتخاب نمایید",
+    'title': 'پروژه',
+    'changeTree': 'تغییر پروژخ',
+    "select":"انتخاب پروژه",
+    'pageTitle': 'پروژه ها',
+    'add': 'افزودن پروژه',
+    'addedit': 'افزودن / ویرایش پروژه',
+    'delete': 'حذف پروژه',
+    'management': 'مدیریت پروژه ها',
+    'addeditsubtitle': 'اطلاعات مورد نظر برای پروژه را وارد نمایید',
+    "selectyourtree":"پروژه مورد نظر برای پژوهش را انتخاب نمایید",
     'autorizedbook': 'کتب مجاز',
     'nodes': 'گره ها',
     'selectednode':'گره انتخاب شده',
@@ -119,7 +120,7 @@
     'addnewnode':'افزدودن گره جدید',
     'samelevelnode':'گره همسطح',
     'childnode':'گره فرزند',
-    "treecleaning":"پاکسازی درخت",
+    "treecleaning":"پاکسازی پروژه",
     "loadingnodedetail":"بارگذاری اطلاعات گره",
     "mergenode":"ادغام گره ها",
     "adddestinationnode":"گره مقصد را انتخاب کنید"
@@ -346,7 +347,7 @@
 
     'tryagainmin':"چند دقیقه دیگر تلاش کنید",
     "youmustselectoneperm":"باید حتما یک دسترسی را انتخاب کنید",
-    "nothaveselecttree":"هیچ پروژه و درختی انتخاب نشده است",
+    "nothaveselecttree":"هیچ پروژه انتخاب نشده است",
     "probleminnodeaddrefreshpage":"مشکلی در افزودن گره بوجود آمده است، درخت را بروزرسانی کنید",
     "transfernodeasbrotherafter":"آیا گره '(0)' به بعد از گره '(1)' منتقل شود؟",
     "transfernodeasbrotherbefore":"آیا گره '(0)' به قبل از گره '(1)' منتقل شود؟",

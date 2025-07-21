@@ -6,7 +6,7 @@ import MCDataShelfBox from './MCDataShelfBox.vue'
 import { useTree } from '@/store/treeStore'
 import type { GridResultFacet } from '@/types/baseModels'
 import { DataBoxType, MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
-import type { IDataShelfBoxView } from '@/types/dataShelf'
+import type { IDataShelfBoxView, LinkDetailModel, UnlinkDataModel } from '@/types/dataShelf'
 import { DataShelfRouteQueryParams } from '@/types/dataShelf'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 import { FacetBoxModel, SearchResultItemModel } from '@/types/SearchResult'
@@ -389,10 +389,44 @@ function contentToNodeAdded(connectednodeid: number) {
   shelfState.lastState.value = !shelfState.lastState.value
 }
 function showrelatedData(selectedItem: ISearchResultItem, datatype: DataBoxType) {
-  console.log('selecteditem', datatype)
   relatedData_Type.value = datatype
   relatedData_CurrentItem.value = selectedItem
   relatedData_Overlay.value = true
+}
+
+function linkdatabox(linkdata: LinkDetailModel[]) {
+  linkdata.sort((a, b) => b.priority - a.priority)
+  resultdataItems.value.forEach(element => {
+    const hasitem = linkdata.find(a => a.id === element.id)
+    if (hasitem) {
+      element.linkId = hasitem.linkId
+      element.hasLink = true
+      if (linkdata[linkdata.length - 1].id === hasitem.id)
+        element.hasLink = false
+    }
+  })
+}
+function unlinkdatabox(unlinkdata: UnlinkDataModel) {
+  unlinkdata.split1.sort((a, b) => b.priority - a.priority)
+  unlinkdata.split2.sort((a, b) => b.priority - a.priority)
+
+  resultdataItems.value.forEach(element => {
+    const hasitemsplite1 = unlinkdata.split1.find(a => a.id === element.id)
+    const hasitemsplite2 = unlinkdata.split2.find(a => a.id === element.id)
+
+    if (hasitemsplite1) {
+      element.linkId = hasitemsplite1.linkId
+      element.hasLink = true
+      if (unlinkdata.split1[unlinkdata.split1.length - 1].id === hasitemsplite1.id)
+        element.hasLink = false
+    }
+    if (hasitemsplite2) {
+      element.linkId = hasitemsplite2.linkId
+      element.hasLink = true
+      if (unlinkdata.split2[unlinkdata.split2.length - 1].id === hasitemsplite2.id)
+        element.hasLink = false
+    }
+  })
 }
 </script>
 
@@ -529,7 +563,7 @@ function showrelatedData(selectedItem: ISearchResultItem, datatype: DataBoxType)
               </div>
             </VCol>
             <VCol :md="activefilter ? 9 : 12">
-              <div>
+              <div style="position: relative;">
                 <div v-show="!loadingdata" ref="loadmorestart" />
                 <MCDataShelfBox
                   v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
@@ -538,7 +572,7 @@ function showrelatedData(selectedItem: ISearchResultItem, datatype: DataBoxType)
                   :prev-item-priority="i > 0 ? resultdataItemsSort[i - 1].priority : -1"
                   :next-item-priority="i < resultdataItemsSort.length - 1 ? resultdataItemsSort[i + 1].priority : -1"
                   @selectedchanged="checkSelectAllState" @orderchanged="databoxOrderChanged" @handlemessage="handleDataBoxMessages" @refreshdatashelf="refreshDataShelf(true)"
-                  @showrelateddata="showrelatedData"
+                  @showrelateddata="showrelatedData" @linkdatabox="linkdatabox" @unlinkdatabox="unlinkdatabox"
                 />
                 <div v-show="!loadingdata" ref="loadmoreend" />
               </div>

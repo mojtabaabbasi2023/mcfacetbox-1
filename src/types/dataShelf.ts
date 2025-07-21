@@ -171,3 +171,14 @@ export interface IFootNote extends ISimpleDTO<string>, baseItemState {
   order: number
   isReference: boolean
 }
+
+export class LinkDetailModel {
+  linkId?: number = 0
+  priority: number = 0
+  id: number = 0
+}
+
+export class UnlinkDataModel {
+  split1: LinkDetailModel[] = []
+  split2: LinkDetailModel[] = []
+}
