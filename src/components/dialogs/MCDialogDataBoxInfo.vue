@@ -126,7 +126,7 @@ async function getDataBoxItem() {
           </div>
         </div>
         <!-- </VCardText> -->
-      </vcardtext>
+      </VCardText>
     </VCard>
   </VDialog>
 </template>

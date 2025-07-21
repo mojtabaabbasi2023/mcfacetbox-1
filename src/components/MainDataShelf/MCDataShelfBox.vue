@@ -13,6 +13,8 @@ const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
 const dialogAddLabelVisible = ref(false)
 const dialogDataBoxInfo = ref(false)
+const dialogResourceHistory = ref(false)
+
 const dialogSelectNodeVisible = ref(false)
 const databoxItem = defineModel<IDataShelfBoxView>({ default: new DataShelfBoxModelView() })
 const { t } = useI18n({ useScope: 'global' })
@@ -606,7 +608,15 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ $t('datashelfbox.showrelateddata') }}
             </VTooltip>
           </VBtn>
-
+          <VBtn v-if="databoxItem.excerptType.id === DataBoxType.quran || databoxItem.excerptType.id === DataBoxType.hadith" icon size="25" variant="text" @click="dialogResourceHistory = true">
+            <VIcon icon="tabler-history-toggle" size="20" />
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('datashelfbox.showrelateddata') }}
+            </VTooltip>
+          </VBtn>
           <VBtn icon size="25" variant="text" @click="">
             <VIcon icon="tabler-box-multiple" size="20" />
             <VTooltip
@@ -678,6 +688,10 @@ watch(isDialogDataShelfBoxEdit, () => {
   />
   <MCDialogDataBoxInfo
     v-if="dialogDataBoxInfo" v-model:is-dialog-visible="dialogDataBoxInfo" :selected-data-box-id="databoxItem.id ?? 0"
+    @error-has-occured="emits('handlemessage', $event, MessageType.error)"
+  />
+  <MCDialogResourceHistory
+    v-if="dialogResourceHistory" v-model:is-dialog-visible="dialogResourceHistory" :selected-data-box-id="databoxItem.id ?? 0" :serviceurl="`app/excerpt/${DataBoxType[databoxItem.excerptType.id]}?SourceId=${databoxItem.sourceId}`"
     @error-has-occured="emits('handlemessage', $event, MessageType.error)"
   />
   <!-- </div> -->

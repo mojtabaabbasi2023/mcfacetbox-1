@@ -14,6 +14,7 @@ const props = defineProps({
   activeDeleteAction: { type: Boolean, default: true },
   activeEditAction: { type: Boolean, default: true },
   gateid: { type: Number, default: 0 },
+  autostart: { type: Boolean, default: true },
 })
 
 const emit = defineEmits<Emit>()
@@ -59,7 +60,8 @@ const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchRe
 }), { immediate: false })
 
 setTimeout(async () => {
-  await fetchData(false)
+  if (props.autostart)
+    await fetchData(false)
 }, 1000)
 
 const datatable = ref(VDataTableServer)
@@ -115,6 +117,8 @@ const searchLabelDefault = computed(() => {
 })
 
 const refreshData = async () => {
+  console.log('refreshdata', props.apiUrl)
+
   await fetchData(false)
 }
 
