@@ -224,9 +224,11 @@ defineExpose({ refreshData })
         v-model:page="pageNumber"
         item-selectable="selectable"
         :items-per-page-options="[
-          { value: 5, title: '5' },
-          { value: 20, title: '20' },
+          { value: 10, title: '10' },
+          { value: 30, title: '30' },
           { value: 50, title: '50' },
+          { value: 75, title: '75' },
+          { value: 100, title: '100' },
           { value: -1, title: '$vuetify.dataFooter.itemsPerPageAll' },
         ]"
         :items="datatableItems"
@@ -236,7 +238,6 @@ defineExpose({ refreshData })
         class="text-no-wrap"
         height="300"
         density="compact"
-        fixed-header
         show-select
         :loading="loadingdata"
         select-strategy="single"

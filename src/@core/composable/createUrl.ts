@@ -12,8 +12,6 @@ export const createUrl = (url: MaybeRefOrGetter<string>, options?: Options) => c
   const _url = toValue(url)
   const _query = toValue(options?.query)
 
-  console.log('queryurl', _url, _query)
-
   const queryObj = Object.fromEntries(
     Object.entries(_query).map(([key, val]) => [key, toValue(val)]),
   )

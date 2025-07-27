@@ -27,11 +27,11 @@ interface Emit {
 }
 
 const tableHeaders = [
-  { title: t('content'), key: 'content' },
-  { title: t('datashelfbox.connectednodesimple'), key: 'node', sortable: false },
+  { title: t('content'), key: 'content', maxWidth: 700, width: 700, nowrap: true, sortable: false },
+  { title: t('datashelfbox.connectednodesimple'), key: 'node', sortable: true },
   { title: t('description'), key: 'description', sortable: false },
   { title: t('labels'), key: 'labels', sortable: false },
-  { title: t('creatoruser'), key: 'creatorFullName' },
+  { title: t('creatoruser'), key: 'creatorFullName', sortable: false },
   { title: t('createDate'), key: 'creationTime' },
 ]
 
@@ -59,13 +59,10 @@ async function getDataBoxItem() {
 </script>
 
 <template>
-  <VDialog
-    v-if="props.isDialogVisible" :width="$vuetify.display.mdAndDown ? 'auto' : DialogSizeMD" :model-value="props.isDialogVisible"
-    persistent
-  >
+  <VDialog v-if="props.isDialogVisible" :model-value="props.isDialogVisible">
     <DialogCloseBtn :disabled="loading" @click="emit('update:isDialogVisible', false)" />
 
-    <VCard variant="flat" :loading="opening" :min-height="200" class="pa-3">
+    <VCard variant="flat" :loading="opening" :min-height="400" class="pa-3">
       <MCLoading :loadingsize="SizeType.MD" :showloading="opening" />
       <VCardTitle class="primary white--text">
         {{ $t('datashelfbox.about') }}
@@ -73,6 +70,11 @@ async function getDataBoxItem() {
       </VCardTitle>
       <VDivider />
       <MCDataTable ref="mcsourcehistory" :headers="tableHeaders" :api-url="props.serviceurl" :gateid="0" :autostart="false">
+        <template #item.content="{ value }">
+          <div style="white-space: pre-line;">
+            {{ value.content }}
+          </div>
+        </template>
         <template #item.labels="{ value }">
           <div class="d-flex align-center gap-x-4">
             {{ value.labels && value.labels.map((item: ISimpleDTO<number>) => `${item.title}`).join(' ,') }}
