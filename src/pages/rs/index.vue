@@ -68,7 +68,7 @@ function changeWindowTitle(status: boolean) {
       <Pane>
         <Splitpanes horizontal rtl class="default-theme">
           <Pane>
-            <MCWindow :title="changeWindowTitle(isComponentSwitch)" @move="changeComponent">
+            <MCWindow :title="$t('gathering')" @move="changeComponent">
               <template #default>
                 <MCMainDataCollection />
               </template>
@@ -77,7 +77,7 @@ function changeWindowTitle(status: boolean) {
 
           <Pane>
             <MCWindow
-              :title="changeWindowTitle(isComponentSwitch === false)"
+              :title="$t('excerpts')"
               @move="changeComponent"
             >
               <template #default>

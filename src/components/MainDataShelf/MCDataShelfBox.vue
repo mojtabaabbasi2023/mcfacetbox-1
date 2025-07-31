@@ -568,7 +568,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               activator="parent"
               location="top center"
             >
-              {{ $t('datashelfbox.connecttonode') }}
+              {{ $t('datashelfbox.transfertonode') }}
             </VTooltip>
           </VBtn>
           <VBtn icon size="25" variant="text" color="error" @click="deleteSelectedExcerpt">
@@ -614,7 +614,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               activator="parent"
               location="top center"
             >
-              {{ $t('datashelfbox.showrelateddata') }}
+              {{ `${$t('datashelfbox.otherusage')} ${$t(DataBoxType[databoxItem.excerptType.id])}` }}
             </VTooltip>
           </VBtn>
           <VBtn icon size="25" variant="text" @click="">
@@ -623,7 +623,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               activator="parent"
               location="top center"
             >
-              {{ $t('datashelfbox.duplicate') }}
+              {{ $t('datashelfbox.copytonode') }}
             </VTooltip>
           </VBtn>
         </div>

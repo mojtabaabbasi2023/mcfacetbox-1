@@ -41,7 +41,6 @@ const sourceDraggableItem = ref<ISimpleTreeActionable | null>(null)
 const activeDraggableItem = ref<ISimpleTreeActionable | null>(null)
 const editableNode = ref()
 const activeSearch = ref(false)
-const showDisconnectedDatabox = ref(false)
 const dialogAddNewNodeVisible = ref(false)
 const dialogMergeNodeVisible = ref(false)
 const dialogTransferNodeVisible = ref(false)
@@ -118,10 +117,6 @@ const selectTreeNode = (item: ISimpleTreeActionable) => {
   router.push({ query: newQuery })
 }
 
-watch(showDisconnectedDatabox, newval => {
-  if (newval)
-    selectTreeNode(new SimpleTreeAcionableModel(0))
-})
 function checkTreeRoute(deselectAll: boolean) {
   if (!route.query.gtd) {
     emit('showSelectTree')
@@ -146,11 +141,10 @@ function checkTreeRoute(deselectAll: boolean) {
       else if (deselectAll)
         deselectAllTreeNodes()
       if (snd === '0') {
-        showDisconnectedDatabox.value = true
-        selectNode(new SimpleTreeAcionableModel())
+        selectNode(treeIndex[-9])
+        gotoNode(useToNumber(-9).value)
       }
       else {
-        showDisconnectedDatabox.value = false
         selectNode(treeIndex[snd])
         gotoNode(useToNumber(snd).value)
       }
@@ -607,7 +601,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
               activator="parent"
               location="top center"
             >
-              {{ $t('datashelfbox.selectall') }}
+              {{ $t('tree.newnode') }}
             </VTooltip>
           </VBtn>
 
@@ -621,28 +615,32 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
               {{ $t('search') }}
             </VTooltip>
           </VBtn>
-          <VBtn size="small" variant="text">
+          <!--
+            <VBtn size="small" variant="text">
             <VIcon icon="tabler-box-multiple" size="22" />
 
             <VTooltip
-              activator="parent"
-              location="top center"
+            activator="parent"
+            location="top center"
             >
-              {{ $t('tree.duplicate') }}
+            {{ $t('tree.duplicate') }}
             </VTooltip>
-          </VBtn>
+            </VBtn>
+          -->
           <!-- <VBtn icon="tabler-select" size="small" variant="text" /> -->
 
-          <VBtn size="small" :variant="showDisconnectedDatabox ? 'elevated' : 'text'" @click="showDisconnectedDatabox = !showDisconnectedDatabox">
+          <!--
+            <VBtn size="small" :variant="showDisconnectedDatabox ? 'elevated' : 'text'" @click="showDisconnectedDatabox = !showDisconnectedDatabox">
             <VIcon icon="tabler-arrow-capsule" size="22" />
 
             <VTooltip
-              activator="parent"
-              location="top center"
+            activator="parent"
+            location="top center"
             >
-              {{ $t('showdisconnectedfish') }}
+            {{ $t('showdisconnectedfish') }}
             </VTooltip>
-          </VBtn>
+            </VBtn>
+          -->
 
           <VBtn size="small" variant="text">
             <VIcon icon="tabler-eraser" size="22" />
@@ -681,7 +679,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
 
     <VRow dense class="header">
       <VCol />
-      <VCol cols="auto">
+      <VCol cols="1">
         {{ $t('tree.nodes') }}
       </VCol>
     </VRow>
@@ -703,7 +701,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
               <template #activator="{ props }">
             -->
             <VRow dense class="mx-0">
-              <VCol class="tree-title d-flex flex-column">
+              <VCol cols="11" class="tree-title d-flex flex-column">
                 <div
                   v-if="(activeDraggableItem && activeDraggableItem.id === item.id)"
                   class="d-flex align-center" style="height: 10px;" @mouseup="treeDividerMouseUp($event, item, NodeType.SiblingBefore)" @mouseenter="treeDividerMouseEnter(NodeType.SiblingBefore)"
@@ -739,10 +737,10 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
                 </div>
                 <!-- <span>{{ item.title }}</span> -->
               </VCol>
-              <VCol cols="auto" class="tree-node">
-                <template v-if="item.children && item.children.length > 0">
-                  {{ item.children.length }}
-                </template>
+              <VCol cols="1" class="tree-node">
+                <div style="width: 100%;">
+                  {{ item.children?.length ?? 0 }}
+                </div>
               </VCol>
             </VRow>
             <!--
@@ -753,10 +751,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         </template>
       </VTreeview>
     </div>
-    <VBtn
-      v-if="selectedNode.id
-        > 0" class="selected-node pr-1 pl-1 pb-1" variant="text" @click="gotoNode(selectedNode.id)"
-    >
+    <VBtn v-if="selectedNode.id" class="selected-node pr-1 pl-1 pb-1" variant="text" @click="gotoNode(selectedNode.id)">
       <p>
         {{ $t('tree.selectednode') }}: <span>
           {{ selectedNode.title }}
