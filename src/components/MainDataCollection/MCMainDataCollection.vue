@@ -337,69 +337,71 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
     <VDivider />
     <MCLoading :showloading="resultDataOnState[dataTabValue].loading" :loadingsize="SizeType.MD" />
     <!-- class="mc-data-scroll" -->
-    <VTabsWindow v-model="dataTabValue" class="h-100">
-      <VTabsWindowItem :value="DataBoxType.hadith" :transition="false" class="h-100">
-        <VFadeTransition>
-          <div v-if="dataTabValue === DataBoxType.hadith" ref="mainDataResultHadith" class="mc-data-scrolly">
-            <VRow v-if="resultDataOnState[DataBoxType.hadith].results.length > 0 && !resultDataOnState[DataBoxType.hadith].loading" dense>
-              <VCol md="3">
-                <div v-if="resultDataOnState[DataBoxType.hadith].facets.length > 0">
-                  <MCFacetBox
-                    v-for="item in resultDataOnState[DataBoxType.hadith].facets"
-                    :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.hadith].selectedFacets[item.key]" :istree="item.isTree"
-                    :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
-                    :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
-                  />
-                </div>
-              </VCol>
-              <VCol md="9">
-                <div class="pl-2 py-2">
-                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmorestarthadith" />
-                  <MCSearchResultBox
-                    v-for="item in resultDataOnState[DataBoxType.hadith].results"
-                    :key="item.id" :box-type="DataBoxType.hadith" expandable
-                    :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
-                    @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
-                  />
-                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmoreendhadith" />
-                </div>
-              </VCol>
-            </VRow>
-          </div>
-        </VFadeTransition>
-      </VTabsWindowItem>
-      <VTabsWindowItem :value="DataBoxType.quran" :transition="false" class="h-100">
-        <VFadeTransition>
-          <div v-if="dataTabValue === DataBoxType.quran" ref="mainDataResultQuran" class="mc-data-scrolly">
-            <VRow v-if="resultDataOnState[DataBoxType.quran].results.length > 0 && !resultDataOnState[DataBoxType.quran].loading" dense>
-              <VCol md="3">
-                <div v-if="resultDataOnState[DataBoxType.quran].facets.length > 0">
-                  <MCFacetBox
-                    v-for="item in resultDataOnState[DataBoxType.quran].facets"
-                    :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.quran].selectedFacets[item.key]" :istree="item.isTree"
-                    :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
-                    :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
-                  />
-                </div>
-              </VCol>
-              <VCol md="9">
-                <div class="pl-2 py-2">
-                  <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmorestartquran" />
-                  <MCSearchResultBox
-                    v-for="item in resultDataOnState[DataBoxType.quran].results"
-                    :key="item.id" :box-type="DataBoxType.quran" expandable
-                    :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
-                    @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
-                  />
-                  <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmoreendquran" />
-                </div>
-              </VCol>
-            </VRow>
-          </div>
-        </VFadeTransition>
-      </VTabsWindowItem>
-      <VTabsWindowItem :value="DataBoxType.vocabulary" :transition="false" />
-    </VTabsWindow>
+    <VRow dense style="padding-block-end: 5px;height: 100%;">
+      <VTabsWindow v-model="dataTabValue" class="h-100">
+        <VTabsWindowItem :value="DataBoxType.hadith" :transition="false" class="h-100">
+          <VFadeTransition>
+            <div v-if="dataTabValue === DataBoxType.hadith" ref="mainDataResultHadith" class="mc-data-scrolly">
+              <VRow v-if="resultDataOnState[DataBoxType.hadith].results.length > 0 && !resultDataOnState[DataBoxType.hadith].loading" dense>
+                <VCol md="3">
+                  <div v-if="resultDataOnState[DataBoxType.hadith].facets.length > 0">
+                    <MCFacetBox
+                      v-for="item in resultDataOnState[DataBoxType.hadith].facets"
+                      :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.hadith].selectedFacets[item.key]" :istree="item.isTree"
+                      :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
+                      :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
+                    />
+                  </div>
+                </VCol>
+                <VCol md="9">
+                  <div class="pl-2 py-2">
+                    <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmorestarthadith" />
+                    <MCSearchResultBox
+                      v-for="item in resultDataOnState[DataBoxType.hadith].results"
+                      :key="item.id" :box-type="DataBoxType.hadith" expandable
+                      :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
+                      @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
+                    />
+                    <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmoreendhadith" />
+                  </div>
+                </VCol>
+              </VRow>
+            </div>
+          </VFadeTransition>
+        </VTabsWindowItem>
+        <VTabsWindowItem :value="DataBoxType.quran" :transition="false" class="h-100">
+          <VFadeTransition>
+            <div v-if="dataTabValue === DataBoxType.quran" ref="mainDataResultQuran" class="mc-data-scrolly">
+              <VRow v-if="resultDataOnState[DataBoxType.quran].results.length > 0 && !resultDataOnState[DataBoxType.quran].loading" dense>
+                <VCol md="3">
+                  <div v-if="resultDataOnState[DataBoxType.quran].facets.length > 0">
+                    <MCFacetBox
+                      v-for="item in resultDataOnState[DataBoxType.quran].facets"
+                      :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.quran].selectedFacets[item.key]" :istree="item.isTree"
+                      :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
+                      :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
+                    />
+                  </div>
+                </VCol>
+                <VCol md="9">
+                  <div class="pl-2 py-2">
+                    <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmorestartquran" />
+                    <MCSearchResultBox
+                      v-for="item in resultDataOnState[DataBoxType.quran].results"
+                      :key="item.id" :box-type="DataBoxType.quran" expandable
+                      :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
+                      @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
+                    />
+                    <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmoreendquran" />
+                  </div>
+                </VCol>
+              </VRow>
+            </div>
+          </VFadeTransition>
+        </VTabsWindowItem>
+        <VTabsWindowItem :value="DataBoxType.vocabulary" :transition="false" />
+      </VTabsWindow>
+    </VRow>
     <VRow dense>
       <VCol md="12">
         <MCTablePagination

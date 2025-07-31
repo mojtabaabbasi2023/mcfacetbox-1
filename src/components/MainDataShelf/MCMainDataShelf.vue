@@ -552,7 +552,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
       <MCLoading :showloading="loadingdata" :loadingsize="SizeType.MD" />
       <VCol md="12">
         <VFadeTransition>
-          <VRow v-if="resultdataItems.length > 0">
+          <VRow v-if="resultdataItems.length > 0" style="padding-block-end: 5px;">
             <VCol v-if="activefilter" md="3">
               <div v-if="facetboxItems.length > 0">
                 <MCFacetBox

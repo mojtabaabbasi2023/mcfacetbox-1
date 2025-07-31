@@ -15,7 +15,8 @@
 
     .tool-bar {
         border-block-end: 1px solid rgb(var(--v-theme-primary));
-        margin-inline: -6px !important;
+        height: 30px;
+        padding-inline-end: 5px;
     }
 
     .title {
@@ -38,7 +39,8 @@
 
     .content {
         position: relative;
-        block-size: 100%;
+        //این اندازه گذاری برای ارتفاع متناسب با ارتفاع نوار ابزار بالای فرم و فاصله های تعیین شده آن است
+        block-size: calc(100% - 35px) !important;
         padding-block: 0;
         padding-inline: 12px;
 
@@ -538,7 +540,7 @@
 }
 
 .mc-data-scrolly {
-    block-size: calc(100% - 90px);
+    block-size: calc(100% - 40px);
     margin-block-start: 1.5px;
     overflow-y: scroll;
     overflow-x: auto;

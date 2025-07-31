@@ -13,25 +13,24 @@ interface Emit {
 </script>
 
 <template>
-  <div class="content-box">
-    <VCard class="elevation-1 content">
-      <VRow no-gutters justify="space-between" align="center" class="tool-bar my-1">
-        <div class="title mb-1">
-          {{ props.title }}
-        </div>
+  <!-- <div class=" h-100"> -->
+  <VCard class="elevation-1 content-box">
+    <div class="tool-bar my-1" style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="title mb-1">
+        {{ props.title }}
+      </div>
 
-        <div>
-          <VRow no-gutters class="btn-box mb-1">
-            <slot name="actions" />
-            <!-- <IconBtn size="small" @click="emit('move')"> -->
-            <!-- <VIcon icon="tabler-arrows-down-up" size="18" @click="emit('move')" /> -->
-            <!-- </IconBtn> -->
-            <VIcon icon="tabler-settings" size="18" @click="emit('open')" />
-            <VIcon icon="tabler-x" size="18" @click="emit('close')" />
-          </VRow>
+      <div>
+        <div class="btn-box mb-1" style="display: flex; gap: 8px; align-items: center;">
+          <slot name="actions" />
+          <VIcon icon="tabler-settings" size="18" @click="emit('open')" />
+          <!-- <VIcon icon="tabler-x" size="18" @click="emit('close')" /> -->
         </div>
-      </VRow>
+      </div>
+    </div>
+    <div class="content">
       <slot name="default" />
-    </VCard>
-  </div>
+    </div>
+  </VCard>
+  <!-- </div> -->
 </template>
