@@ -30,7 +30,7 @@ const activatedNode = ref<number[]>([])
 const openedNode = ref<number[]>([])
 const isLoading = ref(false)
 const selecteTreeStore = useSelectedTree()
-const { treeData, treeIndex, selectNode, selectedNode, clearTreeData, deselectAllTreeNodes, deleteNode, transferNode, isLastNode } = useTree()
+const { treeData, treeIndex, selectNode, selectedNode, getNodePath, clearTreeData, deselectAllTreeNodes, deleteNode, transferNode, isLastNode } = useTree()
 const currentTreeId = ref(0)
 const nodeTempTitleForEdit = ref('')
 const searchResultSelectedNodes = ref<number[]>([])
@@ -43,17 +43,32 @@ const editableNode = ref()
 const activeSearch = ref(false)
 const dialogAddNewNodeVisible = ref(false)
 const dialogMergeNodeVisible = ref(false)
+const dialogDescriptionVisible = shallowRef(false)
 const dialogTransferNodeVisible = ref(false)
-
+const activeTooltipPath = shallowRef('')
 interface Emit {
   (e: 'close'): void
   (e: 'open'): void
   (e: 'showSelectTree'): void
 }
+const { x: cursorX, y: cursorY, pressure, pointerType } = usePointer()
 
-// watch(activatedNode, (newvalue, oldvalue) => {
-//   console.log('activenode', activatedNode.value)
-// })
+// نمایش Tooltip هنگام کلیک
+const showNodeTooltip = (event: MouseEvent, item: ISimpleTreeActionable) => {
+  console.log('activenodes1', activatedNode.value)
+
+  activeTooltipPath.value = getNodePath(item, '')
+  setTimeout(() => {
+    if (!activatedNode.value.includes(item.id))
+      activatedNode.value = [item.id]
+    console.log('activenodes2', activatedNode.value)
+    dialogDescriptionVisible.value = true
+  }, 500)
+}
+
+watch(activatedNode, () => {
+  console.log('activatednodewatch', activatedNode.value)
+})
 
 const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<ISimpleTreeActionable[]>(createUrl('app/node/hierarchy',
   { query: { treeid: currentTreeId } }), { immediate: false })
@@ -339,8 +354,6 @@ const nodeTransfered = (sourceNodeId: number, destinationNodeID: number) => {
 //   }
 }
 
-function treeDividerMouseDown(mouseEvent: MouseEvent) {
-}
 function treeDividerMouseLeave(mouseEvent: MouseEvent, transfertype: NodeType) {
   if (transfertype === NodeType.SiblingBefore)
     hasDividerDraggableBefore.value = false
@@ -738,7 +751,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
                 <!-- <span>{{ item.title }}</span> -->
               </VCol>
               <VCol cols="1" class="tree-node">
-                <div style="width: 100%;">
+                <div style="width: 100%;cursor: pointer;" v-bind="props" @click="showNodeTooltip($event, item)">
                   {{ item.children?.length ?? 0 }}
                 </div>
               </VCol>
@@ -750,6 +763,8 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
           </div>
         </template>
       </VTreeview>
+
+      <!-- Tooltip موقعیت‌یابی شده -->
     </div>
     <VBtn v-if="selectedNode.id" class="selected-node pr-1 pl-1 pb-1" variant="text" @click="gotoNode(selectedNode.id)">
       <p>
@@ -758,6 +773,10 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
         </span>
       </p>
     </VBtn>
+    <MCDialogDescription
+      v-if="dialogDescriptionVisible" v-model:is-dialog-visible="dialogDescriptionVisible" :description="activeTooltipPath"
+      :loc-x="cursorX" :loc-y="cursorY"
+    />
   </div>
 </template>
 

@@ -287,6 +287,19 @@ export function useTree() {
     }
   }
 
+  const getNodePath = (nodeItem: ISimpleTreeActionable, nodepath: string = ''): string => {
+    if (!nodeItem)
+      return nodepath
+
+    if (nodeItem.parentId && treeIndex[nodeItem.parentId]) {
+      const parentPath = getNodePath(treeIndex[nodeItem.parentId])
+
+      return `${parentPath} \\ ${nodeItem.title}`
+    }
+
+    return nodeItem.title
+  }
+
   const selectNode = (nodeItem: ISimpleTreeActionable) => {
     if (treeIndex[nodeItem.id])
       treeIndex[nodeItem.id].selected = true
@@ -308,6 +321,7 @@ export function useTree() {
     transferNode,
     createTreeIndex,
     isLastNode,
+    getNodePath,
   }
 }
 
