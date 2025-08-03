@@ -9,6 +9,7 @@ import type { IUser, IUserEdit } from '@/types/users'
 import { UserEditModel } from '@/types/users'
 import { type GridResult, type ISimpleDTO, SimpleDTOModel } from '@/types/baseModels'
 import { useSelectedTree } from '@/store/treeStore'
+import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
@@ -17,6 +18,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<Emit>()
+const { treeIdQuery } = useRouterForGlobalVariables()
 const { t } = useI18n({ useScope: 'global' })
 const toast = useToast()
 
@@ -118,9 +120,9 @@ onMounted(async () => {
   await loadGates()
 })
 function startWorkWithTree() {
-  selectedTreeItem.value.id = selectedTree.value.id
-  selectedTreeItem.value.title = selectedTree.value.title
-  router.replace({ name: 'rs', query: { gtd: btoa(selectedTree.value.id.toString()) } })
+  selectedTreeItem.id = selectedTree.value.id
+  selectedTreeItem.title = selectedTree.value.title
+  router.replace({ name: 'rs', query: { ...treeIdQuery(selectedTree.value.id) } })
   emit('update:isDialogVisible', false)
 }
 

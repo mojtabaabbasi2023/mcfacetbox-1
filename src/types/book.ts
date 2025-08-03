@@ -47,6 +47,7 @@ export interface ISelectableBookInfo extends ISelectable, IBookInfo {
 
 }
 export class selectableBookInfo implements ISelectable, IBookInfo {
+  bookId: number = 0
   creatorList: IBookCreator[] = []
   publisherList: IBookPublisher[] = []
   languageList: IBookLanguage[] = []

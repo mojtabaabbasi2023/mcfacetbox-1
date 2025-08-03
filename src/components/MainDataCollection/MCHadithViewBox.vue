@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { GridResultFacet } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
-import { type IDataShelfBoxNew } from '@/types/dataShelf'
+import type { IDataShelfBoxNew, IFootNote } from '@/types/dataShelf'
 import { HadithSearchResultItemModel } from '@/types/hadithResult'
 import { DataShelfBoxModelNew } from '@/types/dataShelf'
-import { getSelectedTextWithinElement } from '@/utils/htmlUtils'
+import { createFootnoteTag, getSelectedTextWithinElement } from '@/utils/htmlUtils'
 import type { ISearchResultItem } from '@/types/SearchResult'
 import type { IHadithSearchResultItem, IHadithTranslateItem } from '@/types/hadithResult'
+import { NewUUID } from '@/utils/general'
+import { generateFootnote } from '@/utils/stringUtils'
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
@@ -151,7 +153,21 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
 
   if (selectedText.length > 0)
     contentdata.content = selectedText
+  const uuid = NewUUID()
 
+  const footnoteTemp: IFootNote = {
+    id: uuid,
+    isReference: true,
+    title: generateFootnote({
+      bookTitle: props.dataitem.bookTitle,
+      volumeNumber: (props.dataitem.vol && props.dataitem.vol > 0) ? props.dataitem.vol.toString() : undefined,
+      pageNumber: (props.dataitem.pageNum && props.dataitem.pageNum > 0) ? props.dataitem.pageNum.toString() : undefined,
+    }),
+    order: 1,
+  }
+
+  contentdata.content += createFootnoteTag(uuid, '1')
+  contentdata.footNotes.push(footnoteTemp)
   emit('oncontextmenuselect', e, contentType, contentdata)
 }
 

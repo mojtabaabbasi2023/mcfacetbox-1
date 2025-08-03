@@ -173,6 +173,16 @@ export interface IFootNote extends ISimpleDTO<string>, baseItemState {
   isReference: boolean
 }
 
+export interface IFootnoteReference {
+  bookTitle: string
+  author?: string
+  volumeNumber?: string
+  pageNumber?: string
+  edition?: string
+  publisher?: string
+  year?: string
+  city?: string
+}
 export class LinkDetailModel {
   linkId?: number = 0
   priority: number = 0

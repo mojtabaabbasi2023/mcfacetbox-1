@@ -22,3 +22,7 @@ export function getSelectedTextWithinElement(element: HTMLElement): string {
 
   return clonedRange.toString().trim()
 }
+
+export function createFootnoteTag(id: string, text: string) {
+  return `<sup class="footenote-index" footnote-id="${id}">${text}</sup>`
+}

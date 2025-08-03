@@ -23,7 +23,6 @@ declare module 'vue' {
     CardStatisticsHorizontal: typeof import('./src/@core/components/cards/CardStatisticsHorizontal.vue')['default']
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsVerticalSimple: typeof import('./src/@core/components/CardStatisticsVerticalSimple.vue')['default']
-    copy: typeof import('./src/components/dialogs/MCDialogAddLabel copy.vue')['default']
     CustomCheckboxes: typeof import('./src/@core/components/app-form-elements/CustomCheckboxes.vue')['default']
     CustomCheckboxesWithIcon: typeof import('./src/@core/components/app-form-elements/CustomCheckboxesWithIcon.vue')['default']
     CustomCheckboxesWithImage: typeof import('./src/@core/components/app-form-elements/CustomCheckboxesWithImage.vue')['default']
@@ -375,6 +374,7 @@ declare module 'vue' {
     MCMainDataShelf: typeof import('./src/components/MainDataShelf/MCMainDataShelf.vue')['default']
     MCMainTree: typeof import('./src/components/MainTree/MCMainTree.vue')['default']
     MCNotify: typeof import('./src/components/notify/MCNotify.vue')['default']
+    MCPreviewTreeNode: typeof import('./src/components/MCPreviewTreeNode.vue')['default']
     MCSearchApiAutoComplete: typeof import('./src/components/MCSearchApiAutoComplete.vue')['default']
     MCSearchApiTree: typeof import('./src/components/MCSearchApiTree.vue')['default']
     MCSearchResultBox: typeof import('./src/components/MainDataCollection/MCSearchResultBox.vue')['default']
@@ -395,6 +395,5 @@ declare module 'vue' {
     TimelineOutlined: typeof import('./src/views/demos/components/timeline/TimelineOutlined.vue')['default']
     TimelineWithIcons: typeof import('./src/views/demos/components/timeline/TimelineWithIcons.vue')['default']
     TiptapEditor: typeof import('./src/@core/components/TiptapEditor.vue')['default']
-    VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
 }

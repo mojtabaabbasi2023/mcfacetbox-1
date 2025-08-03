@@ -1,4 +1,4 @@
-import { ActionDates, type ISimpleTree, type baseItemState } from './baseModels'
+import type { ActionDates, type ISimpleTree, ISimpleTreeActionable, type baseItemState } from './baseModels'
 
 export function createTreeIndex(tree: ISimpleTree[]): Record<number, ISimpleTree> {
   const index: Record<number, ISimpleTree> = {}
@@ -89,4 +89,9 @@ export class TreeTitleModel implements ITreeTitle {
   title: string = ''
   isActive: boolean = false
   description: string = ''
+}
+export interface ITree {
+  id: number
+  title: string
+  nodes: ISimpleTreeActionable[]
 }

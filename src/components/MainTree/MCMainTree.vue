@@ -3,14 +3,14 @@ import { VTreeview } from 'vuetify/labs/VTreeview'
 import { isNumericString, isUndefined } from '@sindresorhus/is'
 import { useToast } from 'vue-toastification'
 import ContextMenu from '@imengyu/vue3-context-menu'
-import Swal from 'sweetalert2'
 import MCLoading from '../MCLoading.vue'
 import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import { type ISimpleDTO, type ISimpleTree, type ISimpleTreeActionable, SimpleTreeAcionableModel, SizeType } from '@/types/baseModels'
-import type { INodeView } from '@/types/tree'
+import type { INodeView, ITree } from '@/types/tree'
 import { NodeType, createTreeIndex, getNodeTypeNameSpace } from '@/types/tree'
 import { useSelectedTree, useTree } from '@/store/treeStore'
 import { SelectionType } from '@/types/baseModels'
+import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 
 const props = defineProps({
   title: { type: String },
@@ -29,7 +29,7 @@ const toast = useToast()
 const activatedNode = ref<number[]>([])
 const openedNode = ref<number[]>([])
 const isLoading = ref(false)
-const selecteTreeStore = useSelectedTree()
+const selectedTreeStore = useSelectedTree()
 const { treeData, treeIndex, selectNode, selectedNode, getNodePath, clearTreeData, deselectAllTreeNodes, deleteNode, transferNode, isLastNode } = useTree()
 const currentTreeId = ref(0)
 const nodeTempTitleForEdit = ref('')
@@ -46,6 +46,7 @@ const dialogMergeNodeVisible = ref(false)
 const dialogDescriptionVisible = shallowRef(false)
 const dialogTransferNodeVisible = ref(false)
 const activeTooltipPath = shallowRef('')
+const { routerTreeId, routerNodeId, clearUnNeededQueryItems, addTreeIdToQuery, addNodeIdToQuery } = useRouterForGlobalVariables()
 interface Emit {
   (e: 'close'): void
   (e: 'open'): void
@@ -63,43 +64,22 @@ const showNodeTooltip = (event: MouseEvent, item: ISimpleTreeActionable) => {
   }, 500)
 }
 
-const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<ISimpleTreeActionable[]>(createUrl('app/node/hierarchy',
-  { query: { treeid: currentTreeId } }), { immediate: false })
+// const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useApi<ITree>(createUrl(`app/tree/${currentTreeId.value}/hierarchy`), { immediate: false })
 
-onFetchResponse(() => {
-  if (resultData.value) {
-    activatedNode.value.splice(0)
-    clearTreeData()
-    treeData.push(...resultData.value)
-    updateTreeIndex(treeData)
+// onFetchResponse(() => {
 
-    // console.log('loadtree')
-    checkTreeRoute(false)
-  }
-  if (isUndefined(treeData))
-    toast.error(t('alert.probleminGetInformation'))
-  isLoading.value = false
-})
-onFetchError(() => {
-  toast.error(t('alert.dataActionFailed'))
-  isLoading.value = false
-})
-watch(loadingdata, () => {
-  if (loadingdata.value)
-    isLoading.value = true
-})
-watch(currentTreeId, async () => {
-  try {
-    if (currentTreeId.value !== selecteTreeStore.value.id) {
-      const treeDataResult = await $api<ISimpleDTO<number>>(`app/tree/${currentTreeId.value}`)
-
-      selecteTreeStore.value.id = treeDataResult.id
-      selecteTreeStore.value.title = treeDataResult.title
-    }
-  }
-  catch (error) {
-
-  }
+// })
+// onFetchError(() => {
+//   toast.error(t('alert.dataActionFailed'))
+//   isLoading.value = false
+// })
+// watch(loadingdata, () => {
+//   if (loadingdata.value)
+//     isLoading.value = true
+// })
+watch(currentTreeId, async (newval, oldVal) => {
+  if (newval !== oldVal)
+    refreshTree()
 })
 watch(searchResultSelectedNodes, () => {
   activatedNode.value.splice(0)
@@ -113,55 +93,38 @@ watch(route, () => {
 const selectTreeNode = (item: ISimpleTreeActionable) => {
   const newQuery = { ...route.query }
 
-  Object.keys(newQuery).forEach(key => {
-    // پارامتر dps از کوئری نباید حذف شود چون اندازه صفحه میباشد
-    if (key !== 'dps')
-      delete newQuery[key]
-  })
+  clearUnNeededQueryItems(newQuery)
 
-  //   router.push({ name: 'rs', query: { gtd: btoa(currentTreeId.value.toString()), snd: btoa(item.id.toString()) } })
-  newQuery.gtd = btoa(currentTreeId.value.toString())
+  addTreeIdToQuery(currentTreeId.value, newQuery)
   if (item.id > 0)
-    newQuery.snd = btoa(item.id.toString())
+    addNodeIdToQuery(item.id, newQuery)
 
   router.push({ query: newQuery })
 }
 
 function checkTreeRoute(deselectAll: boolean) {
-  if (!route.query.gtd) {
+  if (routerTreeId.value === 0) {
     emit('showSelectTree')
     toast.warning(t('alert.nothaveselecttree'))
 
     return
   }
-  const gtd = atob(route.query.gtd.toString())
-  if (!isNumericString(gtd)) {
-    toast.warning(t('alert.nothaveselecttree'))
-
-    return
-  }
-
-  if (currentTreeId.value === useToNumber(gtd).value) {
-    const snd = route.query.snd ? atob(route.query.snd.toString()) : '0'
-
-    // && selectedNode.id.toString() !== snd
-    if (isNumericString(snd)) {
-      if (selectedNode.id > 0)
-        treeIndex[selectedNode.id].selected = false
-      else if (deselectAll)
-        deselectAllTreeNodes()
-      if (snd === '0') {
-        selectNode(treeIndex[-9])
-        gotoNode(useToNumber(-9).value)
-      }
-      else {
-        selectNode(treeIndex[snd])
-        gotoNode(useToNumber(snd).value)
-      }
+  if (currentTreeId.value === routerTreeId.value) {
+    if (selectedNode.id > 0)
+      treeIndex[selectedNode.id].selected = false
+    else if (deselectAll)
+      deselectAllTreeNodes()
+    if (routerNodeId.value === 0) {
+      selectNode(treeIndex[-9])
+      gotoNode(useToNumber(-9).value)
+    }
+    else {
+      selectNode(treeIndex[routerNodeId.value])
+      gotoNode(routerNodeId.value)
     }
   }
 
-  currentTreeId.value = useToNumber(gtd).value
+  currentTreeId.value = routerTreeId.value
 }
 function selectSearchTree() {
   activeSearch.value = !activeSearch.value
@@ -443,7 +406,31 @@ function resetMouseDraggable() {
 }
 
 const refreshTree = async () => {
-  await fetchData()
+  try {
+    isLoading.value = true
+
+    const { data } = await useApi<ITree>(createUrl(`app/tree/${currentTreeId.value}/hierarchy`), { refetch: false })
+    if (data.value) {
+      activatedNode.value.splice(0)
+      clearTreeData()
+      selectedTreeStore.id = data.value.id
+      selectedTreeStore.title = data.value.title
+
+      treeData.push(...data.value.nodes)
+      updateTreeIndex(treeData)
+
+      // console.log('loadtree')
+      checkTreeRoute(false)
+    }
+  }
+  catch (error) {
+    toast.error(t('alert.probleminGetInformation'))
+  }
+  finally {
+    isLoading.value = false
+  }
+
+//   await fetchData()
 }
 
 const addcomment = async (nodeItem: ISimpleTreeActionable) => {

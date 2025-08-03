@@ -1,4 +1,4 @@
-import { createGlobalState, useStorage } from '@vueuse/core'
+import { createGlobalState } from '@vueuse/core'
 import type { ISimpleDTO, ISimpleTreeActionable } from '@/types/baseModels'
 import { SimpleDTOModel, SimpleTreeAcionableModel, SimpleTreeModel } from '@/types/baseModels'
 import { NodeType } from '@/types/tree'
@@ -11,7 +11,7 @@ export const useSelectedNode = createGlobalState(
   },
 )
 export const useSelectedTree = createGlobalState(() => {
-  return useStorage<ISimpleDTO<number>>('gtd', new SimpleDTOModel(0, ''))
+  return reactive<ISimpleDTO<number>>(new SimpleDTOModel(0, ''))
 })
 
 const treeData = reactive<ISimpleTreeActionable[]>([])

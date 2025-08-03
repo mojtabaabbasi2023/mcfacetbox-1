@@ -8,6 +8,7 @@ import type { GridResultFacet } from '@/types/baseModels'
 import { DataBoxType, MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxView, LinkDetailModel, UnlinkDataModel } from '@/types/dataShelf'
 import { DataShelfRouteQueryParams } from '@/types/dataShelf'
+import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 import { FacetBoxModel, SearchResultItemModel } from '@/types/SearchResult'
 import type { IFacetBox, ISearchResultItem } from '@/types/SearchResult'
@@ -37,6 +38,11 @@ const decreasebtn = shallowRef<VBtn>()
 const apiQueryParamtData = reactive<QueryRequestModel>(new QueryRequestModel())
 const routeQueryParamData = reactive<DataShelfRouteQueryParams>(new DataShelfRouteQueryParams())
 const isDialogDataShelfBoxEdit = ref(false)
+
+const {
+  routerTreeId, routerNodeId, routerExcerptPage, routerExcerptPageSize, routerExcerptFacet,
+  excerptFacetQuery, excerptPageQuery, excerptPageSizeQuery, changeRouteQueryIfNeeded,
+} = useRouterForGlobalVariables()
 
 // const facettimeout: ReturnType<typeof setTimeout> | null = null
 // const facetinterval = ref(3000)
@@ -105,21 +111,21 @@ watch(() => routeQueryParamData.pageNumber, (newVal, oldVal) => {
   if (newVal === oldVal)
     return // از تغییرات مشابه جلوگیری می‌کنیم
 
-  updateRouteIfNeeded({ dp: newVal })
+  updateRouteIfNeeded(excerptPageQuery(newVal))
 })
 watch(() => routeQueryParamData.pageSize, (newVal, oldVal) => {
   if (newVal === oldVal)
     return
 
   // اگر اندازه صفحه تغییر کرده باشد شماره صفحه باید 1 باشد
-  updateRouteIfNeeded({ dps: newVal, dp: 1 })
+  updateRouteIfNeeded({ ...excerptPageSizeQuery(newVal), ...excerptPageQuery(1) })
 })
 watch(() => routeQueryParamData.rawFacets, (newVal, oldVal) => {
   if (newVal === oldVal)
     return
 
   // اگر فیلترها تغییر کرده باشند صفحه باید یک شود
-  updateRouteIfNeeded({ df: newVal, dp: 1 })
+  updateRouteIfNeeded({ ...excerptFacetQuery(newVal), ...excerptPageQuery(1) })
 })
 watch(shelfState.lastState, async () => {
   try {
@@ -132,9 +138,9 @@ watch(shelfState.lastState, async () => {
 
 async function checkRoute() {
   /**
-   * 1- بررسی وجود شناسه درخت و رمز گشایی آن
+   * 1- بررسی وجود شناسه درخت
    * 2- مقدار دهی شناسه درخت
-   * 3- بررسی وجود شناسه گره درخت و رمز گشایی آن
+   * 3- بررسی وجود شناسه گره درخت
    * 4- مقداردهی شناسه گره جاری
    * 5-بررسی شماره صفحه و اندازه صفحه در Url
    * 6- در صورت وجود مقادیر در ظرف موقت ریخته میشود
@@ -143,40 +149,25 @@ async function checkRoute() {
    * Note : مقادیر دریافتی از url در متغیر های محلی مورد نیاز و یا در شیء مورد استفاده در دریافت دیتای لیست قرار میگیرند
    */
   try {
-    if (!route.query.gtd)
-      return
-    const gtd = atob(route.query.gtd.toString())
-    if (!isNumericString(gtd))
+    if (routerTreeId.value === 0)
       return
     apiQueryParamtData.resetDynamicFields()
     currentNodeId.value = 0
     apiQueryParamtData.nodeId = 0
-    currentTreeId.value = useToNumber(gtd).value
+    currentTreeId.value = routerTreeId.value
     apiQueryParamtData.treeId = currentTreeId.value
 
-    if (route.query.snd) {
-      const snd = atob(route.query.snd.toString())
-      if (isNumericString(snd)) {
-        currentNodeId.value = useToNumber(snd).value
-        apiQueryParamtData.nodeId = currentNodeId.value
-      }
+    if (routerNodeId.value > 0) {
+      currentNodeId.value = routerNodeId.value
+      apiQueryParamtData.nodeId = currentNodeId.value
     }
-
     const temprouteQueryParam = new DataShelfRouteQueryParams()
-    if (route.query.dp) {
-      const temppagenumber = atob(route.query.dp.toString())
-      if (isNumericString(temppagenumber))
-        temprouteQueryParam.pageNumber = apiQueryParamtData.PageNumber = useToNumber(temppagenumber).value
-    }
-    if (route.query.dps) {
-      const temppagesize = atob(route.query.dps.toString())
-      if (isNumericString(temppagesize))
-        temprouteQueryParam.pageSize = apiQueryParamtData.PageSize = useToNumber(temppagesize).value
-    }
-    if (route.query.df) {
-      const tempfacets = atob(route.query.df.toString())
-
-      const facetlist = tempfacets.split('#')
+    if (routerExcerptPage.value > 0)
+      temprouteQueryParam.pageNumber = apiQueryParamtData.PageNumber = routerExcerptPage.value
+    if (routerExcerptPageSize.value > 0)
+      temprouteQueryParam.pageSize = apiQueryParamtData.PageSize = routerExcerptPageSize.value
+    if (routerExcerptFacet.value.length > 0) {
+      const facetlist = routerExcerptFacet.value.split('#')
 
       facetlist.forEach(facetitem => {
         if (facetitem.includes('=')) {
@@ -187,8 +178,6 @@ async function checkRoute() {
     }
     Object.assign(routeQueryParamData, temprouteQueryParam)
 
-    // console.log('facetbeforechange', routeQueryParamData.selectedFacetItems)
-
     refreshDataShelf(false)
   }
   catch (error) {
@@ -198,14 +187,7 @@ async function checkRoute() {
 function updateRouteIfNeeded(params: Record<string, any>) {
   const newQuery = { ...route.query }
 
-  Object.keys(params).forEach(paramKey => {
-    const newVal = params[paramKey]
-
-    // 👉 - بررسی اینکه آیا تغییرات صفحه بندی و فست تکراری است یا نه؟ برای جلوگیری از ایجاد حلقه
-    if (newQuery[paramKey] !== btoa(newVal.toString()))
-      newQuery[paramKey] = btoa(newVal.toString())
-  })
-
+  changeRouteQueryIfNeeded(params, newQuery)
   router.replace({ query: newQuery })
 }
 

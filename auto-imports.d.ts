@@ -19,7 +19,9 @@ declare global {
   const MainPage: typeof import('./src/utils/constants')['MainPage']
   const MainPageURI: typeof import('./src/utils/constants')['MainPageURI']
   const MapTwoObjectProperties: typeof import('./src/utils/objectUtils')['MapTwoObjectProperties']
+  const NewUUID: typeof import('./src/utils/general')['NewUUID']
   const PersianDateService: typeof import('./src/utils/persianDate')['PersianDateService']
+  const QueryParamAlias: typeof import('./src/composables/useRouterVariables')['QueryParamAlias']
   const ServerApi: typeof import('./src/utils/constants')['ServerApi']
   const ServerApiAddress: typeof import('./src/utils/constants')['ServerApiAddress']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
@@ -43,6 +45,7 @@ declare global {
   const createApp: typeof import('vue')['createApp']
   const createAyahUrl: typeof import('./src/utils/dataResolver')['createAyahUrl']
   const createEventHook: typeof import('@vueuse/core')['createEventHook']
+  const createFootnoteTag: typeof import('./src/utils/htmlUtils')['createFootnoteTag']
   const createGenericProjection: typeof import('@vueuse/math')['createGenericProjection']
   const createGlobalState: typeof import('@vueuse/core')['createGlobalState']
   const createHadithURL: typeof import('./src/utils/dataResolver')['createHadithURL']
@@ -72,6 +75,7 @@ declare global {
   const formatDate: typeof import('./src/@core/utils/formatters')['formatDate']
   const formatDateToMonthShort: typeof import('./src/@core/utils/formatters')['formatDateToMonthShort']
   const formatString: typeof import('./src/composables/objectUtils')['formatString']
+  const generateFootnote: typeof import('./src/utils/stringUtils')['generateFootnote']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCleanSelectedText: typeof import('./src/utils/htmlUtils')['getCleanSelectedText']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
@@ -333,6 +337,8 @@ declare global {
   const useRound: typeof import('@vueuse/math')['useRound']
   const useRoute: typeof import('vue-router/auto')['useRoute']
   const useRouter: typeof import('vue-router/auto')['useRouter']
+  const useRouterForGlobalVariables: typeof import('./src/composables/useRouterVariables')['useRouterForGlobalVariables']
+  const useRouterVariables: typeof import('./src/composables/useRouterVariables')['default']
   const useScreenOrientation: typeof import('@vueuse/core')['useScreenOrientation']
   const useScreenSafeArea: typeof import('@vueuse/core')['useScreenSafeArea']
   const useScriptTag: typeof import('@vueuse/core')['useScriptTag']
@@ -410,6 +416,9 @@ declare global {
   export type { Component, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
   // @ts-ignore
+  export type { QueryParamAlias } from './src/composables/useRouterVariables'
+  import('./src/composables/useRouterVariables')
+  // @ts-ignore
   export type { CustomFetchError } from './src/utils/api'
   import('./src/utils/api')
 }
@@ -427,6 +436,8 @@ declare module 'vue' {
     readonly DialogSizeXS: UnwrapRef<typeof import('./src/utils/constants')['DialogSizeXS']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly HttpStatusCodesWasHandled: UnwrapRef<typeof import('./src/utils/constants')['HttpStatusCodesWasHandled']>
+    readonly NewUUID: UnwrapRef<typeof import('./src/utils/general')['NewUUID']>
+    readonly QueryParamAlias: UnwrapRef<typeof import('./src/composables/useRouterVariables')['QueryParamAlias']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly alphaDashValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['alphaDashValidator']>
     readonly alphaValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['alphaValidator']>
@@ -447,6 +458,7 @@ declare module 'vue' {
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly createAyahUrl: UnwrapRef<typeof import('./src/utils/dataResolver')['createAyahUrl']>
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
+    readonly createFootnoteTag: UnwrapRef<typeof import('./src/utils/htmlUtils')['createFootnoteTag']>
     readonly createGenericProjection: UnwrapRef<typeof import('@vueuse/math')['createGenericProjection']>
     readonly createGlobalState: UnwrapRef<typeof import('@vueuse/core')['createGlobalState']>
     readonly createHadithURL: UnwrapRef<typeof import('./src/utils/dataResolver')['createHadithURL']>
@@ -475,6 +487,7 @@ declare module 'vue' {
     readonly formatDate: UnwrapRef<typeof import('./src/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./src/@core/utils/formatters')['formatDateToMonthShort']>
     readonly formatString: UnwrapRef<typeof import('./src/composables/objectUtils')['formatString']>
+    readonly generateFootnote: UnwrapRef<typeof import('./src/utils/stringUtils')['generateFootnote']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
@@ -723,6 +736,7 @@ declare module 'vue' {
     readonly useRound: UnwrapRef<typeof import('@vueuse/math')['useRound']>
     readonly useRoute: UnwrapRef<typeof import('vue-router/auto')['useRoute']>
     readonly useRouter: UnwrapRef<typeof import('vue-router/auto')['useRouter']>
+    readonly useRouterVariables: UnwrapRef<typeof import('./src/composables/useRouterVariables')['default']>
     readonly useScreenOrientation: UnwrapRef<typeof import('@vueuse/core')['useScreenOrientation']>
     readonly useScreenSafeArea: UnwrapRef<typeof import('@vueuse/core')['useScreenSafeArea']>
     readonly useScriptTag: UnwrapRef<typeof import('@vueuse/core')['useScriptTag']>
