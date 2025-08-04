@@ -75,7 +75,10 @@ declare global {
   const formatDate: typeof import('./src/@core/utils/formatters')['formatDate']
   const formatDateToMonthShort: typeof import('./src/@core/utils/formatters')['formatDateToMonthShort']
   const formatString: typeof import('./src/composables/objectUtils')['formatString']
+  const generateAyahFootnote: typeof import('./src/utils/stringUtils')['generateAyahFootnote']
+  const generateAyahFootnoteRefrence: typeof import('./src/utils/refrenceUtils')['generateAyahFootnoteRefrence']
   const generateFootnote: typeof import('./src/utils/stringUtils')['generateFootnote']
+  const generateFootnoteRefrence: typeof import('./src/utils/refrenceUtils')['generateFootnoteRefrence']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCleanSelectedText: typeof import('./src/utils/htmlUtils')['getCleanSelectedText']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
@@ -487,7 +490,8 @@ declare module 'vue' {
     readonly formatDate: UnwrapRef<typeof import('./src/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./src/@core/utils/formatters')['formatDateToMonthShort']>
     readonly formatString: UnwrapRef<typeof import('./src/composables/objectUtils')['formatString']>
-    readonly generateFootnote: UnwrapRef<typeof import('./src/utils/stringUtils')['generateFootnote']>
+    readonly generateAyahFootnoteRefrence: UnwrapRef<typeof import('./src/utils/refrenceUtils')['generateAyahFootnoteRefrence']>
+    readonly generateFootnoteRefrence: UnwrapRef<typeof import('./src/utils/refrenceUtils')['generateFootnoteRefrence']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>

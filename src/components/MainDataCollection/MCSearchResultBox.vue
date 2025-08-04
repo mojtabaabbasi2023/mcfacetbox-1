@@ -7,7 +7,7 @@ import type { ISimpleTreeActionable } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import { DataShelfBoxModelNew } from '@/types/dataShelf'
 import type { IDataShelfBoxNew } from '@/types/dataShelf'
-import type { ISearchResultItem } from '@/types/SearchResult'
+import type { ISearchResultItem, SearchResultItemModel } from '@/types/SearchResult'
 
 interface Props {
   dataitem: ISearchResultItem // در حالت واقعی بهتر است این از یک interface عمومی مثل ISearchResultItem باشد
@@ -26,7 +26,7 @@ const emit = defineEmits<{
   (e: 'messageHasOccured', message: string, type: MessageType): void
   (e: 'contentToNodeAdded', connectednodeid: number): void
   (e: 'update:isExpanded', value: boolean): void
-  (e: 'dataitemhaschanged', value: ISearchResultItem): void
+  (e: 'dataitemhaschanged', value: SearchResultItemModel): void
   (e: 'oncontextmenuselect', mouseEvent: MouseEvent, contenttype: DataBoxType, boxdata: IDataShelfBoxNew, element: HTMLElement): void
 
 }
@@ -68,9 +68,13 @@ async function addContentToNode(datashelfbox: IDataShelfBoxNew, duplicate: boole
           },
         )
       }
-      else { emit('messageHasOccured', error.message, MessageType.error) }
+      else {
+        emit('messageHasOccured', error.message, MessageType.error)
+      }
     }
-    else { emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error) }
+    else {
+      emit('messageHasOccured', t('httpstatuscodes.0'), MessageType.error)
+    }
   }
   loadinglocal.value = false
 }
@@ -184,6 +188,15 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
     ],
   })
 }
+
+// const searchResultItem = computed(() => {
+//   switch (props.boxType) {
+//     case DataBoxType.hadith:
+//       return (props.dataitem as HadithSearchResultItemModel)
+//     case DataBoxType.quran:
+//       return (props.dataitem as AyahSearchResultItemModel)
+//   }
+// })
 
 function openBoxLink() {
   window.open(boxUrl.value, '_blank')

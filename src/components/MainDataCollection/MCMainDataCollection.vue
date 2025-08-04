@@ -206,7 +206,7 @@ function resetData() {
   resultDataOnState[dataTabValue.value].facets.splice(0)
 }
 
-function searchResultItemChaneged(searchresultItem: ISearchResultItem) {
+function searchResultItemChaneged(searchresultItem: SearchResultItemModel) {
   const index = resultDataOnState[dataTabValue.value].results.findIndex(item => item.id === searchresultItem.id)
   if (index !== -1)
     resultDataOnState[dataTabValue.value].results[index].text = searchresultItem.text
@@ -242,7 +242,8 @@ async function runSearch(resetToDefault: boolean) {
       resultDataOnState[contentType].results = resultCastedData.items.map(item => {
         switch (contentType) {
           case DataBoxType.hadith:
-          return new HadithSearchResultItemModel(item.highLight, item.id, item.text ?? '', item.shortText ?? '', item.qaelTitleList, item.noorLibLink, item.qaelList, item.bookTitle, item.bookTitleShort, item.pageNum, item.sourceId, item.vol)
+          return new HadithSearchResultItemModel(item.highLight, item.id, item.text ?? '', item.shortText ?? '', item.qaelTitleList, item.noorLibLink, item.qaelList,
+              item.bookTitle, item.bookTitleShort, item.pageNum, item.sourceId, item.vol, item.translateCount, item.hadithRelatedCount)
         case DataBoxType.quran:
           return new AyahSearchResultItemModel(item.highLight, item.id, item.ayahNumber, item.link, item.shortText, item.text, item.surahTitle, item.surahId)
         case DataBoxType.vocabulary:
@@ -281,7 +282,7 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
         <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
           <MCSearchResultBox
             v-model:is-expanded="maximizBoxOverlay" :box-type="dataTabValue" :search-phrase="searchPhrase" expandable :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id"
-            :selected-node="selectedNode" @content-to-node-added="contentToNodeAdded"
+            :selected-node="selectedNode" @content-to-node-added="contentToNodeAdded" @message-has-occured="searchResultBoxMessageHandle"
             @dataitemhaschanged="(value) => { currentitem = value }"
           />
         </div>

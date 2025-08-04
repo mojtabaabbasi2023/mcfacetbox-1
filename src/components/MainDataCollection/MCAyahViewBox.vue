@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import type { GridResultFacet } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
-import { type IDataShelfBoxNew } from '@/types/dataShelf'
+import type { IDataShelfBoxNew, IFootNote } from '@/types/dataShelf'
 import type { IAyahSearchResultItem, IAyahTranslateItem } from '@/types/ayahResult'
-import { AyahSearchResultItemModel } from '@/types/ayahResult'
+import { AyahSearchResultItemModel, AyahTranslateItemModel } from '@/types/ayahResult'
 import { DataShelfBoxModelNew } from '@/types/dataShelf'
 import { getSelectedTextWithinElement } from '@/utils/htmlUtils'
-
-import type { ISearchResultItem } from '@/types/SearchResult'
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
@@ -60,7 +58,7 @@ async function loadcompleteayah() {
     })
 
     if (result.id) {
-      emit('dataitemchanged', result)
+      emit('dataitemchanged', new AyahSearchResultItemModel(result.highLight, result.id, result.ayahNumber, result.link, result.shortText, result.text, result.surahTitle, result.surahId))
       showfulltext.value = true
     }
   }
@@ -73,12 +71,14 @@ async function loadcompleteayah() {
 async function loadtranslate() {
   loadinglocal.value = true
   try {
-    const result = await $api <GridResultFacet<IAyahTranslateItem>>(`app/source/quran/${props.dataitem.id}/translate?PageNumber=${translateayahPage.value}&PageSize=${translateayahPageSize.value}`, {
+    const result = await $api <GridResultFacet<AyahTranslateItemModel>>(`app/source/quran/${props.dataitem.id}/translate?PageNumber=${translateayahPage.value}&PageSize=${translateayahPageSize.value}`, {
       method: 'GET',
     })
 
     translatelist.splice(0)
-    translatelist.push(...result.items)
+    translatelist.push(...result.items.map(item => {
+      return new AyahTranslateItemModel(item.highLight, useToNumber(item.id).value, item.text, item.shortText, item.translationBookId, item.bookFromPage, item.bookTitle, item.volumeNumber, item.section, item.ayahId)
+    }))
     translateayahTotalCount.value = result.totalCount
 
     loadinglocal.value = false
@@ -94,7 +94,7 @@ async function loadtranslate() {
 async function loadrelated() {
   loadinglocal.value = true
   try {
-    const result = await $api <GridResultFacet<IAyahSearchResultItem>>(`app/source/quran/${props.dataitem.id}/related?PageNumber=${relatedayahPage.value}&PageSize=${relatedayahPageSize.value}`, {
+    const result = await $api <GridResultFacet<AyahSearchResultItemModel>>(`app/source/quran/${props.dataitem.id}/related?PageNumber=${relatedayahPage.value}&PageSize=${relatedayahPageSize.value}`, {
       method: 'GET',
     })
 
@@ -150,7 +150,7 @@ watch(translateayahPage, () => {
 },
 )
 
-const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDataShelfBoxNew, htmlElement?: HTMLElement) => {
+const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDataShelfBoxNew, refrenceString?: string, htmlElement?: HTMLElement) => {
   // prevent the browser's default menu
 
   e.preventDefault()
@@ -162,6 +162,17 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
   if (selectedText.length > 0)
     contentdata.content = selectedText
 
+  const uuid = NewUUID()
+
+  const footnoteTemp: IFootNote = {
+    id: uuid,
+    isReference: false,
+    title: refrenceString ?? '',
+    order: 1,
+  }
+
+  contentdata.content += createFootnoteTag(uuid, '1')
+  contentdata.footNotes.push(footnoteTemp)
   emit('oncontextmenuselect', e, contentType, contentdata)
 }
 
@@ -205,7 +216,7 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
                 v-for="(item) in relatedayah"
                 :key="item.id" nestedmode :box-type="DataBoxType.quran" :expandable="false"
                 :dataitem="item" :search-phrase="searchPhrase"
-                @message-has-occured="(message, type) => $emit('messageHasOccured', message, type)" @oncontextmenuselect="onContextMenu"
+                @message-has-occured="(message, type) => $emit('messageHasOccured', message, type)" @oncontextmenuselect="($event, contenttype, contentdata) => emit('oncontextmenuselect', $event, contenttype, contentdata)"
               />
             </div>
             <div class="paging-container-fixed">
@@ -225,7 +236,7 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
               <div
                 class="py-1 px-1" @contextmenu="(e) => {
                   const textContainer = e.currentTarget.querySelector('.selectable-content') || e.currentTarget;
-                  onContextMenu(e, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), textContainer)
+                  onContextMenu(e, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), item.refrenceAsString, textContainer)
                 }"
               >
                 <VRow>
@@ -273,7 +284,7 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
 
               @contextmenu="(e) => {
                 const textContainer = e.currentTarget.querySelector('.selectable-content') || e.currentTarget;
-                onContextMenu(e, DataBoxType.quran, new DataShelfBoxModelNew(0, 0, 0, props.dataitem.text, '', [], [], props.dataitem.id.toString()), textContainer)
+                onContextMenu(e, DataBoxType.quran, new DataShelfBoxModelNew(0, 0, 0, props.dataitem.text, '', [], [], props.dataitem.id.toString()), props.dataitem.refrenceAsString, textContainer)
               }"
             >
               <VCol md="12">

@@ -1,6 +1,7 @@
 import { isNull, isUndefined } from '@sindresorhus/is'
 import type { FacetType } from './baseModels'
 import { joinWithDots } from '@/utils/stringUtils'
+import type { IReference } from '@/utils/refrenceUtils'
 
 export function convertFacetItemToFacetTree(items: IFacetItem[]): IFacetTreeItem[] {
   const map = new Map<string, IFacetTreeItem>()
@@ -118,6 +119,10 @@ export interface ISearchResultItem {
   text: string
   shortText: string
   readonly hasShortText: boolean
+
+  readonly refrenceAsString: string
+  readonly refrenceAsModel: IReference
+  readonly ayahRefrenceAsString: string
 }
 
 /**
@@ -140,6 +145,12 @@ export class SearchResultItemModel implements ISearchResultItem {
     this.text = text
     this.shortText = shortText
   }
+
+  get refrenceAsString(): string { return ' ' }
+  get refrenceAsModel(): IReference { return { bookTitle: ' ' } }
+  get ayahRefrenceAsString(): string { return ' ' }
+
+  [x: string]: any
 
   get highlightText(): string {
     return joinWithDots(this.highLight, {

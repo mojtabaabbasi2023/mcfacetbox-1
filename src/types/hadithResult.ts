@@ -1,4 +1,6 @@
 import { type ISearchResultItem, SearchResultItemModel } from './SearchResult'
+import type { IReference } from '@/utils/refrenceUtils'
+import { generateFootnoteRefrence } from '@/utils/refrenceUtils'
 
 export interface IqaelItem {
   id: number
@@ -71,6 +73,8 @@ export class HadithSearchResultItemModel
     pageNum: number = 0,
     sourceId: number = 0,
     vol: number = 0,
+    translatecount: number = 0,
+    hadithrelatedcount: number = 0,
   ) {
     super(highLight, id, text, shortText)
     this.qaelTitleList = qaelTitleList
@@ -81,7 +85,25 @@ export class HadithSearchResultItemModel
     this.pageNum = pageNum
     this.sourceId = sourceId
     this.vol = vol
+    this.translateCount = translatecount
+    this.hadithRelatedCount = hadithrelatedcount
   }
+
+  get refrenceAsString(): string {
+    return generateFootnoteRefrence({ bookTitle: this.bookTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() })
+  }
+
+  get refrenceAsModel(): IReference {
+    return { bookTitle: this.bookTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() }
+  }
+
+  //   override createRefrenceAsString(): string {
+  //     return generateFootnoteRefrence({ bookTitle: this.bookTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() })
+  //   }
+
+//   override createRefrenceAsModel(): IReference {
+//     return { bookTitle: this.bookTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() }
+//   }
 }
 
 export class HadithTranslateItemModel
@@ -105,6 +127,8 @@ export class HadithTranslateItemModel
     sourceShortTitle: string = '',
     authorTitle: string = '',
     authorId: number = 0,
+    volume: number = 0,
+    pagenumber: number = 0,
   ) {
     super(highLight, id, text, shortText)
     this.hadithId = hadithId
@@ -113,9 +137,27 @@ export class HadithTranslateItemModel
     this.sourceShortTitle = sourceShortTitle
     this.authorTitle = authorTitle
     this.authorId = authorId
+    this.vol = volume
+    this.pageNum = pagenumber
   }
 
   [x: string]: any
   vol: number = 0
   pageNum: number = 0
+
+  get refrenceAsString(): string {
+    return generateFootnoteRefrence({ bookTitle: this.sourceShortTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() })
+  }
+
+  get refrenceAsModel(): IReference {
+    return { bookTitle: this.sourceShortTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() }
+  }
+
+  //   createRefrenceAsString(): string {
+  //     return generateFootnoteRefrence({ bookTitle: this.sourceMainTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString(), author: this.authorTitle })
+  //   }
+
+//   createRefrenceAsModel(): IReference {
+//     return { bookTitle: this.sourceMainTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString(), author: this.authorTitle }
+//   }
 }

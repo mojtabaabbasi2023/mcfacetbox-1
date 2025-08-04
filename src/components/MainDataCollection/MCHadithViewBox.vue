@@ -2,13 +2,13 @@
 import type { GridResultFacet } from '@/types/baseModels'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxNew, IFootNote } from '@/types/dataShelf'
-import { HadithSearchResultItemModel } from '@/types/hadithResult'
+import type { IHadithSearchResultItem } from '@/types/hadithResult'
+import { HadithSearchResultItemModel, HadithTranslateItemModel, IHadithTranslateItem } from '@/types/hadithResult'
 import { DataShelfBoxModelNew } from '@/types/dataShelf'
 import { createFootnoteTag, getSelectedTextWithinElement } from '@/utils/htmlUtils'
 import type { ISearchResultItem } from '@/types/SearchResult'
-import type { IHadithSearchResultItem, IHadithTranslateItem } from '@/types/hadithResult'
 import { NewUUID } from '@/utils/general'
-import { generateFootnote } from '@/utils/stringUtils'
+import type { IReference } from '@/utils/refrenceUtils'
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
@@ -18,15 +18,15 @@ const { t } = useI18n({ useScope: 'global' })
 const loadinglocal = ref(false)
 const loadingMore = ref(false)
 const showfulltext = ref(false)
-const translatelist = shallowReactive<IHadithTranslateItem[]>([])
-const relatedhadith = reactive<IHadithSearchResultItem[]>([])
+const translatelist = shallowReactive<HadithTranslateItemModel[]>([])
+const relatedhadith = reactive<HadithSearchResultItemModel[]>([])
 const relatedHadithPage = shallowRef(1)
 const relatedHadithPageSize = shallowRef(10)
 const relatedHadithTotalCount = shallowRef(0)
 
 // const { selectedNode } = useTree()
 interface Props {
-  dataitem: IHadithSearchResultItem
+  dataitem: HadithSearchResultItemModel
   isExpanded: boolean
   searchPhrase: string
   showTools: boolean
@@ -34,7 +34,7 @@ interface Props {
 interface Emit {
   (e: 'messageHasOccured', message: string, type: MessageType): void
   (e: 'contentToNodeAdded', connectednodeid: number): void
-  (e: 'dataitemchanged', value: IHadithSearchResultItem): void
+  (e: 'dataitemchanged', value: HadithSearchResultItemModel): void
   (e: 'oncontextmenuselect', mouseEvent: MouseEvent, contenttype: DataBoxType, boxdata: IDataShelfBoxNew): void
 }
 async function selectmorelessHadith() {
@@ -54,13 +54,14 @@ async function selectmorelessHadith() {
 }
 async function loadcompletehadith() {
   try {
-    const result = await $api <IHadithSearchResultItem>(`app/source/hadith/${props.dataitem.id}${(props.searchPhrase && props.searchPhrase.length > 1) ? `?searchPhrase=${props.searchPhrase}` : ''}`, {
+    const result = await $api <HadithSearchResultItemModel>(`app/source/hadith/${props.dataitem.id}${(props.searchPhrase && props.searchPhrase.length > 1) ? `?searchPhrase=${props.searchPhrase}` : ''}`, {
       method: 'GET',
     })
 
-    console.log('result', result)
     if (result.id) {
-      emit('dataitemchanged', result)
+      emit('dataitemchanged', new HadithSearchResultItemModel(result.highLight, result.id, result.text, result.shortText, result.qaelTitleList, result.noorLibLink, result.qaelList,
+        result.bookTitle, result.bookTitleShort, result.pageNum, result.sourceId, result.vol, result.translateCount, result.hadithRelatedCount,
+      ))
       showfulltext.value = true
     }
   }
@@ -73,11 +74,13 @@ async function loadcompletehadith() {
 async function loadtranslate() {
   loadinglocal.value = true
   try {
-    const result = await $api <IHadithTranslateItem[]>(`app/source/hadith/${props.dataitem.id}/translate`, {
+    const result = await $api <HadithTranslateItemModel[]>(`app/source/hadith/${props.dataitem.id}/translate`, {
       method: 'GET',
     })
 
-    translatelist.push(...result)
+    translatelist.push(...result.map(item => {
+      return new HadithTranslateItemModel(item.highLight, useToNumber(item.id).value, item.text, item.shortText, item.hadithId, item.noorLibLink, item.sourceMainTitle, item.sourceShortTitle, item.authorTitle, item.authorId, item.vol, item.pageNum)
+    }))
     loadinglocal.value = false
   }
   catch (error) {
@@ -142,11 +145,10 @@ watch(relatedHadithPage, () => {
 },
 )
 
-const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDataShelfBoxNew, htmlElement?: HTMLElement) => {
+const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDataShelfBoxNew, refrenceString?: string, refrenceModel?: IReference, htmlElement?: HTMLElement) => {
   // prevent the browser's default menu
 
   e.preventDefault()
-
   let selectedText = ''
   if (htmlElement)
     selectedText = getSelectedTextWithinElement(htmlElement)
@@ -158,11 +160,7 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
   const footnoteTemp: IFootNote = {
     id: uuid,
     isReference: true,
-    title: generateFootnote({
-      bookTitle: props.dataitem.bookTitle,
-      volumeNumber: (props.dataitem.vol && props.dataitem.vol > 0) ? props.dataitem.vol.toString() : undefined,
-      pageNumber: (props.dataitem.pageNum && props.dataitem.pageNum > 0) ? props.dataitem.pageNum.toString() : undefined,
-    }),
+    title: refrenceString ?? '',
     order: 1,
   }
 
@@ -209,7 +207,7 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
                 v-for="(item) in relatedhadith"
                 :key="item.id" nestedmode :box-type="DataBoxType.hadith" :expandable="false"
                 :dataitem="item" :search-phrase="searchPhrase"
-                @message-has-occured="(message, type) => $emit('messageHasOccured', message, type)" @oncontextmenuselect="onContextMenu" @dataitemhaschanged="relatedHadithItemChanged"
+                @message-has-occured="(message, type) => $emit('messageHasOccured', message, type)" @oncontextmenuselect="($event, contenttype, contentdata) => emit('oncontextmenuselect', $event, contenttype, contentdata)" @dataitemhaschanged="relatedHadithItemChanged"
               />
             </div>
             <div class="paging-container-fixed">
@@ -229,7 +227,7 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
               <div
                 class="py-1 px-1" @contextmenu="(e) => {
                   const textContainer = e.currentTarget.querySelector('.selectable-content') || e.currentTarget;
-                  onContextMenu(e, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), textContainer)
+                  onContextMenu(e, DataBoxType.text, new DataShelfBoxModelNew(0, 0, 0, item.text, '', [], [], '0'), item.refrenceAsString, item.refrenceAsModel, textContainer)
                 }"
               >
                 <VRow>
@@ -274,7 +272,7 @@ function relatedHadithItemChanged(searchresultItem: ISearchResultItem) {
 
               @contextmenu="(e) => {
                 const textContainer = e.currentTarget.querySelector('.selectable-content') || e.currentTarget;
-                onContextMenu(e, DataBoxType.hadith, new DataShelfBoxModelNew(0, 0, 0, props.dataitem.text, '', [], [], props.dataitem.id.toString()), textContainer)
+                onContextMenu(e, DataBoxType.hadith, new DataShelfBoxModelNew(0, 0, 0, props.dataitem.text, '', [], [], props.dataitem.id.toString()), props.dataitem.refrenceAsString, props.dataitem.refrenceAsModel, textContainer)
               }"
             >
               <VCol md="12" class="d-flex flex-column hadith-container">

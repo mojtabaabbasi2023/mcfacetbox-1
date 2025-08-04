@@ -62,6 +62,9 @@ export class AyahSearchResultItemModel
   link: string = ''
   surahId: number = 0
   surahTitle: string = ''
+  get refrenceAsString(): string {
+    return generateAyahFootnoteRefrence({ surahTitle: this.surahTitle, ayahNumber: this.ayahNumber.toString() })
+  }
 }
 
 export class AyahTranslateItemModel
@@ -99,6 +102,7 @@ export class AyahTranslateItemModel
   }
 
   [x: string]: any
-  vol: number = 0
-  pageNum: number = 0
+  get refrenceAsString(): string {
+    return generateFootnoteRefrence({ bookTitle: this.bookTitle, volumeNumber: this.volumeNumber.toString(), pageNumber: this.bookFromPage.toString() })
+  }
 }
