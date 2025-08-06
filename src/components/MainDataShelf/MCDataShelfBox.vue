@@ -8,7 +8,7 @@ import { DataBoxType, MessageType, SizeType, SupervisionStatus } from '@/types/b
 import { type ISearchResultItem, SearchResultItemModel } from '@/types/SearchResult'
 import { useDataShelfPriorityChanged } from '@/store/databoxStore'
 
-const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number;nextItemPriority: number;prevItemPriority: number }>()
+const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number;nextItemPriority: number;prevItemPriority: number;readonlyMode?: boolean }>()
 const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
 const dialogAddLabelVisible = ref(false)
@@ -31,7 +31,7 @@ const selectedbox = shallowRef(false)
 
 // const toast = useToast()
 const databox = ref()
-const highlightClass = ref(['mc-data-shelf-box'])
+const highlightClass = ref([`mc-data-shelf-box${props.readonlyMode ? 'mc-data-shelf-box--readonly' : ''}`])
 const loadinglocal = ref(false)
 const btnlabel = ref()
 
@@ -465,6 +465,9 @@ const isSelected = computed({
 })
 
 const itemsHasLink = computed(() => {
+  if (props.readonlyMode)
+    return false
+
   return databoxItem.value.hasLink || databoxItem.value.linkId
 })
 
@@ -505,15 +508,15 @@ watch(isDialogDataShelfBoxEdit, () => {
 <template>
   <div
     ref="databox" :class="[highlightClass]"
-    :style="{ 'overflow': 'visible !important', 'margin-block-end': databoxItem.hasLink ? '3px' : '10px', 'margin-right': itemsHasLink ? '10px' : '0px', 'background-color': itemsHasLink ? 'rgba(var(--v-shadow-key-umbra-color), 0.10)' : '' }" @mouseenter="showTools = true"
+    :style="{ 'overflow': 'visible !important', 'margin-block-end': itemsHasLink ? '3px' : '10px', 'margin-right': itemsHasLink ? '10px' : '0px', 'background-color': itemsHasLink ? 'rgba(var(--v-shadow-key-umbra-color), 0.10)' : '' }" @mouseenter="showTools = true"
     @mouseleave="showTools = false" @contextmenu="onContextMenu"
   >
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
 
     <div :class="`${selectedbox ? 'selectedbox h-auto shelf-box-body' : 'h-auto shelf-box-body'}`">
       <VRow no-gutters class="justify-start align-start box">
-        <span>{{ props.itemIndex + 1 }}</span>
-        <VCheckbox v-model="isSelected" density="compact" />
+        <span v-if="!readonlyMode">{{ props.itemIndex + 1 }}</span>
+        <VCheckbox v-if="!readonlyMode" v-model="isSelected" density="compact" />
         <VCol>
           <div class="text pb-1" v-html="databoxItem?.content" />
           <VDivider v-if="((databoxItem?.footNotes && databoxItem?.footNotes.length) ?? 0) > 0" class="w-50" />
@@ -532,7 +535,7 @@ watch(isDialogDataShelfBoxEdit, () => {
         <!-- position-absolute px-2 d-flex flex-column top-0 left-0 -->
       </VRow>
     </div>
-    <div>
+    <div v-if="!readonlyMode">
       <VBtn
         v-if="databoxItem.hasLink" icon size="25" color="error"
         variant="text" class="box-unpin-item" @click="unlinkdatabox"
@@ -547,7 +550,7 @@ watch(isDialogDataShelfBoxEdit, () => {
       </VBtn>
     </div>
     <VFabTransition>
-      <div v-if="showTools" class="box-state-container">
+      <div v-if="showTools && !readonlyMode" class="box-state-container">
         <VTooltip location="right center">
           <template #activator="{ props }">
             <VIcon v-if="(databoxItem?.node?.id ?? 0) > 0" icon="tabler-plug-connected-x" size="12" class="mb-1" v-bind="props" />
@@ -572,7 +575,7 @@ watch(isDialogDataShelfBoxEdit, () => {
     </VFabTransition>
     <VFadeTransition>
       <!-- <VRow v-if="showTools" no-gutters class="border-t-sm tools" justify="space-between"> -->
-      <div v-if="showTools" class="box-state-toolbar">
+      <div v-if="showTools && !readonlyMode" class="box-state-toolbar">
         <!-- <VRow no-gutters class="btn-box data-box-toolbar"> -->
         <div :style="databoxItem.state.id === SupervisionStatus.accept ? { pointerEvents: 'none', opacity: '0.5' } : {}">
           <VBtn v-if="!databoxItem.hasLink" icon size="25" variant="text" @click="linkdatabox">

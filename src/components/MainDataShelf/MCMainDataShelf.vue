@@ -453,15 +453,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
                 {{ $t('datashelfbox.filter') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text">
-              <VIcon icon="tabler-list-tree" size="22" />
-              <VTooltip
-                activator="parent"
-                location="top center"
-              >
-                {{ $t('datashelfbox.treemode') }}
-              </VTooltip>
-            </VBtn>
+
             <VBtn icon size="small" variant="text" @click="deleteSelectedItem">
               <VIcon icon="tabler-trash-x" size="22" />
               <VTooltip

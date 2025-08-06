@@ -1,4 +1,5 @@
-import type { ActionDates, type ISimpleTree, ISimpleTreeActionable, type baseItemState } from './baseModels'
+import type { ISimpleTree, baseItemAction, baseItemState } from './baseModels'
+import type { IDataShelfBoxView, IExerptSupervisionStat } from './dataShelf'
 
 export function createTreeIndex(tree: ISimpleTree[]): Record<number, ISimpleTree> {
   const index: Record<number, ISimpleTree> = {}
@@ -34,12 +35,19 @@ export function getNodeTypeNameSpace(nodetype: NodeType) {
     return 'sibling'
 }
 
-export interface INodeNew {
+/**
+ * اینترفیس برای ایجاد یک نو
+ */
+export interface ISingleNodeNew {
   treeId: number
   selectedId: number
   title: string
 }
-export class NodeNewModel implements INodeNew {
+
+/**
+ * مدل برای ایجاد یک نود
+ */
+export class SingleNodeNewModel implements ISingleNodeNew {
   treeId: number = 0
   selectedId: number = 0
   title: string = ''
@@ -49,7 +57,11 @@ export class NodeNewModel implements INodeNew {
     this.selectedId = selectedid
   }
 }
-export interface INodeView {
+
+/**
+ * اینترفیس برای دریافت جزییات یک نود
+ */
+export interface ISingleNodeView {
   id: number
   isDeleted: boolean
   isActive: boolean
@@ -66,6 +78,10 @@ export interface INodeView {
   pathOrder: string
   parentId: number
 }
+
+/**
+ * اینترفیس برای تعریف یک عنوان درخت و ویژگیهای آن
+ */
 export interface ITreeTitle extends Record<string, any>, baseItemState {
   id: number
   title: string
@@ -76,6 +92,9 @@ export interface ITreeTitle extends Record<string, any>, baseItemState {
   description: string
 }
 
+/**
+ * مدل برای تعریف یک عنوان درخت و ویژگیهای آن
+ */
 export class TreeTitleModel implements ITreeTitle {
   projectsCount: number = 0
   editing?: boolean | undefined = false
@@ -90,8 +109,94 @@ export class TreeTitleModel implements ITreeTitle {
   isActive: boolean = false
   description: string = ''
 }
+
+/**
+ *  اینترفیس ساختار تو در تو یک نود در حالت ساده با پشتیبانی از فیلد های وضعیت و اکشن
+ */
+export interface ISimpleNestedNodeActionable extends baseItemAction, baseItemState {
+  id: number
+  title: string
+  children?: ISimpleNestedNodeActionable[] | null
+  parentId: number
+  priority: number
+  hasDescription?: boolean
+}
+
+/**
+ * اینترفیس ساختار تو در تو یک نود به همراه فیش های آن در حالت ساده با پشتیبانی از فیلد های وضعیت و اکشن
+ */
+export interface ISimpleNestedNodeExcerptActionable extends baseItemAction, baseItemState {
+  id: number
+  title: string
+  children?: ISimpleNestedNodeExcerptActionable[] | null
+  parentId: number
+  priority: number
+  excerptCount: IExerptSupervisionStat | null
+  excerpts: IDataShelfBoxView[] | null
+  hasDescription?: boolean
+}
+
+/**
+ * مدل ساختار تو در تو یک نود در حالت ساده با پشتیبانی از فیلد های وضعیت و اکشن
+ */
+export class SimpleNestedNodeAcionableModel implements ISimpleNestedNodeActionable {
+  priority: number = 0
+  parentId: number = -1
+  id: number = -1
+  title: string = ''
+  children?: ISimpleNestedNodeActionable[] | undefined
+  editing?: boolean | undefined = false
+  loading?: boolean | undefined = false
+  selected?: boolean | undefined = false
+  tempData: any = null
+  selectable?: boolean | undefined = false
+  disabled?: boolean | undefined = false
+  constructor(id: number = 0, title: string = '', parentid: number = 0) {
+    this.id = id
+    this.title = title
+    this.parentId = parentid
+  }
+}
+
+export class SimpleNestedNodeExcerptAcionableModel implements ISimpleNestedNodeExcerptActionable {
+  priority: number = 0
+  parentId: number = -1
+  id: number = -1
+  title: string = ''
+  children?: ISimpleNestedNodeExcerptActionable[] | undefined
+  editing?: boolean | undefined = false
+  loading?: boolean | undefined = false
+  selected?: boolean | undefined = false
+  tempData: any = null
+  selectable?: boolean | undefined = false
+  disabled?: boolean | undefined = false
+  excerptCount: IExerptSupervisionStat | null = null
+  excerpts: IDataShelfBoxView[] | null = []
+  hasDescription?: boolean | undefined
+  failed?: boolean | null | undefined
+
+  constructor(id: number = 0, title: string = '', parentid: number = 0) {
+    this.id = id
+    this.title = title
+    this.parentId = parentid
+  }
+}
+
+/**
+ * اینترفیس یک درخت به همراه نودها
+ */
 export interface ITree {
   id: number
   title: string
-  nodes: ISimpleTreeActionable[]
+  nodes: ISimpleNestedNodeActionable[]
+}
+
+/**
+ * اینترفیس یک درخت به همراه نودها و فیش های نود
+ */
+export interface ITreeExcerpt extends ITree {
+  id: number
+  title: string
+  excerptCount: IExerptSupervisionStat | null
+  nodes: ISimpleNestedNodeExcerptActionable[]
 }

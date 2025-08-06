@@ -2,12 +2,12 @@
 // !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
 
 import { useTree } from '@/store/treeStore'
-import type { ISimpleTreeActionable } from '@/types/baseModels'
+import type { ISimpleNestedNodeActionable } from '@/types/tree'
 import { SelectionType } from '@/types/baseModels'
 
 interface Prop {
   isDialogVisible: boolean
-  selectedNode: ISimpleTreeActionable
+  selectedNode: ISimpleNestedNodeActionable
   parentNodeTitle: string
   selectedTreeId: number
 }

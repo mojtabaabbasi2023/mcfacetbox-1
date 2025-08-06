@@ -1,62 +1,78 @@
 <script lang="ts" setup>
+import type { ISimpleNestedNodeExcerptActionable } from '@/types/tree'
+
 const props = defineProps<{
-  node: any
+  node: ISimpleNestedNodeExcerptActionable
   depth: number
 }>()
 
-const isOpen = ref(true)
+// const nodeelement = ref()
+const isOpen = shallowRef(false)
 const toggle = () => (isOpen.value = !isOpen.value)
 
 // فرض بر اینه که داده‌ی children از بیرون وصل میشه
 const children = computed(() => props.node.children || [])
+
+// const targetIsVisible = shallowRef(true)
+
+// const { stop } = useIntersectionObserver(
+//   nodeelement,
+//   ([entry], observerElement) => {
+//     targetIsVisible.value = entry?.isIntersecting || false
+//   },
+// )
 </script>
 
 <template>
-  <div :style="{ marginLeft: `${depth * 16}px` }" class="mb-2">
-    <VCard outlined>
-      <VCardTitle @click="toggle">
-        <VIcon class="mr-2" size="small">
-          {{ isOpen ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-        </VIcon>
+  <div class="mb-2">
+    <VCard ref="nodeelement" flat>
+      <VCardTitle>
+        <VBtn v-if="node.children || (node.excerptCount?.total ?? 0 > 0)" variant="plain" size="medium" @click="toggle">
+          <VIcon class="mr-1 ml-2" size="small">
+            {{ isOpen ? 'tabler-chevron-down' : 'tabler-chevron-left' }}
+          </VIcon>
+        </VBtn>
+        <span v-else class="mr-7" />
         <strong>{{ node.title }}</strong>
       </VCardTitle>
 
       <VExpandTransition>
-        <div v-show="isOpen">
+        <div v-if="isOpen" class="pt-2 pr-6">
           <!-- نمایش توضیح نود -->
-          <VCardText v-if="node.description">
-            {{ node.description }}
-          </VCardText>
+          <!--
+            <VCardText v-if="node.hasDescription">
+            {{ node.excerpts }}
+            </VCardText>
+          -->
 
           <!-- فیش‌ها -->
-          <VList v-if="node.excerpts && node.excerpts.length > 0" dense>
-            <VListItem
-              v-for="excerpt in node.excerpts"
+          <div>
+            <div
+              v-for="(excerpt, i) in node.excerpts"
               :key="excerpt.id"
-              class="pl-6"
+              :item-index="i"
+              class="pl-2" style="position: relative;"
             >
-              <VListItemContent>
-                <VListItemTitle>{{ excerpt.content }}</VListItemTitle>
-                <VListItemSubtitle v-if="excerpt.description">
-                  {{ excerpt.description }}
-                </VListItemSubtitle>
-              </VListItemContent>
-            </VListItem>
-          </VList>
-
-          <!-- نودهای فرزند -->
-          <MCPreviewTreeNode
-            v-for="child in children"
-            :key="child.id"
-            :node="child"
-            :depth="depth + 1"
-          />
+              <MCDataShelfBox
+                :model-value="excerpt"
+                :prev-item-order="i - 1" :item-index="i"
+                :next-item-order="i + 1"
+                :prev-item-priority="i > 0 ? node.excerpts[i - 1].priority : -1"
+                :next-item-priority="i < node.excerpts.length - 1 ? node.excerpts[i + 1].priority : -1" readonly-mode
+              />
+            </div>
+          </div>
+          <div>
+            <!-- نودهای فرزند -->
+            <MCPreviewTreeNode
+              v-for="child in children"
+              :key="child.id"
+              :node="child"
+              :depth="depth + 1"
+            />
+          </div>
         </div>
       </VExpandTransition>
     </VCard>
   </div>
 </template>
-
-<style lang="scss">
-
-</style>

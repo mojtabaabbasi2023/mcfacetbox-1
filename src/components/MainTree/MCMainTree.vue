@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { VTreeview } from 'vuetify/labs/VTreeview'
-import { isNumericString, isUndefined } from '@sindresorhus/is'
 import { useToast } from 'vue-toastification'
 import ContextMenu from '@imengyu/vue3-context-menu'
 import MCLoading from '../MCLoading.vue'
 import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
-import { type ISimpleDTO, type ISimpleTree, type ISimpleTreeActionable, SimpleTreeAcionableModel, SizeType } from '@/types/baseModels'
-import type { INodeView, ITree } from '@/types/tree'
-import { NodeType, createTreeIndex, getNodeTypeNameSpace } from '@/types/tree'
+import MCDialogTreePreview from '../dialogs/MCDialogTreePreview.vue'
+import { type ISimpleTree, SizeType } from '@/types/baseModels'
+import { NodeType, SimpleNestedNodeAcionableModel, createTreeIndex, getNodeTypeNameSpace } from '@/types/tree'
+import type { ISimpleNestedNodeActionable, ISingleNodeView, ITree } from '@/types/tree'
 import { useSelectedTree, useTree } from '@/store/treeStore'
 import { SelectionType } from '@/types/baseModels'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
@@ -37,12 +37,13 @@ const searchResultSelectedNodes = ref<number[]>([])
 const hasDraggableState = ref(false)
 const hasDividerDraggableBefore = ref(false)
 const hasDividerDraggableAfter = ref(false)
-const sourceDraggableItem = ref<ISimpleTreeActionable | null>(null)
-const activeDraggableItem = ref<ISimpleTreeActionable | null>(null)
+const sourceDraggableItem = ref<ISimpleNestedNodeActionable | null>(null)
+const activeDraggableItem = ref<ISimpleNestedNodeActionable | null>(null)
 const editableNode = ref()
 const activeSearch = ref(false)
 const dialogAddNewNodeVisible = ref(false)
 const dialogMergeNodeVisible = ref(false)
+const dialogTreePreviewVisible = ref(false)
 const dialogDescriptionVisible = shallowRef(false)
 const dialogTransferNodeVisible = ref(false)
 const activeTooltipPath = shallowRef('')
@@ -55,7 +56,7 @@ interface Emit {
 const { x: cursorX, y: cursorY } = usePointer()
 
 // نمایش Tooltip هنگام کلیک
-const showNodeTooltip = (event: MouseEvent, item: ISimpleTreeActionable) => {
+const showNodeTooltip = (event: MouseEvent, item: ISimpleNestedNodeActionable) => {
   activeTooltipPath.value = getNodePath(item, '')
   setTimeout(() => {
     if (!activatedNode.value.includes(item.id))
@@ -90,7 +91,7 @@ watch(route, () => {
   checkTreeRoute(true)
 }, { immediate: true })
 
-const selectTreeNode = (item: ISimpleTreeActionable) => {
+const selectTreeNode = (item: ISimpleNestedNodeActionable) => {
   const newQuery = { ...route.query }
 
   clearUnNeededQueryItems(newQuery)
@@ -172,13 +173,13 @@ function handleTreeViewKeydown(event: KeyboardEvent) {
 //     event.stopPropagation()
 //   }
 }
-function nodeEditCancel(nodeitem: ISimpleTreeActionable) {
+function nodeEditCancel(nodeitem: ISimpleNestedNodeActionable) {
   nodeitem.loading = nodeitem.editing = false
   nodeitem.failed = false
   nodeitem.title = useCloned(nodeitem.tempData).cloned.value
   treeview.value.$el.focus()
 }
-async function nodeEditProgress(nodeitem: ISimpleTreeActionable) {
+async function nodeEditProgress(nodeitem: ISimpleNestedNodeActionable) {
   nodeitem.loading = true
   try {
     await $api(`app/node/${nodeitem.id}/title`, {
@@ -204,7 +205,7 @@ async function nodeEditProgress(nodeitem: ISimpleTreeActionable) {
     else toast.error(t('httpstatuscodes.0'))
   }
 }
-function handleEditableNodeKeydown(event: KeyboardEvent, item: ISimpleTreeActionable) {
+function handleEditableNodeKeydown(event: KeyboardEvent, item: ISimpleNestedNodeActionable) {
   switch (event.key) {
     case ' ':
     event.stopPropagation()
@@ -234,7 +235,7 @@ function gotoNode(nodeId: number, mustSelectNode: boolean = true) {
   }
 }
 
-const deleteSelectedNode = async (nodeItem: ISimpleTreeActionable) => {
+const deleteSelectedNode = async (nodeItem: ISimpleNestedNodeActionable) => {
   const title = formatString(t('alert.specificItemDeleted'), nodeItem.title)
   const serviceError = shallowRef()
 
@@ -283,7 +284,7 @@ function isValidActivateNode(): boolean {
   return !!(activatedNode.value.length > 0 && treeIndex[activatedNode.value[0]])
 }
 
-const nodeItemAdded = (nodeItem: ISimpleTreeActionable) => {
+const nodeItemAdded = (nodeItem: ISimpleNestedNodeActionable) => {
   toast.success(formatString(t('alert.specificNodeAdded'), nodeItem.title))
 }
 
@@ -326,16 +327,16 @@ function treeDividerMouseEnter(transfertype: NodeType) {
   if (transfertype === NodeType.SiblingAfter)
     hasDividerDraggableAfter.value = true
 }
-function treeDividerMouseUp(mouseEvent: MouseEvent, treeItem: ISimpleTreeActionable, transfertype: NodeType) {
+function treeDividerMouseUp(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable, transfertype: NodeType) {
   if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
     transferNodeWithDraggableMouse(transfertype, sourceDraggableItem.value, activeDraggableItem.value)
 }
-function treeItemMouseDown(mouseEvent: MouseEvent, treeItem: ISimpleTreeActionable) {
+function treeItemMouseDown(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable) {
   hasDraggableState.value = true
 
   sourceDraggableItem.value = treeItem
 }
-function treeItemMouseLeave(mouseEvent: MouseEvent, treeItem: ISimpleTreeActionable) {
+function treeItemMouseLeave(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable) {
   if (mouseEvent.buttons === 0)
     resetMouseDraggable()
 
@@ -344,7 +345,7 @@ function treeItemMouseLeave(mouseEvent: MouseEvent, treeItem: ISimpleTreeActiona
     activatedNode.value.push(treeItem.id)
   }
 }
-function treeItemMouseEnter(mouseEvent: MouseEvent, treeItem: ISimpleTreeActionable) {
+function treeItemMouseEnter(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable) {
   if (mouseEvent.buttons === 0)
     resetMouseDraggable()
   if (hasDraggableState.value) {
@@ -355,11 +356,11 @@ function treeItemMouseEnter(mouseEvent: MouseEvent, treeItem: ISimpleTreeActiona
     }, 2000)
   }
 }
-function treeItemMouseUp(mouseEvent: MouseEvent, treeItem: ISimpleTreeActionable) {
+function treeItemMouseUp(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable) {
   if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
     transferNodeWithDraggableMouse(NodeType.Children, sourceDraggableItem.value, activeDraggableItem.value)
 }
-async function transferNodeWithDraggableMouse(transfertype: NodeType, sourceNodeItem: ISimpleTreeActionable, destinationNodeItem: ISimpleTreeActionable) {
+async function transferNodeWithDraggableMouse(transfertype: NodeType, sourceNodeItem: ISimpleNestedNodeActionable, destinationNodeItem: ISimpleNestedNodeActionable) {
   const title = formatString(t(`${transfertype === NodeType.Children ? 'alert.transfernodeaschild' : (transfertype === NodeType.SiblingAfter ? 'alert.transfernodeasbrotherafter' : 'alert.transfernodeasbrotherbefore')}`), sourceNodeItem.title, destinationNodeItem.title)
   const serviceError = shallowRef()
 
@@ -433,12 +434,12 @@ const refreshTree = async () => {
 //   await fetchData()
 }
 
-const addcomment = async (nodeItem: ISimpleTreeActionable) => {
-  let resultTree: INodeView | null = null
+const addcomment = async (nodeItem: ISimpleNestedNodeActionable) => {
+  let resultTree: ISingleNodeView | null = null
 
   try {
     await showLoadingSwal(t('tree.loadingnodedetail'), async () => {
-      resultTree = await $api<INodeView>(
+      resultTree = await $api<ISingleNodeView>(
         `app/node/${nodeItem.id}`,
         { method: 'GET', ignoreResponseError: false },
       )
@@ -498,7 +499,7 @@ const addcomment = async (nodeItem: ISimpleTreeActionable) => {
   }
 }
 
-const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
+const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => {
   resetMouseDraggable()
 
   // prevent the browser's default menu
@@ -576,15 +577,15 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
   <div class="mc-main-tree" @keydown="handleKeydown">
     <MCLoading :showloading="isLoading" :loadingsize="SizeType.XL" />
     <MCDialogAddNewNode
-      v-if="dialogAddNewNodeVisible" v-model:is-dialog-visible="dialogAddNewNodeVisible" :selected-tree-id="currentTreeId" :selected-node="isValidActivateNode() ? treeIndex[activatedNode[0]] : new SimpleTreeAcionableModel(-1, '', -1)"
+      v-if="dialogAddNewNodeVisible" v-model:is-dialog-visible="dialogAddNewNodeVisible" :selected-tree-id="currentTreeId" :selected-node="isValidActivateNode() ? treeIndex[activatedNode[0]] : new SimpleNestedNodeAcionableModel(-1, '', -1)"
       @node-added="nodeItemAdded" @node-added-failed="nodeaddfailed"
     />
     <MCDialogMergeNode
-      v-if="dialogMergeNodeVisible" v-model:is-dialog-visible="dialogMergeNodeVisible" :selected-tree-id="currentTreeId" :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)" :selected-node="isValidActivateNode() ? treeIndex[activatedNode[0]] : new SimpleTreeAcionableModel(-1, '', -1)"
+      v-if="dialogMergeNodeVisible" v-model:is-dialog-visible="dialogMergeNodeVisible" :selected-tree-id="currentTreeId" :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)" :selected-node="isValidActivateNode() ? treeIndex[activatedNode[0]] : new SimpleNestedNodeAcionableModel(-1, '', -1)"
       @nodemerged="nodeMerged" @node-merge-failed="nodeaddfailed"
     />
     <MCDialogTransferNode
-      v-if="dialogTransferNodeVisible" v-model:is-dialog-visible="dialogTransferNodeVisible" :selected-tree-id="currentTreeId" :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)" :selected-node="isValidActivateNode() ? treeIndex[activatedNode[0]] : new SimpleTreeAcionableModel(-1, '', -1)"
+      v-if="dialogTransferNodeVisible" v-model:is-dialog-visible="dialogTransferNodeVisible" :selected-tree-id="currentTreeId" :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)" :selected-node="isValidActivateNode() ? treeIndex[activatedNode[0]] : new SimpleNestedNodeAcionableModel(-1, '', -1)"
       @node-transfered="nodeTransfered" @node-transfer-faild="nodeaddfailed"
     />
     <VRow no-gutters class="btn-box toolbar">
@@ -637,6 +638,16 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
             </VBtn>
           -->
 
+          <VBtn size="small" variant="text" @click="refreshTree">
+            <VIcon icon="tabler-refresh" size="22" />
+
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('refresh') }}
+            </VTooltip>
+          </VBtn>
           <VBtn size="small" variant="text">
             <VIcon icon="tabler-eraser" size="22" />
 
@@ -647,14 +658,13 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
               {{ $t('tree.treecleaning') }}
             </VTooltip>
           </VBtn>
-          <VBtn size="small" variant="text" @click="refreshTree">
-            <VIcon icon="tabler-refresh" size="22" />
-
+          <VBtn icon size="small" variant="text" @click="dialogTreePreviewVisible = true">
+            <VIcon icon="tabler-list-tree" size="22" />
             <VTooltip
               activator="parent"
               location="top center"
             >
-              {{ $t('refresh') }}
+              {{ $t('tree.preview') }}
             </VTooltip>
           </VBtn>
         </div>
@@ -759,6 +769,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleTreeActionable) => {
       v-if="dialogDescriptionVisible" v-model:is-dialog-visible="dialogDescriptionVisible" :description="activeTooltipPath"
       :loc-x="cursorX" :loc-y="cursorY"
     />
+    <MCDialogTreePreview v-if="dialogTreePreviewVisible" v-model:is-dialog-visible="dialogTreePreviewVisible" :description="activeTooltipPath" :treeid="currentTreeId" />
   </div>
 </template>
 

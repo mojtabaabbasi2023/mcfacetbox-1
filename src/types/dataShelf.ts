@@ -2,6 +2,14 @@ import type { ISimpleDTO, baseItemState } from './baseModels'
 import { DataBoxType, SupervisionStatus } from './baseModels'
 
 // NOTE - بازای هر تغییری در محتوای جعبه داده باید یک نسخه ثبت گردد و قابلیت آندو داشته باشد
+/**
+ * اینترفیس مورد نیاز برای مشاهده دیتای یک فیش
+ *
+ *در تمام برنامه عبارات زیر از جهت معنی با هم برابر هستند ولی یکسان سازی نشده اند
+ *
+ * ِDataShelfBox = Excerpt = جعبه داده = فیش
+ *
+ */
 export interface IDataShelfBoxView {
   id: number
   content: string
@@ -108,6 +116,15 @@ export class DataShelfRouteQueryParams {
     this.selectedFacetItems = selectedFacetItems
   }
 }
+
+/**
+ * مدل مورد نیاز برای مشاهده دیتای یک فیش
+ *
+ *در تمام برنامه عبارات زیر از جهت معنی با هم برابر هستند ولی یکسان سازی نشده اند
+ *
+ * ِDataShelfBox = Excerpt = جعبه داده = فیش
+ *
+ */
 export class DataShelfBoxModelView implements IDataShelfBoxView {
   state: ISimpleDTO<SupervisionStatus> = { id: SupervisionStatus.primary, title: '' }
   supervisionState: ISimpleDTO<SupervisionStatus> = { id: SupervisionStatus.primary, title: '' }
@@ -167,6 +184,17 @@ export class DataShelfBoxModelView implements IDataShelfBoxView {
   labels: ISimpleDTO<number>[] = []
 }
 
+/**
+ * اینترفیس آمار کلی نظارت فیش ها
+ */
+export interface IExerptSupervisionStat {
+  total: number
+  primary: number
+  ready: number
+  review: number
+  corrected: number
+  accepted: number
+}
 export interface IFootNote extends ISimpleDTO<string>, baseItemState {
   index?: number
   order: number

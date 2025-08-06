@@ -57,15 +57,6 @@ export interface ISimpleTree extends baseItemState {
   children?: ISimpleTree[] | null
 }
 
-export interface ISimpleTreeActionable extends baseItemAction, baseItemState {
-  id: number
-  title: string
-  children?: ISimpleTreeActionable[] | null
-  parentId: number
-  priority: number
-  hasDescription?: boolean
-}
-
 export class SimpleDTOModel<T extends stringNumber> implements ISimpleDTO<T> {
   id: T
   title: string = ''
@@ -74,24 +65,7 @@ export class SimpleDTOModel<T extends stringNumber> implements ISimpleDTO<T> {
     this.title = title
   }
 }
-export class SimpleTreeAcionableModel implements ISimpleTreeActionable {
-  priority: number = 0
-  parentId: number = -1
-  id: number = -1
-  title: string = ''
-  children?: ISimpleTreeActionable[] | undefined
-  editing?: boolean | undefined = false
-  loading?: boolean | undefined = false
-  selected?: boolean | undefined = false
-  tempData: any = null
-  selectable?: boolean | undefined = false
-  disabled?: boolean | undefined = false
-  constructor(id: number = 0, title: string = '', parentid: number = 0) {
-    this.id = id
-    this.title = title
-    this.parentId = parentid
-  }
-}
+
 export interface baseItemState {
   editing?: boolean
   loading?: boolean

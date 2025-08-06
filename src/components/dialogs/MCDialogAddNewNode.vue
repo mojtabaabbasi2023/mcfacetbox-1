@@ -2,13 +2,13 @@
 // !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
 
 import { useTree } from '@/store/treeStore'
-import type { ISimpleTreeActionable } from '@/types/baseModels'
-import { SelectionType, SimpleTreeAcionableModel } from '@/types/baseModels'
-import { NodeNewModel, NodeType, getNodeTypeNameSpace } from '@/types/tree'
+import type { ISimpleNestedNodeActionable } from '@/types/tree'
+import { SelectionType } from '@/types/baseModels'
+import { NodeType, SimpleNestedNodeAcionableModel, SingleNodeNewModel, getNodeTypeNameSpace } from '@/types/tree'
 
 interface Prop {
   isDialogVisible: boolean
-  selectedNode: ISimpleTreeActionable
+  selectedNode: ISimpleNestedNodeActionable
   selectedTreeId: number
 }
 
@@ -25,7 +25,7 @@ const { t } = useI18n({ useScope: 'global' })
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
   (e: 'errorHasOccured', message: string): void
-  (e: 'nodeAdded', node: ISimpleTreeActionable): void
+  (e: 'nodeAdded', node: ISimpleNestedNodeActionable): void
   (e: 'nodeAddedFailed', message: string): void
 
 }
@@ -54,7 +54,7 @@ const addNewNode = async () => {
   try {
     const resultid = await $api(`app/node/${getNodeTypeNameSpace(nodeAddingType.value)}`, {
       method: 'POST',
-      body: JSON.parse(JSON.stringify(new NodeNewModel(props.selectedTreeId, props.selectedNode.id, nodeTitle.value))),
+      body: JSON.parse(JSON.stringify(new SingleNodeNewModel(props.selectedTreeId, props.selectedNode.id, nodeTitle.value))),
       ignoreResponseError: false,
     })
 
@@ -64,7 +64,7 @@ const addNewNode = async () => {
     //   result.value = addNode({ id: resultid, title: nodeTitle.value, parentId: props.selectedNode.id, tempData: null, priority: 0 })
     // else
     //   result.value = addNode({ id: resultid, title: nodeTitle.value, parentId: props.selectedNode.parentId, tempData: null, priority: 0 })
-    emit('nodeAdded', new SimpleTreeAcionableModel(resultid, nodeTitle.value, props.selectedNode.id))
+    emit('nodeAdded', new SimpleNestedNodeAcionableModel(resultid, nodeTitle.value, props.selectedNode.id))
     loading.value = false
   }
   catch (error) {

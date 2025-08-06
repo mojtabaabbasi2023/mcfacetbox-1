@@ -150,6 +150,10 @@
         width: 99%;
         height: 100%;
 
+        &--readonly {
+            box-shadow: none !important;
+        }
+
         .shelf-box-body {
             position: relative;
             padding: 8px;

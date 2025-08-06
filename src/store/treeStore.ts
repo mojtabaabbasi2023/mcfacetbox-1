@@ -1,7 +1,7 @@
 import { createGlobalState } from '@vueuse/core'
-import type { ISimpleDTO, ISimpleTreeActionable } from '@/types/baseModels'
-import { SimpleDTOModel, SimpleTreeAcionableModel, SimpleTreeModel } from '@/types/baseModels'
-import { NodeType } from '@/types/tree'
+import type { ISimpleDTO } from '@/types/baseModels'
+import { SimpleDTOModel, SimpleTreeModel } from '@/types/baseModels'
+import { type ISimpleNestedNodeActionable, NodeType, SimpleNestedNodeAcionableModel } from '@/types/tree'
 
 export const useSelectedNode = createGlobalState(
   () => {
@@ -14,13 +14,13 @@ export const useSelectedTree = createGlobalState(() => {
   return reactive<ISimpleDTO<number>>(new SimpleDTOModel(0, ''))
 })
 
-const treeData = reactive<ISimpleTreeActionable[]>([])
-const treeIndex = reactive<Record<number, ISimpleTreeActionable>>({})
-const selectedNode = reactive<ISimpleTreeActionable>(new SimpleTreeAcionableModel())
+const treeData = reactive<ISimpleNestedNodeActionable[]>([])
+const treeIndex = reactive<Record<number, ISimpleNestedNodeActionable>>({})
+const selectedNode = reactive<ISimpleNestedNodeActionable>(new SimpleNestedNodeAcionableModel())
 
 // const selecedTree = reactive<ISimpleDTO<number>>({id:0,title:0})
 export function useTree() {
-  const addNewNode = (nodeItem: ISimpleTreeActionable, destinationNodeID: number, newNodeType: NodeType) => {
+  const addNewNode = (nodeItem: ISimpleNestedNodeActionable, destinationNodeID: number, newNodeType: NodeType) => {
     /**
      * در مرحله اول بررسی میشود که نود جدید میخواد در ریشه اضافه شود و یا در فرزندان نودهای ریشه
      * اگر در ریشه باشد از treeData برای مدیریت استفاده میکنیم وگرنه از treeIndex استفاده میکنیم
@@ -71,7 +71,7 @@ export function useTree() {
     }
   }
 
-  const addNode = (nodeItem: ISimpleTreeActionable, destinationNodeID: number, newNodeType: NodeType): boolean => {
+  const addNode = (nodeItem: ISimpleNestedNodeActionable, destinationNodeID: number, newNodeType: NodeType): boolean => {
     // console.log('nodeitem', nodeItem)
 
     // if (nodeItem.parentId && nodeItem.parentId > 0) {
@@ -87,8 +87,8 @@ export function useTree() {
     return true
   }
 
-  function createTreeIndex(tree: ISimpleTreeActionable[]) {
-    function populateIndex(nodes: ISimpleTreeActionable[]) {
+  function createTreeIndex(tree: ISimpleNestedNodeActionable[]) {
+    function populateIndex(nodes: ISimpleNestedNodeActionable[]) {
       for (const node of nodes) {
         treeIndex[node.id] = node
         if (node.children)
@@ -98,7 +98,7 @@ export function useTree() {
     populateIndex(tree)
   }
 
-  const deleteSingleLevelNodeFromParent = (nodeItem: ISimpleTreeActionable) => {
+  const deleteSingleLevelNodeFromParent = (nodeItem: ISimpleNestedNodeActionable) => {
     /**
      * !SECTION
      * 1- بررسی میشود که آیا نود مورد نظر در یک parent وجود دارد یا نه؟
@@ -127,12 +127,12 @@ export function useTree() {
     }
   }
 
-  const deleteSingleLevelNode = (nodeItem: ISimpleTreeActionable) => {
+  const deleteSingleLevelNode = (nodeItem: ISimpleNestedNodeActionable) => {
     deleteSingleLevelNodeFromParent(nodeItem)
     delete treeIndex[nodeItem.id]
   }
 
-  const deleteNode = (nodeItem: ISimpleTreeActionable, isRoot: boolean) => {
+  const deleteNode = (nodeItem: ISimpleNestedNodeActionable, isRoot: boolean) => {
     // NOTE - 1- بررسی موجود بودن نود
     // NOTE - 2- بررسی اینکه نود پدر دارد یا نه
     // NOTE - 3- اگر پدر داشته باشد از فرزندان آن پدر حذف میشود در treeIndex
@@ -156,12 +156,12 @@ export function useTree() {
   }
 
   function countNodesAndFindDuplicates(
-    nodes: ISimpleTreeActionable[],
+    nodes: ISimpleNestedNodeActionable[],
   ): { count: number; duplicates: Set<number> } {
     const seen = new Set<number>()
     const duplicates = new Set<number>()
 
-    function traverse(node: ISimpleTreeActionable) {
+    function traverse(node: ISimpleNestedNodeActionable) {
       // اگر نود قبلاً دیده شده باشد، آن را به دابلیکت‌ها اضافه کن
       if (seen.has(node.id))
         duplicates.add(node.id)
@@ -265,7 +265,7 @@ export function useTree() {
     }
   }
 
-  function isLastNode(nodeItem: ISimpleTreeActionable): boolean {
+  function isLastNode(nodeItem: ISimpleNestedNodeActionable): boolean {
     if (nodeItem.parentId && nodeItem.parentId > 0 && treeIndex[nodeItem.parentId] && treeIndex[nodeItem.parentId].children)
       return treeIndex[nodeItem.parentId].children[treeIndex[nodeItem.parentId].children?.length - 1].id === nodeItem.id
     if (nodeItem.parentId == null || nodeItem.parentId <= 0)
@@ -277,7 +277,7 @@ export function useTree() {
   const clearTreeData = () => {
     treeData.splice(0)
     Object.assign(treeIndex, [])
-    Object.assign(selectedNode, new SimpleTreeAcionableModel())
+    Object.assign(selectedNode, new SimpleNestedNodeAcionableModel())
   }
 
   const deselectAllTreeNodes = () => {
@@ -287,7 +287,7 @@ export function useTree() {
     }
   }
 
-  const getNodePath = (nodeItem: ISimpleTreeActionable, nodepath: string = ''): string => {
+  const getNodePath = (nodeItem: ISimpleNestedNodeActionable, nodepath: string = ''): string => {
     if (!nodeItem)
       return nodepath
 
@@ -300,7 +300,7 @@ export function useTree() {
     return nodeItem.title
   }
 
-  const selectNode = (nodeItem: ISimpleTreeActionable) => {
+  const selectNode = (nodeItem: ISimpleNestedNodeActionable) => {
     if (treeIndex[nodeItem.id])
       treeIndex[nodeItem.id].selected = true
     selectedNode.id = nodeItem.id
@@ -325,8 +325,8 @@ export function useTree() {
   }
 }
 
-// const treeData = reactive<ISimpleTreeActionable[]>([])
-// const treeIndex = reactive<Record<number, ISimpleTreeActionable>>({})
+// const treeData = reactive<ISimpleNestedNodeActionable[]>([])
+// const treeIndex = reactive<Record<number, ISimpleNestedNodeActionable>>({})
 
 // export function useTreeData() {
 //   return treeData
@@ -335,7 +335,7 @@ export function useTree() {
 //   return treeIndex
 // }
 
-// export function addNode(nodeItem: ISimpleTreeActionable): boolean {
+// export function addNode(nodeItem: ISimpleNestedNodeActionable): boolean {
 //   if (nodeItem.parentId === -1)
 //     return false
 
@@ -347,7 +347,7 @@ export function useTree() {
 //   return true
 // }
 
-// export function addNodeSibling(nodeItem: ISimpleTreeActionable, parentId: number): boolean {
+// export function addNodeSibling(nodeItem: ISimpleNestedNodeActionable, parentId: number): boolean {
 //   if (nodeItem.parentId === -1)
 //     return false
 //   if (isUndefined(treeIndex[parentId].children))
