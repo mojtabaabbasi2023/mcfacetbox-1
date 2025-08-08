@@ -40,8 +40,7 @@ const roleHeaders = [
   { text: '0', value: 'num', sortable: false },
   { title: t('role.title'), key: 'name' },
 
-  { title: t('permissions'), key: 'permissions' },
-  { title: t('role.trees'), key: 'trees' },
+  { title: t('permissions'), key: 'permissions', nowrap: true },
   { title: t('createdate'), key: 'creationTime' },
   { title: t('status'), key: 'isActive', sortable: false },
   { title: t('actions'), key: 'actions', sortable: false },
@@ -129,6 +128,11 @@ const roleDataAdded = () => {
             ref="mcdatatableUserRole" :headers="roleHeaders" :api-url="roleApiUrl" :gateid="currentGateId"
             @edit-item="roleEdit"
           >
+            <template #item.permissions="{ value }">
+              <div style="white-space: pre-line;">
+                {{ value.permissions }}
+              </div>
+            </template>
             <!--
               <template #item.permissions="{ value }">
               <div class="d-flex align-center gap-x-4">

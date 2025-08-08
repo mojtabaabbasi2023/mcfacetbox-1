@@ -30,20 +30,13 @@ const refForm = ref<VForm>()
 const isloading = ref(false)
 const roleData = reactive<IRoleEdit>(new RoleEditModel())
 
-// const projectList = reactive<ISimpleTree[]>([])
-// const permissionList = reactive<ISimpleTree[]>([{ id: 1, title: 'ماژول درخت', children: [{ id: 2, title: 'افزودن نود' }, { id: 3, title: 'جابجایی نود' }] }, { id: 4, title: 'فیش نگار', children: [{ id: 5, title: 'افزودن فیش' }, { id: 6, title: 'اتصال فیش' }] }])
-
-const projectList = reactive<IBasePermissionTree[]>([])
 const permissionList = reactive<IBasePermissionTree[]>([])
 const opening = ref(false)
 
 const selectedPermissions = ref<string[]>([])
-const selectedProjects = ref<string[]>([])
 
 async function roleAdd() {
   roleData.gateId = props.gateId ?? 0
-  console.log('roledata', roleData)
-
   try {
     await $api(props.apiUrl === undefined ? '' : props.apiUrl, {
       method: 'POST',
@@ -108,10 +101,7 @@ const onSubmit = () => {
 
 function collectPermissionData() {
   roleData.permissions.splice(0)
-  selectedProjects.value.forEach(projecItem => {
-    roleData.permissions.push(...selectedPermissions.value.map(item => `${projecItem}.${item}`))
-  })
-  console.log('permission', roleData)
+  roleData.permissions.push(...selectedPermissions.value)
 }
 function generateUniqueId(): number {
   return Math.floor(Math.random() * 1000000) // عددی تصادفی بین 0 و 999999 تولید می‌کند
@@ -130,19 +120,11 @@ function attachUniqueIds(tree: IBasePermissionTree[]): IBasePermissionTree[] {
 }
 
 const loadPermissions = async () => {
-  const projectListResult = await $api<IBasePermissionTree[]>(`app/permissions?gateId=${props.gateId}`)
-  const permissionListResult = await $api<IBasePermissionTree[]>('app/permissions/static')
+  const permissionListResult = await $api<IBasePermissionTree[]>('app/permissions/tree')
 
-  projectList.splice(0)
   permissionList.splice(0)
 
-  projectList.push(...attachUniqueIds(projectListResult))
   permissionList.push(...attachUniqueIds(permissionListResult))
-
-  //   permissionList.push(...result2)
-
-//   Object.assign(projectList)
-//   Object.assign(permissionList)
 }
 
 function onReset() {
@@ -150,7 +132,6 @@ function onReset() {
   isloading.value = false
   roleData.permissions.splice(0)
   selectedPermissions.value.splice(0)
-  selectedProjects.value.splice(0)
   emit('update:isDialogVisible', false)
   refForm.value?.reset()
   refForm.value?.resetValidation()
@@ -177,10 +158,8 @@ const updateRole = async (roleId: string) => {
     const roleListResult = await $api<IRoleView>(`app/role/${roleId}`)
 
     selectedPermissions.value.splice(0)
-    selectedProjects.value.splice(0)
 
     selectedPermissions.value.push(...roleListResult.permissions.map(item => item.name))
-    selectedProjects.value.push(...roleListResult.trees.map(item => item.name))
 
     objectMap(roleData, useCloned(roleListResult))
     roleData.permissions.splice(0)
@@ -195,7 +174,6 @@ const updateRole = async (roleId: string) => {
   }
 
 //   selectedPermissions.value = roleData.permissions.map(item => item.id)
-//   selectedProjects.value = roleData.projects.map(item => item.id)
 }
 
 defineExpose({ updateRole })
@@ -216,51 +194,68 @@ defineExpose({ updateRole })
           </VBtn>
         -->
         <VForm ref="refForm" v-model="isFormValid" :disabled="opening" @submit.prevent="onSubmit">
-          <VRow>
+          <VRow dense>
             <VCol cols="12">
               <AppTextField
                 v-model="roleData.name"
+                class="pb-2"
                 :rules="[requiredValidator(roleData.name, $t('validatorrequired'))]"
                 :label="$t('role.title')" placeholder=""
               />
             </VCol>
 
             <VCol cols="12">
-              <VRow>
-                <VCol cols="6" sm="6">
-                  <VTreeview
-                    v-model:selected="selectedProjects" :items="projectList" :return-object="false"
-                    expand-icon="mdi-menu-left" item-value="name" item-title="title"
-                    select-strategy="leaf" density="compact" height="300px" lines="one" selectable
-                  >
-                    <template #title="{ item }">
-                      <VTooltip :text="item.title">
-                        <template #activator="{ props }">
-                          <span v-bind="props"> {{ item.title }}</span>
-                        </template>
-                      </VTooltip>
-                    </template>
-                  </VTreeview>
+              <!--
+                <VRow>
+                <VCol cols="12">
+              -->
+              <!--
+                <VTreeview
+                v-model:selected="selectedProjects" :items="projectList" :return-object="false"
+                expand-icon="mdi-menu-left" item-value="name" item-title="title"
+                select-strategy="leaf" density="compact" height="300px" lines="one" selectable
+                >
+                <template #title="{ item }">
+                <VTooltip :text="item.title">
+                <template #activator="{ props }">
+                <span v-bind="props"> {{ item.title }}</span>
+                </template>
+                </VTooltip>
+                </template>
+                </VTreeview>
                 </VCol>
                 <VCol cols="6" sm="6">
-                  <VTreeview
-                    v-model:selected="selectedPermissions" density="compact" :items="permissionList" height="300px"
-                    width="100%" item-value="name" item-title="title" :return-object="false"
-                    expand-icon="mdi-menu-left" select-strategy="classic" selectable
-                  >
-                    <template #header="{ props }">
-                      <span>jsrs </span>
-                    </template>
-                    <template #title="{ item }">
+              -->
+              <VLabel
+                class="mb-1 text-body-2"
+                text="انتخاب دسترسی"
+              />
+              <div class="mc-data-scrolly">
+                <VTreeview
+                  v-model:selected="selectedPermissions" density="compact" :items="permissionList" height="300px"
+                  width="100%" item-value="name" item-title="title" :return-object="false"
+                  expand-icon="mdi-menu-left" select-strategy="classic" selectable
+                >
+                  <template #header="{ props }">
+                    <span>{{ props.title = 'asdasdasd   ' }} </span>
+                  </template>
+                  <template #title="{ item }">
+                    <!--
                       <VTooltip :text="item.title">
-                        <template #activator="{ props }">
-                          <span v-bind="props"> {{ item.title }}</span>
-                        </template>
+                      <template #activator="{ props }">
+                    -->
+                    <span v-bind="props"> {{ item.title }}</span>
+                    <!--
+                      </template>
                       </VTooltip>
-                    </template>
-                  </VTreeview>
+                    -->
+                  </template>
+                </VTreeview>
+              </div>
+              <!--
                 </VCol>
-              </VRow>
+                </VRow>
+              -->
             </VCol>
             <VCol cols="12">
               <VRow>
