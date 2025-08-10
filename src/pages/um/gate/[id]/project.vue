@@ -48,8 +48,6 @@ const tableHeight = computed(() => {
 })
 
 const treeTitleDataAdded = () => {
-  console.log('treeTitleDataAdded')
-
   mcdatatableTree.value.refreshData()
 }
 
@@ -86,7 +84,6 @@ const openword = (item: baseDataTableModel) => {
 const importword = async (myevent: Event, item: baseDataTableModel) => {
   if (myevent?.target?.files[0]) {
     selectedFile.value = myevent?.target?.files[0]
-    console.log('selectedfile', selectedFile)
 
     item.isLoading = true
     try {
@@ -108,6 +105,43 @@ const importword = async (myevent: Event, item: baseDataTableModel) => {
     }
     finally {
       item.isLoading = false
+    }
+  }
+
+//   open()
+}
+
+const deleteUserRole = async (item: baseDataTableModel, userid: string) => {
+  const serviceError = shallowRef()
+
+  const result = await confirmSwal(
+    t('alert.deleteSelectedItem?'),
+    '',
+    t('$vuetify.confirmEdit.ok'),
+    t('$vuetify.confirmEdit.cancel'),
+    true, 'warning',
+    async () => {
+      try {
+        await $api(`app/tree/${item.id}/user/${userid}`, {
+          method: 'DELETE',
+        })
+      }
+      catch (error) {
+        serviceError.value = error
+      }
+    },
+  )
+
+  if (result.isConfirmed) {
+    const err = serviceError.value
+    if (err) {
+      if (err instanceof CustomFetchError && err.message)
+        toast.error(err.message)
+      else toast.error(t('httpstatuscodes.0'))
+    }
+    else {
+      onToggleExpandRow(item, true, true)
+      toast.success(t('alert.deleteDataSuccess'))
     }
   }
 
@@ -248,6 +282,7 @@ function userRoleHasBeenAdded(treeid: number) {
                         <th :colspan="columns.length - 1">
                           {{ $t('role.pageTitle') }}
                         </th>
+                        <th />
                         <th class="text-end">
                           <VBtn append-icon="tabler-plus" size="small" variant="text" @click="() => { currentTreeId = item.id, dialogAddTreeUserRole = true }">
                             {{ $t('user.add') }}
@@ -264,6 +299,27 @@ function userRoleHasBeenAdded(treeid: number) {
                         <td>
                           {{ detailItem.roles.map((role) => role.title).join(' , ') }}
                         </td>
+                        <td>
+                          <div v-if="!item.isLoading">
+                            <IconBtn @click="deleteUserRole(item, detailItem.id.toString())">
+                              <VIcon icon="tabler-trash" color="error" />
+                              <!--
+                                <VProgressCircular
+                                v-else
+                                size="20"
+                                width="3"
+                                indeterminate
+                                />
+                              -->
+                            </IconBtn>
+                            <!--
+                              <IconBtn @click="editUserRole(item)">
+                              <VIcon icon="tabler-pencil" />
+                              </IconBtn>
+                            -->
+                          </div>
+                        </td>
+                        <td />
                       </tr>
                     </tbody>
                   </vtable>

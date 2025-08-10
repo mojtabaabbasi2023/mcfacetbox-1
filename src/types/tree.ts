@@ -187,7 +187,7 @@ export class SimpleNestedNodeExcerptAcionableModel implements ISimpleNestedNodeE
  * نقش کاربر در یک درخت
  */
 export class TreeUserRoleModel extends ActionDates {
-  id: number = 0
+  id: number | string = 0
   fullName: string = ''
   avatarUrl: string = ''
   lastLoginDate: string = ''

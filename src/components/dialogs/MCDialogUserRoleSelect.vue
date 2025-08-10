@@ -111,7 +111,7 @@ const onSubmit = () => {
           <div class="pb-2">
             <AppAutocomplete
               v-model="selectedUser" :items="users" item-title="title"
-              item-value="id" :label="$t('role.select')"
+              item-value="id" :label="$t('user.select')"
               :rules="[requiredValidator(selectedUser, $t('validatorrequired'))]"
             />
           </div>

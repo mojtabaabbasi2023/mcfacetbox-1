@@ -8,11 +8,8 @@ import 'splitpanes/dist/splitpanes.css'
 import { useSelectedTree } from '@/store/treeStore'
 import { useNavLinkSelectState } from '@/store/baseStore'
 import { useShortcutManager } from '@/composables/useShortcutManager'
-import { setServerPermissions } from '@/plugins/casl/ability'
-import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 
 const menu = ref(false)
-const isComponentSwitch = ref(false)
 const topComponentOrder = ref(2)
 const bottomComponentOrder = ref(2)
 const dialogSelectTreeVisible = ref(false)
@@ -20,8 +17,6 @@ const selectedTreeItem = useSelectedTree()
 const navlinkSelecState = useNavLinkSelectState()
 const toast = useToast()
 const { registerAllShortcuts } = useShortcutManager()
-const { routerTreeId } = useRouterForGlobalVariables()
-const { rules } = useAbility()
 
 const resolveTopComponent = (order: number) => {
   if (order === 1)
