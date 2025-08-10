@@ -12,6 +12,7 @@ import { useDataShelfStateChanged } from '@/store/databoxStore'
 import { FacetBoxModel, SearchResultItemModel } from '@/types/SearchResult'
 import type { IFacetBox, ISearchResultItem } from '@/types/SearchResult'
 import { SHORTCUTKeys, ShortcutName } from '@/types/shortcutKeys'
+import { can } from '@/@layouts/plugins/casl'
 
 interface ISelectAllState {
   state: SelectAllState
@@ -266,6 +267,8 @@ function changeselectAllState() {
     selectAll.value.state = SelectAllState.Select
 }
 async function deleteSelectedItem() {
+  if (!can('Delete', 'Excerpt'))
+    return
   const serviceError = shallowRef()
 
   const result = await confirmSwal(
@@ -317,7 +320,10 @@ const setdataboxref = (elementParam: any, item: IDataShelfBoxView) => {
 
 // تابع داخلی جعبه داده برای تغییر اولویت را صدا میزنذ، ابتدا جعبه داده انتخاب شده را پیدا میکند و بعد ارجاع مرتبط با آن را استفاده میکند
 const increaseOrder = () => {
-// با توجه به اینکه تغییر اولویت فقط در حالت انتخاب یک جعبه داده فعال میشود
+  if (!can('Move', 'Excerpt'))
+    return
+
+  // با توجه به اینکه تغییر اولویت فقط در حالت انتخاب یک جعبه داده فعال میشود
   const dataItemResult = resultdataItemsSort.value.find(dataItem => dataItem.selected === true)
   if (dataItemResult) {
     const databoxrefResult = databoxrefs.value.find(refItem => refItem.dataBoxId === dataItemResult.id)
@@ -327,6 +333,8 @@ const increaseOrder = () => {
 }
 
 const decreaseOrder = () => {
+  if (!can('Move', 'Excerpt'))
+    return
   const dataItemResult = resultdataItemsSort.value.find(dataItem => dataItem.selected === true)
   if (dataItemResult) {
     const databoxrefResult = databoxrefs.value.find(refItem => refItem.dataBoxId === dataItemResult.id)
@@ -459,7 +467,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
               </VTooltip>
             </VBtn>
 
-            <VBtn icon size="small" variant="text" @click="deleteSelectedItem">
+            <VBtn icon size="small" :disabled="!can('Delete', 'Excerpt')" variant="text" @click="deleteSelectedItem">
               <VIcon icon="tabler-trash-x" size="22" />
               <VTooltip
                 activator="parent"
@@ -468,7 +476,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
                 {{ $t('datashelfbox.deleteselecteditem') }}
               </VTooltip>
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="isDialogDataShelfBoxEdit = true">
+            <VBtn icon size="small" variant="text" :disabled="!can('Create', 'Excerpt')" @click="isDialogDataShelfBoxEdit = (true && (can('Create', 'Excerpt') ?? false))">
               <VIcon icon="tabler-pencil-plus" size="22" />
               <VTooltip
                 activator="parent"
@@ -486,7 +494,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
                 {{ $t('refresh') }}
               </VTooltip>
             </VBtn>
-            <div v-if="selectAll.count === 1" class="border-thin rounded d-flex align-center">
+            <div v-if="selectAll.count === 1" :disabled="!can('Move', 'Excerpt')" class="border-thin rounded d-flex align-center">
               <VBtn ref="decreasebtn" icon size="25" variant="text" @click="decreaseOrder">
                 <VIcon icon="tabler-arrow-up" size="22" />
                 <VTooltip
@@ -497,7 +505,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
                 </VTooltip>
               </VBtn>
 
-              <VBtn ref="increasebtn" icon size="25" variant="text" @click="increaseOrder">
+              <VBtn ref="increasebtn" icon size="25" :disabled="!can('Move', 'Excerpt')" variant="text" @click="increaseOrder">
                 <VIcon icon="tabler-arrow-down" size="22" />
                 <VTooltip
                   activator="parent"

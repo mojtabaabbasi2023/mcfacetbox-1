@@ -22,6 +22,7 @@ const databoxItem = defineModel<IDataShelfBoxView>({ default: new DataShelfBoxMo
 const { t } = useI18n({ useScope: 'global' })
 const showTools = ref(false)
 const marginbottom = ref('10px')
+const { can } = useAbility()
 const priorityChangedData = useDataShelfPriorityChanged()
 const copytoNodeAction = shallowRef(false)
 const transfertoNodeAction = shallowRef(false)
@@ -128,6 +129,8 @@ const changeOrder = async (direction: 'next' | 'prev'): Promise<IOrderChangedRes
 }
 
 const addlabels = () => {
+  if (!can('Update', 'Excerpt'))
+    return
   dialogAddLabelVisible.value = true
 }
 
@@ -137,6 +140,8 @@ const updatedataboxItem = (databoxitemResult: IDataShelfBoxView) => {
 
 const changeSupervisionStatus = async (statusId: SupervisionStatus) => {
 //   loadinglocal.value = true
+  if ((statusId === SupervisionStatus.accept || statusId === SupervisionStatus.review) && !can('Supervision', 'Excerpt'))
+    return
 
   const serviceError = shallowRef()
 
@@ -265,6 +270,8 @@ function nodehasbeenselected(nodeid: number) {
 }
 
 const disconnectSelectedExcerpt = async () => {
+  if (!can('Delete', 'Excerpt'))
+    return
   selectedbox.value = true
 
   const serviceError = shallowRef()
@@ -305,6 +312,8 @@ const disconnectSelectedExcerpt = async () => {
 }
 
 const deleteSelectedExcerpt = async () => {
+  if (!can('Delete', 'Excerpt'))
+    return
   selectedbox.value = true
 
   const serviceError = shallowRef()
@@ -391,6 +400,8 @@ const unlinkdatabox = async () => {
 }
 
 const addcomment = async () => {
+  if (!can('Description', 'Excerpt'))
+    return
   selectedbox.value = true
   let description = ''
   let haserror = false
@@ -625,7 +636,7 @@ watch(isDialogDataShelfBoxEdit, () => {
       <div v-if="showTools && !readonlyMode" class="box-state-toolbar">
         <!-- <VRow no-gutters class="btn-box data-box-toolbar"> -->
         <div :style="databoxItem.state.id === SupervisionStatus.accept ? { pointerEvents: 'none', opacity: '0.5' } : {}">
-          <VBtn v-if="!databoxItem.hasLink" icon size="25" variant="text" @click="linkdatabox">
+          <VBtn v-if="!databoxItem.hasLink" icon size="25" variant="text" :disabled="!can('Link', 'Excerpt')" @click="linkdatabox">
             <VIcon icon="tabler-link-plus" size="20" />
             <VTooltip
               activator="parent"
@@ -643,7 +654,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ $t('datashelfbox.about') }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="25" variant="text" @click="isDialogDataShelfBoxEdit = true">
+          <VBtn icon size="25" variant="text" :disabled="!can('Update', 'Excerpt')" @click="isDialogDataShelfBoxEdit = (true && (can('Link', 'Excerpt') ?? false))">
             <VIcon icon="tabler-edit" size="20" />
             <VTooltip
               activator="parent"
@@ -652,7 +663,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ $t('datashelfbox.edit') }}
             </VTooltip>
           </VBtn>
-          <VBtn v-if="databoxItem.node && databoxItem.node.id > 0" icon size="25" variant="text" @click="disconnectSelectedExcerpt">
+          <VBtn v-if="databoxItem.node && databoxItem.node.id > 0" :disabled="!can('Delete', 'Excerpt')" icon size="25" variant="text" @click="disconnectSelectedExcerpt">
             <VIcon icon="tabler-plug-connected-x" size="20" color="error" />
             <VTooltip
               activator="parent"
@@ -661,7 +672,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ $t('datashelfbox.disconnect') }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="25" variant="text" @click="() => { dialogSelectNodeVisible = true;transfertoNodeAction = true }">
+          <VBtn icon size="25" variant="text" :disabled="!can('Connect', 'Excerpt')" @click="() => { if (!can('Connect', 'Excerpt')) return; dialogSelectNodeVisible = true;transfertoNodeAction = true }">
             <VIcon icon="tabler-plug-connected" size="20" />
             <VTooltip
               activator="parent"
@@ -670,7 +681,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ $t('datashelfbox.transfertonode') }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="25" variant="text" color="error" @click="deleteSelectedExcerpt">
+          <VBtn icon size="25" variant="text" :disabled="!can('Delete', 'Excerpt')" color="error" @click="deleteSelectedExcerpt">
             <VIcon icon="tabler-trash-x" size="20" />
             <VTooltip
               activator="parent"
@@ -679,7 +690,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ $t('datashelfbox.delete') }}
             </VTooltip>
           </VBtn>
-          <VBtn ref="btnlabel" icon size="25" variant="text" @click="addlabels">
+          <VBtn ref="btnlabel" icon size="25" variant="text" :disabled="!can('Update', 'Excerpt')" @click="addlabels">
             <VIcon icon="tabler-tag" size="20" />
             <VTooltip
               activator="parent"
@@ -688,7 +699,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ $t('datashelfbox.addlabel') }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="25" variant="text" @click="addcomment">
+          <VBtn icon size="25" variant="text" :disabled="!can('Description', 'Excerpt')" @click="addcomment">
             <VIcon icon="tabler-square-plus" size="20" />
             <VTooltip
               activator="parent"
@@ -716,7 +727,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ `${$t('datashelfbox.otherusage')} ${$t(DataBoxType[databoxItem.excerptType.id])}` }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="25" variant="text" @click="() => { dialogSelectNodeVisible = true ;copytoNodeAction = true }">
+          <VBtn icon size="25" variant="text" :disabled="!can('Copy', 'Excerpt')" @click="() => { if (!can('Copy', 'Excerpt')) return dialogSelectNodeVisible = true ;copytoNodeAction = true }">
             <VIcon icon="tabler-box-multiple" size="20" />
             <VTooltip
               activator="parent"
@@ -757,7 +768,10 @@ watch(isDialogDataShelfBoxEdit, () => {
             {{ $t('supervision.ready') }}
           </VTooltip>
         </VBtn>
-        <VBtn v-if="resolveSupervisionStatus(databoxItem.state?.id ?? SupervisionStatus.primary, SupervisionStatus.review)" icon size="25" variant="text" color="warning" @click="changeSupervisionStatus(SupervisionStatus.review)">
+        <VBtn
+          v-if="resolveSupervisionStatus(databoxItem.state?.id ?? SupervisionStatus.primary, SupervisionStatus.review)" :disabled="!can('Supervision', 'Excerpt')" icon size="25" variant="text" color="warning"
+          @click="changeSupervisionStatus(SupervisionStatus.review)"
+        >
           <VIcon icon="tabler-zoom-check" size="20" />
           <VTooltip
             activator="parent"
@@ -766,7 +780,10 @@ watch(isDialogDataShelfBoxEdit, () => {
             {{ $t('supervision.review') }}
           </VTooltip>
         </VBtn>
-        <VBtn v-if="resolveSupervisionStatus(databoxItem.state?.id ?? SupervisionStatus.primary, SupervisionStatus.accept)" icon size="25" variant="text" color="success" @click="changeSupervisionStatus(SupervisionStatus.accept)">
+        <VBtn
+          v-if="resolveSupervisionStatus(databoxItem.state?.id ?? SupervisionStatus.primary, SupervisionStatus.accept)" icon :disabled="!can('Supervision', 'Excerpt')" size="25" variant="text" color="success"
+          @click="changeSupervisionStatus(SupervisionStatus.accept)"
+        >
           <VIcon icon="tabler-pencil-check" size="20" />
           <VTooltip
             activator="parent"

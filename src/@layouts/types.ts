@@ -1,6 +1,7 @@
 import type { OffsetOptions } from '@floating-ui/dom'
 import type { RouteLocationRaw } from 'vue-router'
 import type { AppContentLayoutNav, ContentWidth, FooterType, HorizontalNavType, NavbarType } from '@layouts/enums'
+import type { Actions, Subjects } from '@/plugins/casl/ability'
 
 export interface LayoutConfig {
   app: {
@@ -44,8 +45,8 @@ export interface LayoutConfig {
 }
 
 export interface AclProperties {
-  action: string
-  subject: string
+  action: Actions
+  subject: Subjects
 }
 
 // 👉 Vertical nav section title

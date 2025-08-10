@@ -38,18 +38,18 @@ export const setupGuards = (router: Router) => {
         return undefined
     }
 
-    if (!canNavigate(to) && to.matched.length) {
-      /* eslint-disable indent */
-      return isLoggedIn
-        ? { name: 'not-authorized' }
-        : {
-            name: 'auth',
-            query: {
-              ...to.query,
-              to: to.fullPath !== '/' ? to.path : undefined,
-            },
-          }
-      /* eslint-enable indent */
-    }
+    // if (!canNavigate(to) && to.matched.length) {
+
+    //   return isLoggedIn
+    //     ? { name: 'not-authorized' }
+    //     : {
+    //         name: 'auth',
+    //         query: {
+    //           ...to.query,
+    //           to: to.fullPath !== '/' ? to.path : undefined,
+    //         },
+    //       }
+
+    // }
   })
 }

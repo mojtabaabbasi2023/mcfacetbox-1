@@ -3,13 +3,13 @@
 
 import { useToast } from 'vue-toastification'
 import type { VForm } from 'vuetify/components/VForm'
-import Placeholder from '@tiptap/extension-placeholder'
-import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
-import type { IUser, IUserEdit } from '@/types/users'
+
+import type { IUserEdit } from '@/types/users'
 import { UserEditModel } from '@/types/users'
 import { type GridResult, type ISimpleDTO, SimpleDTOModel } from '@/types/baseModels'
 import { useSelectedTree } from '@/store/treeStore'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
+import type { Rule } from '@/plugins/casl/ability'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
@@ -27,7 +27,7 @@ interface Emit {
   (e: 'userTreeSelected', value: number): void
 
 }
-
+const ability = useAbility()
 const refForm = ref<VForm>()
 const isloading = ref(false)
 const userData = reactive<IUserEdit>(new UserEditModel())
@@ -72,25 +72,6 @@ const loadGates = async () => {
   }
 }
 
-// const loadProjects = async () => {
-//   try {
-//     isloading.value = true
-
-//     const projectDataResult = await $api<GridResult<ISimpleDTO<number>>>(`app/project/simple?gateid=${selectedGate.value}`)
-
-//     selectedProject.value = 0
-//     projectList.value.splice(0)
-//     projectList.value.push(...projectDataResult.items)
-//     isloading.value = false
-//   }
-//   catch (error) {
-//     isloading.value = false
-//     if (error instanceof CustomFetchError && error.code > 1)
-//       toast.error(error.message)
-//     else toast.error(t('httpstatuscodes.0'))
-//   }
-// }
-
 const loadTrees = async () => {
   try {
     isloading.value = true
@@ -110,6 +91,28 @@ const loadTrees = async () => {
   }
 }
 
+const setPermissions = async (): Promise<boolean> => {
+  try {
+    isloading.value = true
+
+    const permissionDataResult = await $api<Rule[]>(`app/tree/${selectedTree.value.id}/user/permissions`)
+
+    useCookie('userAbilityRules').value = JSON.stringify(permissionDataResult)
+    ability.update(permissionDataResult)
+    isloading.value = false
+
+    return true
+  }
+  catch (error) {
+    isloading.value = false
+    if (error instanceof CustomFetchError && error.code > 1)
+      toast.error(error.message)
+    else toast.error(t('probleminSetPermissions'))
+
+    return false
+  }
+}
+
 const onReset = () => {
   userData.id = 0
   isloading.value = false
@@ -121,11 +124,14 @@ const onReset = () => {
 onMounted(async () => {
   await loadGates()
 })
-function startWorkWithTree() {
-  selectedTreeItem.id = selectedTree.value.id
-  selectedTreeItem.title = selectedTree.value.title
-  router.replace({ name: 'rs', query: { ...treeIdQuery(selectedTree.value.id) } })
-  emit('update:isDialogVisible', false)
+async function startWorkWithTree() {
+  const result = await setPermissions()
+  if (result) {
+    selectedTreeItem.id = selectedTree.value.id
+    selectedTreeItem.title = selectedTree.value.title
+    router.replace({ name: 'rs', query: { ...treeIdQuery(selectedTree.value.id) } })
+    emit('update:isDialogVisible', false)
+  }
 }
 
 // watch(userData.role, (newdata, olddata) => {

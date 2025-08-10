@@ -1,6 +1,7 @@
 import { useAbility } from '@casl/vue'
 import type { RouteLocationNormalized } from 'vue-router'
 import type { NavGroup } from '@layouts/types'
+import type { Actions, Subjects } from '@/plugins/casl/ability'
 
 /**
  * Returns ability result if ACL is configured or else just return true
@@ -12,7 +13,7 @@ import type { NavGroup } from '@layouts/types'
  * @param {string} action CASL Actions // https://casl.js.org/v4/en/guide/intro#basics
  * @param {string} subject CASL Subject // https://casl.js.org/v4/en/guide/intro#basics
  */
-export const can = (action: string | undefined, subject: string | undefined) => {
+export const can = (action: Actions | undefined, subject: Subjects | undefined) => {
   const vm = getCurrentInstance()
 
   if (!vm)

@@ -22,7 +22,7 @@ const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const ability = useAbility()
+
 const loginfailed = ref(false)
 
 async function sendTokenRequest(systemKey: string) {
@@ -38,8 +38,6 @@ async function sendTokenRequest(systemKey: string) {
       //   gatelist.value.splice(0)
       //   gatelist.value.push(...result.gates.map<ISimpleSelectableDTO>(item => ({ id: item.id, title: item.title, tempData: null })))
       //   gatelist.value[0].selected = true
-      useCookie('userAbilityRules').value = JSON.stringify([{ action: 'manage', subject: 'all' }])
-      ability.update([{ action: 'manage', subject: 'all' }])
 
       const loginstate = useLoginState()
 

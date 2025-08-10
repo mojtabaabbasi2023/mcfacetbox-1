@@ -13,6 +13,7 @@ import { SelectionType } from '@/types/baseModels'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 import { useShortcutManager } from '@/composables/useShortcutManager'
 import { SHORTCUTKeys, ShortcutName } from '@/types/shortcutKeys'
+import type { Rule } from '@/plugins/casl/ability'
 
 const props = defineProps({
   title: { type: String },
@@ -49,6 +50,7 @@ const dialogTreePreviewVisible = ref(false)
 const dialogDescriptionVisible = shallowRef(false)
 const dialogTransferNodeVisible = ref(false)
 const activeTooltipPath = shallowRef('')
+const ability = useAbility()
 const { routerTreeId, routerNodeId, clearUnNeededQueryItems, addTreeIdToQuery, addNodeIdToQuery } = useRouterForGlobalVariables()
 interface Emit {
   (e: 'close'): void
@@ -57,6 +59,7 @@ interface Emit {
 }
 const { x: cursorX, y: cursorY } = usePointer()
 const { lastShortcutTriggered } = useShortcutManager()
+const { rules, can } = useAbility()
 
 // نمایش Tooltip هنگام کلیک
 const showNodeTooltip = (event: MouseEvent, item: ISimpleNestedNodeActionable) => {
@@ -87,6 +90,27 @@ watch(searchResultSelectedNodes, () => {
 watch(route, () => {
   checkTreeRoute(true)
 }, { immediate: true })
+
+onMounted(async () => {
+  console.log('indexmounted')
+
+  if (routerTreeId.value > 0 && rules.length < 1)
+    await setPermissions()
+})
+
+const setPermissions = async (): Promise<boolean> => {
+  try {
+    const permissionDataResult = await $api<Rule[]>(`app/tree/${currentTreeId.value}/user/permissions`)
+
+    useCookie('userAbilityRules').value = JSON.stringify(permissionDataResult)
+    ability.update(permissionDataResult)
+
+    return true
+  }
+  catch (error) {
+    return false
+  }
+}
 
 const selectTreeNode = (item: ISimpleNestedNodeActionable) => {
   const newQuery = { ...route.query }
@@ -345,6 +369,8 @@ function treeItemMouseLeave(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeA
 function treeItemMouseEnter(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable) {
   if (mouseEvent.buttons === 0)
     resetMouseDraggable()
+  if (!can('Move', 'Node'))
+    return
   if (hasDraggableState.value) {
     activeDraggableItem.value = treeItem
     setTimeout(() => {
@@ -502,12 +528,12 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
   // prevent the browser's default menu
   e.preventDefault()
   activatedNode.value = [nodeItem.id]
-
   ContextMenu.showContextMenu({
     x: e.x,
     y: e.y,
     items: [
       {
+        disabled: !can('Create', 'Node'),
         label: t('tree.newnode'),
         icon: 'tabler-plus',
         onClick: () => {
@@ -516,6 +542,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
         },
       },
       {
+        disabled: !can('Delete', 'Node'),
         label: t('tree.deletenode'),
         icon: 'tabler-trash',
         customClass: 'error',
@@ -524,6 +551,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
         },
       },
       {
+        disabled: !can('Update', 'Node'),
         label: t('tree.editnode'),
         icon: 'tabler-edit',
         onClick: () => {
@@ -531,6 +559,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
         },
       },
       {
+        disabled: !can('Description', 'Node'),
         label: t('tree.comment'),
         icon: 'tabler-square-plus',
         onClick: () => {
@@ -538,6 +567,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
         },
       },
       {
+        disabled: !can('Merge', 'Node'),
         label: t('tree.merge'),
         icon: 'tabler-arrow-merge',
 
@@ -547,6 +577,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
         },
       },
       {
+        disabled: !can('Move', 'Node'),
         label: t('tree.transfernode'),
         icon: 'tabler-arrow-merge-alt-left',
 
@@ -558,6 +589,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
         },
       },
       {
+        disabled: !can('Reference', 'Node'),
         label: t('tree.relation'),
         icon: 'tabler-affiliate',
 
@@ -588,7 +620,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
     <VRow no-gutters class="btn-box toolbar">
       <VCol md="12">
         <div class="d-flex toolbar">
-          <VBtn size="small" variant="text" @click=" dialogAddNewNodeVisible = true">
+          <VBtn size="small" variant="text" :disabled="!$can('Create', 'Node')" @click=" dialogAddNewNodeVisible = true">
             <VIcon icon="tabler-plus" size="22" />
             <VTooltip
               activator="parent"
@@ -618,7 +650,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
               {{ $t('refresh') }}
             </VTooltip>
           </VBtn>
-          <VBtn size="small" variant="text">
+          <VBtn size="small" variant="text" :disabled="!can('Cleanup', 'Node')">
             <VIcon icon="tabler-eraser" size="22" />
 
             <VTooltip
@@ -628,7 +660,7 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
               {{ $t('tree.treecleaning') }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="small" variant="text" @click="dialogTreePreviewVisible = true">
+          <VBtn icon size="small" variant="text" :disabled="!can('Preview', 'Node')" @click="dialogTreePreviewVisible = (true && (can('Preview', 'Node') ?? false))">
             <VIcon icon="tabler-list-tree" size="22" />
             <VTooltip
               activator="parent"

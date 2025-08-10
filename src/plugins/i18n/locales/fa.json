@@ -358,13 +358,13 @@
     "probleminLoadInformation":"مشکل در بارگذاری اطلاعات بوجود آمد.",
     "probleminLoadExcerpt":"مشکل در بارگذاری فیش ها بوجود آمد.",
     "probleminLoadSearchResult":"مشکل در بارگذاری نتیجه جستجو بوجود آمد.",
-
-    'specificNodeAdded':"گره (0) اضافه شد",
+    "probleminSetPermissions":"در اعمال دسترسی ها مشکل بوجود امد، صفحه را بروزرسانی کرده و مجدد تلاش کنید",
+    "specificNodeAdded":"گره (0) اضافه شد",
     "specificItemDeleted":"آیا مورد '(0)' حذف شود؟",
     "contentisduplicate":"'(0)' مورد نظر در گره موجود میباشد، آیا میخواهید مجدد اضافه شود؟",
 
 
-    'tryagainmin':"چند دقیقه دیگر تلاش کنید",
+    "tryagainmin":"چند دقیقه دیگر تلاش کنید",
     "youmustselectoneperm":"باید حتما یک دسترسی را انتخاب کنید",
     "nothaveselecttree":"هیچ پروژه انتخاب نشده است",
     "probleminnodeaddrefreshpage":"مشکلی در افزودن گره بوجود آمده است، درخت را بروزرسانی کنید",
