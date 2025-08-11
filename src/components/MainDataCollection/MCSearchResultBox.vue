@@ -136,7 +136,7 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
         },
       },
       {
-        disabled: !can('Create', 'Node'),
+        disabled: !can('Create', 'Excerpt'),
         label: t('datagathering.connecttocustomnode'),
         icon: h('i', {
           class: 'tabler-plug icon iconfont',
@@ -156,7 +156,7 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
         },
       },
       {
-        disabled: !can('Create', 'Node'),
+        disabled: !can('Create', 'Excerpt'),
         icon: h('i', {
           class: 'tabler-plug-off icon iconfont',
           style: {

@@ -1,4 +1,5 @@
 export interface IReference {
+  id: string
   bookTitle: string
   author?: string
   volumeNumber?: string
@@ -13,6 +14,7 @@ export interface IAyahReference {
   ayahNumber: string
 }
 export class BookReferenceModel implements IReference {
+  id: string = ''
   bookTitle: string = ''
   author?: string | undefined = ''
   volumeNumber?: string | undefined = ''

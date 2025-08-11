@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { VForm } from 'vuetify/components/VForm'
-import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue'
 import { BookReferenceModel, type IReference } from '@/utils/refrenceUtils'
 
 const props = defineProps({

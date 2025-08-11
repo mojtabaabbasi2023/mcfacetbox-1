@@ -161,8 +161,14 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
     id: uuid,
     isReference: true,
     title: refrenceString ?? '',
+    reference: refrenceModel,
     order: 1,
   }
+
+  // NOTE - اگر کاربر متن هایلایت شده را بعنوان فیش جدید انتخاب کرده باشد، محتوا خالی به سرور ارسال میشود تا سرور خودش متن کامل را جایگزین کند
+  // NOTE - با توجه به اینکه پاورقی بصورت دستی اضافه میشود، اگر محتوا درای پاورقی باشد به سرور اطلاع میدهیم که متن کامل نیست و در سرور متن کامل بعلاوه محتوای پاورقی میشود
+  if (contentdata.content.length <= 0)
+    contentdata.isContentComplete = false
 
   contentdata.content += createFootnoteTag(uuid, '1')
   contentdata.footNotes.push(footnoteTemp)

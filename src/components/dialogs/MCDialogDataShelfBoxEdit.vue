@@ -185,14 +185,12 @@ const finishInsertBookCitation = (citation: IReference | null) => {
   dialogSupervisionHistory.value = false
 
   const footnoteindex = footNotes.findIndex(item => item.title === '' && item.isReference)
-  if (!citation) {
+  if (!citation)
     deletefootnote(footNotes[footnoteindex].id)
-  }
-  else {
-    console.log('citation', footNotes, footNotes[footnoteindex], footnoteindex)
 
-    footNotes[footnoteindex] = { id: footNotes[footnoteindex].id, editing: false, isReference: true, order: footNotes[footnoteindex].order, title: generateFootnoteRefrence(citation) }
-  }
+  else
+    footNotes[footnoteindex] = { id: footNotes[footnoteindex].id, editing: false, isReference: true, order: footNotes[footnoteindex].order, title: generateFootnoteRefrence(citation), reference: citation }
+
   refreshfootnote()
 }
 

@@ -171,6 +171,8 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
     order: 1,
   }
 
+  if (contentdata.content.length <= 0)
+    contentdata.isContentComplete = false
   contentdata.content += createFootnoteTag(uuid, '1')
   contentdata.footNotes.push(footnoteTemp)
   emit('oncontextmenuselect', e, contentType, contentdata)

@@ -1,5 +1,6 @@
 import type { ISimpleDTO, baseItemState } from './baseModels'
 import { DataBoxType, SupervisionStatus } from './baseModels'
+import type { IReference } from '@/utils/refrenceUtils'
 
 // NOTE - بازای هر تغییری در محتوای جعبه داده باید یک نسخه ثبت گردد و قابلیت آندو داشته باشد
 /**
@@ -62,6 +63,7 @@ export interface IDataShelfBoxNew {
   footNotes: IFootNote[]
   labels: number[]
   sourceId: string
+  isContentComplete: boolean
 }
 
 export class DataShelfBoxModelNew implements IDataShelfBoxNew {
@@ -83,6 +85,8 @@ export class DataShelfBoxModelNew implements IDataShelfBoxNew {
     this.labels = labels
     this.sourceId = sourceId
   }
+
+  isContentComplete: boolean = true
 }
 
 /**
@@ -198,6 +202,7 @@ export interface IExerptSupervisionStat {
 export interface IFootNote extends ISimpleDTO<string>, baseItemState {
   index?: number
   order: number
+  reference?: IReference
   isReference: boolean
 }
 

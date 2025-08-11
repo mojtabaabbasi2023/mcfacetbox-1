@@ -146,11 +146,11 @@ export class HadithTranslateItemModel
   pageNum: number = 0
 
   get refrenceAsString(): string {
-    return generateFootnoteRefrence({ bookTitle: this.sourceShortTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() })
+    return generateFootnoteRefrence({ id: '', bookTitle: this.sourceShortTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() })
   }
 
   get refrenceAsModel(): IReference {
-    return { bookTitle: this.sourceShortTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() }
+    return { id: '', bookTitle: this.sourceShortTitle, volumeNumber: this.vol.toString(), pageNumber: this.pageNum.toString() }
   }
 
   //   createRefrenceAsString(): string {
