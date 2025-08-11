@@ -32,6 +32,7 @@ export function showSwal(options: SweetAlertOptions): Promise<SweetAlertResult> 
 export const showLoadingSwal = (title: string, callback: () => Promise<void>) => {
   return Swal.fire({
     title,
+    backdrop: false,
     allowOutsideClick: false,
     showCloseButton: false,
     didOpen: async () => {

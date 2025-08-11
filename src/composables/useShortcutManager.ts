@@ -47,7 +47,7 @@ export function useShortcutManager() {
       // بررسی تمام میانبرها برای جلوگیری از پیشفرض
       Object.entries(SHORTCUTKeys).forEach(([_, config]) => {
         if (isComboMatch(config.combo, e)) {
-          console.log('prevent', config, e.key)
+        //   console.log('prevent', config, e.key)
 
           e.preventDefault()
 

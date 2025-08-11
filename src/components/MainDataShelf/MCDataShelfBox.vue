@@ -15,6 +15,8 @@ const isDialogDataShelfBoxEdit = ref(false)
 const dialogAddLabelVisible = ref(false)
 const dialogDataBoxInfo = ref(false)
 const dialogResourceHistory = ref(false)
+const dialogStateHistory = ref(false)
+
 const dialogSupervisionHistory = ref(false)
 
 const dialogSelectNodeVisible = ref(false)
@@ -727,7 +729,7 @@ watch(isDialogDataShelfBoxEdit, () => {
               {{ `${$t('datashelfbox.otherusage')} ${$t(DataBoxType[databoxItem.excerptType.id])}` }}
             </VTooltip>
           </VBtn>
-          <VBtn icon size="25" variant="text" :disabled="!can('Copy', 'Excerpt')" @click="() => { if (!can('Copy', 'Excerpt')) return dialogSelectNodeVisible = true ;copytoNodeAction = true }">
+          <VBtn icon size="25" variant="text" :disabled="!can('Copy', 'Excerpt')" @click="() => { if (!can('Copy', 'Excerpt')) { return; } dialogSelectNodeVisible = true ;copytoNodeAction = true }">
             <VIcon icon="tabler-box-multiple" size="20" />
             <VTooltip
               activator="parent"
@@ -739,7 +741,7 @@ watch(isDialogDataShelfBoxEdit, () => {
         </div>
         <VDivider vertical class="mx-2" color="primary" thickness="2" />
         <!-- v-if="databoxItem.supervisionCommentCount ?? 0 > 0" -->
-        <VBtn icon size="25" variant="text" @click="changeSupervisionStatus(SupervisionStatus.primary)">
+        <VBtn icon size="25" variant="text" @click="dialogStateHistory = true">
           <VIcon icon="tabler-timeline-event-text" size="20" />
           <VTooltip
             activator="parent"
@@ -821,7 +823,10 @@ watch(isDialogDataShelfBoxEdit, () => {
     v-if="dialogResourceHistory" v-model:is-dialog-visible="dialogResourceHistory" :selected-data-box-id="databoxItem.id ?? 0" :serviceurl="`app/excerpt/${DataBoxType[databoxItem.excerptType.id]}?SourceId=${databoxItem.sourceId}`"
     @error-has-occured="emits('handlemessage', $event, MessageType.error)"
   />
-
+  <MCDialogStateHistory
+    v-if="dialogStateHistory" v-model:is-dialog-visible="dialogStateHistory" :selected-data-box-id="databoxItem.id ?? 0" :serviceurl="`app/excerpt/${databoxItem.id}/states`"
+    @error-has-occured="emits('handlemessage', $event, MessageType.error)"
+  />
   <MCDialogSupervisionCommentHistory
     v-if="dialogSupervisionHistory" v-model:is-dialog-visible="dialogSupervisionHistory" :selected-data-box-id="databoxItem.id ?? 0" :serviceurl="`app/excerpt/${DataBoxType[databoxItem.excerptType.id]}?SourceId=${databoxItem.sourceId}`"
     @error-has-occured="emits('handlemessage', $event, MessageType.error)"

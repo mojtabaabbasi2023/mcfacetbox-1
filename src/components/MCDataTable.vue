@@ -116,8 +116,6 @@ const searchLabelDefault = computed(() => {
 })
 
 const refreshData = async () => {
-  console.log('refreshdata', props.apiUrl)
-
   await fetchData(false)
 }
 

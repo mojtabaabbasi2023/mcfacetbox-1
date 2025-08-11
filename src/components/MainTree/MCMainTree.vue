@@ -72,7 +72,7 @@ const showNodeTooltip = (event: MouseEvent, item: ISimpleNestedNodeActionable) =
 }
 
 watch(lastShortcutTriggered, newval => {
-  console.log('shortcutvalue', newval)
+//   console.log('shortcutvalue', newval)
   if (newval === ShortcutName.nodesearch)
     activeSearch.value = !activeSearch.value
   if (newval === ShortcutName.nodenew)
@@ -94,7 +94,7 @@ watch(route, () => {
 onMounted(async () => {
   console.log('indexmounted')
 
-  if (routerTreeId.value > 0 && rules.length < 1)
+  if (routerTreeId.value > 0)
     await setPermissions()
 })
 
