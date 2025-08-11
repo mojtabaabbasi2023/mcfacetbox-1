@@ -28,7 +28,6 @@ const userHeaders = [
   { text: '0', value: 'num', sortable: false },
   { title: t('nameandfamily'), key: 'fullName' },
   { title: t('mobilenumber'), key: 'phoneNumber' },
-  { title: t('roles'), key: 'roles' },
   { title: t('email'), key: 'email' },
   { title: t('createdate'), key: 'creationTime' },
   { title: t('description'), key: 'description' },

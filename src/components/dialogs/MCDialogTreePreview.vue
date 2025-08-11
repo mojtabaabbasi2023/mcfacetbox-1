@@ -26,7 +26,7 @@ onMounted(async () => {
 async function loadTreeData() {
   opening.value = true
   try {
-    const result = await $api <ITreeExcerpt>(`app/tree/${props.treeid}/hierarchy/full`, {
+    const result = await $api <ITreeExcerpt>(`app/node/preview/${props.treeid}`, {
       method: 'GET',
     })
 

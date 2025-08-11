@@ -36,11 +36,13 @@ const showTools = ref(false)
 const currentDataboxTypeToConnectToNode = ref(DataBoxType.text)
 const currentContentToConnectToNode = reactive(new DataShelfBoxModelNew(0, props.selectedTreeId ?? 0, props.selectedNode?.id ?? 0, ''))
 const { t } = useI18n({ useScope: 'global' })
-
+const { can } = useAbility()
 const loadinglocal = ref(false)
 
 const dialogSelectNodeVisible = ref(false)
 async function addContentToNode(datashelfbox: IDataShelfBoxNew, duplicate: boolean) {
+  if (!can('Create', 'Excerpt'))
+    return
   loadinglocal.value = true
 
   try {
@@ -120,7 +122,7 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
     y: e.y,
     items: [
       {
-        disabled: !props.selectedNode || props.selectedNode.id <= 0,
+        disabled: !props.selectedNode || props.selectedNode.id <= 0 || !can('Create', 'Excerpt'),
         icon: h('i', {
           class: 'tabler-plug-connected icon iconfont',
           style: {
@@ -134,6 +136,7 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
         },
       },
       {
+        disabled: !can('Create', 'Node'),
         label: t('datagathering.connecttocustomnode'),
         icon: h('i', {
           class: 'tabler-plug icon iconfont',
@@ -143,13 +146,17 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
           },
         }),
         onClick: () => {
-        //   tempSelectedTabBoxItem.content = selectedItem.title
+          if (!can('Create', 'Excerpt'))
+            return
+
+          //   tempSelectedTabBoxItem.content = selectedItem.title
           currentContentToConnectToNode.sourceId = contentdata.sourceId
           currentContentToConnectToNode.content = contentdata.content
           dialogSelectNodeVisible.value = true
         },
       },
       {
+        disabled: !can('Create', 'Node'),
         icon: h('i', {
           class: 'tabler-plug-off icon iconfont',
           style: {
@@ -163,19 +170,20 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
           addContentToNode(contentdata, false)
         },
       },
-      {
-        label: t('datagathering.copy'),
-        icon: h('i', {
-          class: 'tabler-copy icon iconfont',
-          style: {
-            width: '18px',
-            height: '18px',
-          },
-        }),
-        onClick: () => {
-        //   alert('You click a menu item')
-        },
-      },
+
+      //   {
+      //     label: t('datagathering.copy'),
+      //     icon: h('i', {
+      //       class: 'tabler-copy icon iconfont',
+      //       style: {
+      //         width: '18px',
+      //         height: '18px',
+      //       },
+      //     }),
+      //     onClick: () => {
+      //     //   alert('You click a menu item')
+      //     },
+      //   },
 
     //   {
     //     label: 'A submenu',

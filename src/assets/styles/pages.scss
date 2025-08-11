@@ -104,8 +104,10 @@ div {
             display: none;
         }
 
+
+
         input[type="checkbox"] {
-            position: relative;
+            position: absolute;
             display: block !important;
             border: 1px solid #ddd;
             border-radius: 50%;
@@ -123,6 +125,11 @@ div {
             &:checked {
                 background-color: rgb(var(--v-theme-primary));
             }
+        }
+
+        input {
+            left: unset !important;
+            top: unset !important;
         }
     }
 }

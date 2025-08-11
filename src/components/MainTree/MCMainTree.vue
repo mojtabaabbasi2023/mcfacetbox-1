@@ -433,7 +433,7 @@ const refreshTree = async () => {
   try {
     isLoading.value = true
 
-    const { data } = await useApi<ITree>(createUrl(`app/tree/${currentTreeId.value}/hierarchy`), { refetch: false })
+    const { data } = await useApi<ITree>(createUrl(`app/node/hierarchy/${currentTreeId.value}`), { refetch: false })
     if (data.value) {
       activatedNode.value.splice(0)
       clearTreeData()

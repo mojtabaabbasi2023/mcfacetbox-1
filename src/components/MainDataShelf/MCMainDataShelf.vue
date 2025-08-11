@@ -12,7 +12,6 @@ import { useDataShelfStateChanged } from '@/store/databoxStore'
 import { FacetBoxModel, SearchResultItemModel } from '@/types/SearchResult'
 import type { IFacetBox, ISearchResultItem } from '@/types/SearchResult'
 import { SHORTCUTKeys, ShortcutName } from '@/types/shortcutKeys'
-import { can } from '@/@layouts/plugins/casl'
 
 interface ISelectAllState {
   state: SelectAllState
@@ -50,6 +49,7 @@ const {
 const { t } = useI18n({ useScope: 'global' })
 const loadingdata = shallowRef(false)
 const lastscrolltopposition = shallowRef(0)
+const { can } = useAbility()
 
 /**
  * متغیرهای مرتبط با نمایش قسمت داده های مرتبط
