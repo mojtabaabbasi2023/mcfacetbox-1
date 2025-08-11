@@ -31,7 +31,9 @@ export interface IServiceError {
   message: string
   validationErrors: IServiceValidationDetails[]
 }
-
+export class RootServiceErrorModel implements IRootServiceError {
+  error: IServiceError = { code: '0', details: '', message: '', validationErrors: [] }
+}
 type stringNumber = number | string
 
 export interface ISimpleDTO<T extends stringNumber> {

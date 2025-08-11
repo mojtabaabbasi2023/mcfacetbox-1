@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
 import MCDialogBookSelect from '../dialogs/MCDialogBookSelect.vue'
-import type { GridResultFacet } from '@/types/baseModels'
+import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
 import { DataBoxType, MessageType, QueryRequestModel, SizeType } from '@/types/baseModels'
 import { FacetBoxModel, SearchResultItemModel } from '@/types/SearchResult'
 import { HadithSearchResultItemModel } from '@/types/hadithResult'
@@ -235,10 +235,17 @@ async function runSearch(resetToDefault: boolean) {
   apiQueryParamData[dataTabValue.value].PageNumber = resultDataOnState[contentType].page
   resultDataOnState[contentType].loading = true
   try {
-    const { data } = await useApi(createUrl(`app/source/${DataBoxType[contentType]}`, {
+    const { data } = await useApi<any>(createUrl(`app/source/${DataBoxType[contentType]}`, {
       query: apiQueryParamData[dataTabValue.value],
     }), { refetch: false })
 
+    if (data.value && data.value.error) {
+      const errorResult = data.value as IRootServiceError
+
+      toast.error(errorResult.error.message)
+
+      return
+    }
     const resultCastedData = data.value as GridResultFacet<ISearchResultItem>
 
     resetData(false)

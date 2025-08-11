@@ -5,7 +5,7 @@ import ContextMenu from '@imengyu/vue3-context-menu'
 import MCLoading from '../MCLoading.vue'
 import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import MCDialogTreePreview from '../dialogs/MCDialogTreePreview.vue'
-import { type IRootServiceError, type ISimpleTree, SizeType } from '@/types/baseModels'
+import { type IRootServiceError, type ISimpleTree, RootServiceErrorModel, SizeType } from '@/types/baseModels'
 import { NodeType, SimpleNestedNodeAcionableModel, createTreeIndex, getNodeTypeNameSpace } from '@/types/tree'
 import type { ISimpleNestedNodeActionable, ISingleNodeView, ITree } from '@/types/tree'
 import { useSelectedTree, useTree } from '@/store/treeStore'
@@ -433,22 +433,26 @@ const refreshTree = async () => {
   try {
     isLoading.value = true
 
-    const { data } = await useApi<ITree>(createUrl(`app/node/hierarchy/${currentTreeId.value}`), { refetch: false })
+    const { data } = await useApi<ITree | any>(createUrl(`app/node/hierarchy/${currentTreeId.value}`), { refetch: false })
 
-    console.log('data', data.value)
+    if (data.value && data.value.error) {
+      const errorResult = data.value as IRootServiceError
 
-    if (data.value) {
-      activatedNode.value.splice(0)
-      clearTreeData()
-      selectedTreeStore.id = data.value.id
-      selectedTreeStore.title = data.value.title
+      toast.error(errorResult.error.message)
 
-      treeData.push(...data.value.nodes)
-      updateTreeIndex(treeData)
-
-      // console.log('loadtree')
-      checkTreeRoute(false)
+      return
     }
+
+    activatedNode.value.splice(0)
+    clearTreeData()
+    selectedTreeStore.id = data.value.id
+    selectedTreeStore.title = data?.value.title
+
+    treeData.push(...data.value.nodes)
+    updateTreeIndex(treeData)
+
+    // console.log('loadtree')
+    checkTreeRoute(false)
   }
   catch (error) {
     toast.error(t('alert.probleminGetInformation'))

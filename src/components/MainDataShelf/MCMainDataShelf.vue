@@ -215,6 +215,13 @@ async function refreshDataShelf(changescroll: boolean) {
       query: apiQueryParamtData,
     }), { refetch: false })
 
+    if (data.value && data.value.error) {
+      const errorResult = data.value as IRootServiceError
+
+      toast.error(errorResult.error.message)
+
+      return
+    }
     const resultCastedData = data.value as GridResultFacet<IDataShelfBoxView>
 
     resetData()
