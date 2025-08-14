@@ -358,7 +358,7 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
             <div v-if="dataTabValue === DataBoxType.hadith" ref="mainDataResultHadith" class="mc-data-scrolly">
               <VRow v-if="resultDataOnState[DataBoxType.hadith].results.length > 0 && !resultDataOnState[DataBoxType.hadith].loading" dense>
                 <VCol md="3">
-                  <div v-if="resultDataOnState[DataBoxType.hadith].facets.length > 0">
+                  <div v-if="resultDataOnState[DataBoxType.hadith].facets.length > 0" class="pt-2">
                     <MCFacetBox
                       v-for="item in resultDataOnState[DataBoxType.hadith].facets"
                       :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.hadith].selectedFacets[item.key]" :istree="item.isTree"

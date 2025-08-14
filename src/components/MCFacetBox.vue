@@ -113,11 +113,11 @@ function searchinfacet(e: any) {
 </script>
 
 <template>
-  <VCard class="mc-facet-box" variant="flat">
+  <VCard class="mc-facet-box px-1" variant="flat">
     <VCardTitle v-if="props.facettype !== FacetType.switch">
       {{ props.facettitle }}
     </VCardTitle>
-    <div class="search-container">
+    <div class="search-container pt-2">
       <VTextField
         v-show="props.searchable" :placeholder="$t('search')" append-inner-icon="tabler-search" clearable
         density="compact" @update:model-value="searchinfacet"
@@ -144,7 +144,7 @@ function searchinfacet(e: any) {
     </VList>
 
     <VTreeview
-      v-else-if="(props.facettype === FacetType.tree)"
+      v-else-if="(props.istree || props.facettype === FacetType.tree)"
       v-model:activated="selectedTreeFacetItems" :items="treeItems" expand-icon="mdi-menu-left" item-value="facetKey"
       item-title="title" min-height="300px" activatable
       density="compact" active-strategy="single-independent"
