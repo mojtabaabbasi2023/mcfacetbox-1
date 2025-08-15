@@ -164,6 +164,7 @@ declare global {
   const regexValidator: typeof import('./src/@core/utils/validators')['regexValidator']
   const registerPlugins: typeof import('./src/@core/utils/plugins')['registerPlugins']
   const registerPlugins_: typeof import('./src/@core/utils/plugins')['registerPlugins_']
+  const removeHtmlTags: typeof import('./src/utils/htmlUtils')['removeHtmlTags']
   const requiredValidator: typeof import('./src/@core/utils/validators')['requiredValidator']
   const resolveActiveColor: typeof import('./src/utils/dataResolver')['resolveActiveColor']
   const resolveActiveTitle: typeof import('./src/utils/dataResolver')['resolveActiveTitle']
@@ -574,6 +575,7 @@ declare module 'vue' {
     readonly refWithControl: UnwrapRef<typeof import('@vueuse/core')['refWithControl']>
     readonly regexValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['regexValidator']>
     readonly registerPlugins: UnwrapRef<typeof import('./src/@core/utils/plugins')['registerPlugins']>
+    readonly removeHtmlTags: UnwrapRef<typeof import('./src/utils/htmlUtils')['removeHtmlTags']>
     readonly requiredValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['requiredValidator']>
     readonly resolveActiveColor: UnwrapRef<typeof import('./src/utils/dataResolver')['resolveActiveColor']>
     readonly resolveActiveTitle: UnwrapRef<typeof import('./src/utils/dataResolver')['resolveActiveTitle']>

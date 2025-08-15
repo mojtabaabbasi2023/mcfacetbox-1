@@ -28,7 +28,7 @@ interface Emit {
 
 const tableHeaders = [
   { title: t('content'), key: 'content', maxWidth: 600, width: '45%', nowrap: true, sortable: false },
-  { title: t('datashelfbox.connectednodesimple'), key: 'node', sortable: true },
+  { title: t('datashelfbox.connectednodesimple'), key: 'node', sortable: false },
   { title: t('description'), key: 'description', nowrap: true, sortable: false },
   { title: t('labels'), key: 'labels', sortable: false },
   { title: t('creatoruser'), key: 'creatorFullName', sortable: false },

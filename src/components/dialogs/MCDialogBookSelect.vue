@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-// !SECTION این دیالوگ برای افزودن و یا ویرایش یک پروژه میباشد
 import { isUndefined } from '@sindresorhus/is'
 import { useToast } from 'vue-toastification'
 import type { IBookSearchResult, ISelectableBookInfo } from '@/types/book'
 import { BookSearchRequestModel } from '@/types/book'
 import type { IFacetBox, IFacetItem } from '@/types/SearchResult'
+import { removeHtmlTags } from '@/utils/htmlUtils'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
@@ -22,7 +22,7 @@ interface Emit {
 
 const selectedFacetItems = reactive<Record<string, string[]>>({})
 const searchbooktitle = ref('')
-const selectedBooks = ref<number[]>([])
+const selectedBooks = ref<Record<number, ISelectableBookInfo>>({})
 const resultStateMessage = ref('')
 const bookSearchModel = reactive<BookSearchRequestModel>(new BookSearchRequestModel())
 
@@ -80,7 +80,7 @@ onFetchResponse(response => {
     }
     else {
       resultbookItems.value?.resultList.forEach(resultitem => {
-        if (selectedBooks.value.includes(resultitem.bookId))
+        if (selectedBooks.value[resultitem.bookId])
           resultitem.selected = true
       })
     }
@@ -101,7 +101,7 @@ const onReset = (closedialog: boolean = false) => {
   bookSearchModel.query = ''
   searchbooktitle.value = ''
   resultbookItems.value = { facetList: [], pageNumber: 0, pageSize: 0, resultList: [], resultListTotalCount: 0 }
-  selectedBooks.value.splice(0)
+  selectedBooks.value = {}
   resetBookSearchModel()
 }
 
@@ -165,9 +165,9 @@ const searchinBook = async () => {
 const selectBook = (item: ISelectableBookInfo) => {
   item.selected = !(item.selected ?? false)
   if (item.selected)
-    selectedBooks.value.push(item.bookId)
+    selectedBooks.value[item.bookId] = item
   else
-    selectedBooks.value.splice(selectedBooks.value.indexOf(item.bookId), 1)
+    delete selectedBooks.value[item.bookId]
   console.log('selectbook', selectedBooks.value)
 }
 
@@ -202,6 +202,18 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
           </VCol>
           <VCol md="8">
             <VRow>
+              <VCol>
+                <VChip
+                  v-for="(item, i) in selectedBooks" :key="i"
+                  class="mr-1 mb-1"
+                  closable
+                  @click:close="selectBook(item)"
+                >
+                  {{ removeHtmlTags(item.title) }}
+                </VChip>
+              </VCol>
+            </VRow>
+            <VRow>
               <VCol md="12">
                 <VTextField
                   v-model:model-value="searchbooktitle" :placeholder="$t('search')" clearable
@@ -226,7 +238,7 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
                       <VRow dense>
                         <VCol cols="auto">
                           <VImg
-                            :width="90" assspect-ratio="4/3" cover
+                            :width="90" assspect-ratio="4/3" cover lazy
                             :src="`https://noorlib.ir${item.raw.thumbnailUrl}`"
                           />
                         </VCol>

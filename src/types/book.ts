@@ -63,7 +63,7 @@ export class selectableBookInfo implements ISelectable, IBookInfo {
 export class BookSearchRequestModel implements Record<string, any> {
   [x: string]: any;
   language: string = 'fa'
-  page_size: number = 20
+  page_size: number = 10
   page_number: number = 1
   sort: string = 'title-asc'
   origin: string = 'noorlib.web.app'

@@ -26,3 +26,7 @@ export function getSelectedTextWithinElement(element: HTMLElement): string {
 export function createFootnoteTag(id: string, text: string) {
   return `<sup class="footenote-index" footnote-id="${id}">${text}</sup>`
 }
+
+export function removeHtmlTags(htmlString: string): string {
+  return htmlString.replace(/<[^>]*>/g, '')
+}

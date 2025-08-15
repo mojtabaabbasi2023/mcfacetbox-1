@@ -57,11 +57,13 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
 
         <VSpacer />
 
-        <NavBarI18n
+        <!--
+          <NavBarI18n
           v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
           :languages="themeConfig.app.i18n.langConfig"
-        />
-        <NavbarThemeSwitcher />
+          />
+          <NavbarThemeSwitcher />
+        -->
         <!--
           <NavbarShortcuts />
           <NavBarNotifications class="me-1" />
