@@ -260,7 +260,7 @@ async function runSearch(filterType: ChangeFilterType) {
 
   resetData(filterType, false)
   apiQueryParamData[dataTabValue.value].TreeId = routerTreeId.value
-  apiQueryParamData[dataTabValue.value].RequestSearchConfig = currentSearchConfig.value
+  apiQueryParamData[dataTabValue.value].SearchType = currentSearchConfig.value
 
   //   console.log('refreshdata2', filterType)
 

@@ -158,7 +158,7 @@ export class QueryRequestModel implements Record<string, any> {
   Sorting: string = ''
   Filter: string = ''
   TreeId: number = 0
-  RequestSearchConfig: SearchConfig = SearchConfig.OneOrMore
+  SearchType: SearchConfig = SearchConfig.OneOrMore
   public resetAll() {
     this.resetDynamicFields()
     this.PageNumber = PageDefaultSize
@@ -166,7 +166,7 @@ export class QueryRequestModel implements Record<string, any> {
     this.Sorting = ''
     this.Filter = ''
     this.TreeId = 0
-    this.RequestSearchConfig = SearchConfig.OneOrMore
+    this.SearchType = SearchConfig.OneOrMore
   }
 
   /** کلید های داینامیک شیء را حذف میکنیم تا شیء به حالت اولیه برگردد */
