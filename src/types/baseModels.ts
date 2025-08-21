@@ -157,7 +157,7 @@ export class QueryRequestModel implements Record<string, any> {
   Sorting: string = ''
   Filter: string = ''
   TreeId: number = 0
-
+  RequestSearchConfig: SearchConfig = SearchConfig.OneOrMore
   public resetAll() {
     this.resetDynamicFields()
     this.PageNumber = PageDefaultSize
@@ -165,6 +165,7 @@ export class QueryRequestModel implements Record<string, any> {
     this.Sorting = ''
     this.Filter = ''
     this.TreeId = 0
+    this.RequestSearchConfig = SearchConfig.OneOrMore
   }
 
   /** کلید های داینامیک شیء را حذف میکنیم تا شیء به حالت اولیه برگردد */
@@ -245,4 +246,10 @@ export enum SupervisionStatus {
   review = 3,
   correct = 4,
   accept = 5,
+}
+
+export enum SearchConfig {
+  All = 1,
+  OneOrMore = 2,
+  Exact = 3,
 }

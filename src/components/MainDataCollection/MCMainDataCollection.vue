@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
 import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
-import { DataBoxType, MessageType, QueryRequestModel, SizeType } from '@/types/baseModels'
+import { DataBoxType, MessageType, QueryRequestModel, SearchConfig, SizeType } from '@/types/baseModels'
 import type { ISearchResultItem } from '@/types/SearchResult'
 import { FacetBoxModel, SearchResultItemModel, TabSearchStateResultModel } from '@/types/SearchResult'
 import { HadithSearchResultItemModel } from '@/types/hadithResult'
@@ -38,6 +38,8 @@ const toast = useToast()
 const allHadith = shallowRef(false)
 const searchPhrase = ref('')
 const watchSearchFilters = shallowRef(false)
+const dialogSearchConfigVisible = shallowRef(false)
+const currentSearchConfig = ref(SearchConfig.All)
 
 const apiQueryParamData = reactive<Record<DataBoxType, QueryRequestModel>>(
   {
@@ -60,6 +62,7 @@ const maximizBoxOverlay = shallowRef(false)
 const currentitem = ref<ISearchResultItem>(new SearchResultItemModel())
 
 // const loading = ref(false)
+const { x: cursorX, y: cursorY } = usePointer()
 
 const {
   routerTreeId,
@@ -257,6 +260,7 @@ async function runSearch(filterType: ChangeFilterType) {
 
   resetData(filterType, false)
   apiQueryParamData[dataTabValue.value].TreeId = routerTreeId.value
+  apiQueryParamData[dataTabValue.value].RequestSearchConfig = currentSearchConfig.value
 
   //   console.log('refreshdata2', filterType)
 
@@ -337,7 +341,13 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
             <VBtn icon size="small" variant="text" @click="runSearch(ChangeFilterType.SearchPhrase)">
               <VIcon icon="tabler-search" size="22" />
             </VBtn>
-            <VBtn icon size="small" variant="text" @click="">
+            <VBtn icon size="small" :color="currentSearchConfig !== SearchConfig.All ? 'success' : 'primary'" variant="text" @click="dialogSearchConfigVisible = true">
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t(`searchconfig.${SearchConfig[currentSearchConfig]}`) }}
+              </VTooltip>
               <VIcon icon="tabler-settings" size="22" />
             </VBtn>
             <VBtn icon size="small" variant="text" @click="">
@@ -461,6 +471,10 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
       </VCol>
       </VRow>
     -->
+    <MCDialogSearchConfig
+      v-if="dialogSearchConfigVisible" v-model:is-dialog-visible="dialogSearchConfigVisible"
+      v-model:model-value="currentSearchConfig" :loc-x="cursorX" :loc-y="cursorY"
+    />
   </VContainer>
 </template>
 
