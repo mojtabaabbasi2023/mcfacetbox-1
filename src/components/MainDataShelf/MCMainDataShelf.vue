@@ -37,7 +37,8 @@ const increasebtn = shallowRef<VBtn>()
 const decreasebtn = shallowRef<VBtn>()
 const apiQueryParamData = reactive<QueryRequestModel>(new QueryRequestModel())
 const routeQueryParamData = reactive<DataShelfRouteQueryParams>(new DataShelfRouteQueryParams())
-const isDialogDataShelfBoxEdit = ref(false)
+const isDialogDataShelfBoxEdit = shallowRef(false)
+const listHasFilter = shallowRef(false)
 
 const {
   routerTreeId, routerNodeId, routerExcerptPage, routerExcerptPageSize, routerExcerptFacet,
@@ -505,7 +506,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
                 {{ $t('refresh') }}
               </VTooltip>
             </VBtn>
-            <div v-if="selectAll.count === 1" :disabled="!can('Move', 'Excerpt')" class="border-thin rounded d-flex align-center">
+            <div v-if="selectAll.count === 1 && listHasFilter" :disabled="!can('Move', 'Excerpt')" class="border-thin rounded d-flex align-center">
               <VBtn ref="decreasebtn" icon size="25" variant="text" @click="decreaseOrder">
                 <VIcon icon="tabler-arrow-up" size="22" />
                 <VTooltip
@@ -561,6 +562,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
                 <div v-show="!loadingdata" ref="loadmorestart" />
                 <MCDataShelfBox
                   v-for="(item, i) in resultdataItemsSort" :key="item.id" :ref="(el) => setdataboxref(el, item)" v-model="resultdataItemsSort[i]" :item-index="i"
+                  :has-filtered="listHasFilter"
                   :prev-item-order="i - 1"
                   :next-item-order="i + 1"
                   :prev-item-priority="i > 0 ? resultdataItemsSort[i - 1].priority : -1"

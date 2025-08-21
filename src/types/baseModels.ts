@@ -13,6 +13,7 @@ export class GridResultFacet<T> implements Record<string, any> {
   totalCount = 0
   items: T[] = []
   facets: IFacetBox[] = []
+  hasFilter: boolean = false
 }
 export interface ISelectable {
   selectable?: boolean

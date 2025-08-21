@@ -9,7 +9,15 @@ import { DataBoxType, MessageType, SizeType, SupervisionStatus } from '@/types/b
 import { type ISearchResultItem, SearchResultItemModel } from '@/types/SearchResult'
 import { useDataShelfPriorityChanged } from '@/store/databoxStore'
 
-const props = defineProps<{ itemIndex: number;nextItemOrder: number;prevItemOrder: number;nextItemPriority: number;prevItemPriority: number;readonlyMode?: boolean }>()
+const props = defineProps<{
+  itemIndex: number
+  nextItemOrder: number
+  prevItemOrder: number
+  nextItemPriority: number
+  prevItemPriority: number
+  hasFiltered: boolean
+  readonlyMode?: boolean }>()
+
 const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
 const dialogAddLabelVisible = ref(false)
@@ -358,6 +366,8 @@ const deleteSelectedExcerpt = async () => {
 
 const linkdatabox = async () => {
   try {
+    if (!can('Link', 'Excerpt') || !props.hasFiltered)
+      return
     loadinglocal.value = true
 
     const result = await $api<LinkDetailModel[]>(`app/excerpt/${databoxItem.value.id}/link`, {
@@ -381,6 +391,8 @@ const linkdatabox = async () => {
 
 const unlinkdatabox = async () => {
   try {
+    if (!can('Link', 'Excerpt') || !props.hasFiltered)
+      return
     loadinglocal.value = true
 
     const result = await $api<UnlinkDataModel>(`app/excerpt/${databoxItem.value.id}/unlink`, {
@@ -598,7 +610,7 @@ watch(isDialogDataShelfBoxEdit, () => {
     </div>
     <div v-if="!readonlyMode">
       <VBtn
-        v-if="databoxItem.hasLink" icon size="25" color="error"
+        v-if="databoxItem.hasLink" icon size="25" color="error" :disabled="!can('Link', 'Excerpt') || !props.hasFiltered"
         variant="text" class="box-unpin-item" @click="unlinkdatabox"
       >
         <VIcon icon="tabler-link-minus" size="20" />
@@ -639,7 +651,7 @@ watch(isDialogDataShelfBoxEdit, () => {
       <div v-if="showTools && !readonlyMode" class="box-state-toolbar">
         <!-- <VRow no-gutters class="btn-box data-box-toolbar"> -->
         <div :style="databoxItem.state.id === SupervisionStatus.accept ? { pointerEvents: 'none', opacity: '0.5' } : {}">
-          <VBtn v-if="!databoxItem.hasLink" icon size="25" variant="text" :disabled="!can('Link', 'Excerpt')" @click="linkdatabox">
+          <VBtn v-if="!databoxItem.hasLink" icon size="25" variant="text" :disabled="!can('Link', 'Excerpt') || !props.hasFiltered" @click="linkdatabox">
             <VIcon icon="tabler-link-plus" size="20" />
             <VTooltip
               activator="parent"

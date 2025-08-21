@@ -34,17 +34,11 @@ onMounted(() => {
 <template>
   <VDialog
     v-if="props.isDialogVisible"
-    :width="400" :model-value="props.isDialogVisible" :scrim="false"
+    :width="370" :model-value="props.isDialogVisible" :scrim="false"
     :target="[locx, locy + 40]" location-strategy="connected" @update:model-value="onReset(true)"
   >
-    <!-- <DialogCloseBtn :disabled="loading" icon-size="16" btn-size="22" @click="onReset(true)" /> -->
-    <VCard variant="flat" class="v-card-sm">
-      <!--
-        <VBtn size="small" variant="text" style="position: absolute;left: -8px;top:-8px;width: 10px;" @click="onReset(true)">
-        <VIcon icon="tabler-x" size="16" />
-        </VBtn>
-      -->
-      <VCardText class="pa-4">
+    <VCard variant="flat" class="v-card-xs">
+      <VCardText class="pa-2">
         <div class="w-100 d-flex flex-row justify-center">
           <VRadioGroup v-model="searchConfig" inline>
             <VRadio :label="$t('searchconfig.OneOrMore')" :value="SearchConfig.OneOrMore" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
@@ -52,18 +46,6 @@ onMounted(() => {
 
             <VRadio :label="$t('searchconfig.Exact')" :value="SearchConfig.Exact" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
           </VRadioGroup>
-          <!--
-            <VBtn type="submit" class="me-3" :loading="loading" @click="addNewNode">
-            <span>
-            {{ $t('accept') }}
-            </span>
-            </VBtn>
-          -->
-          <!--
-            <VBtn type="reset" variant="tonal" color="error" :disabled="loading" @click="onReset">
-            {{ $t('cancel') }}
-            </VBtn>
-          -->
         </div>
       </VCardText>
       <VDivider />
