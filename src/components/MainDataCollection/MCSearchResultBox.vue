@@ -213,7 +213,7 @@ function openBoxLink() {
 
 <template>
   <VCard
-    v-no-context-menu class="h-100 w-100 mc-search-result" :class="[
+    v-no-context-menu class="h-100 w-100 mc-search-result v-card-sm" :class="[
       { 'not-expanded': !isExpanded },
       boxType === DataBoxType.hadith ? 'hadith-card' : 'quran-card',
     ]" @mouseenter="showTools = true" @mouseleave="showTools = false"
@@ -284,7 +284,7 @@ function openBoxLink() {
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  margin-bottom: 16px;
+  margin-bottom: 5px;
   overflow: hidden;
   border: 1px solid #e0e0e0;
   width: 100%;

@@ -36,7 +36,6 @@ const mainDataResultQuran = shallowRef(null)
 const dataTabValue = ref<DataBoxType>(DataBoxType.hadith)
 const toast = useToast()
 const allHadith = shallowRef(false)
-const searchPhrase = ref('')
 const watchSearchFilters = shallowRef(false)
 const dialogSearchConfigVisible = shallowRef(false)
 const currentSearchConfig = ref(SearchConfig.All)
@@ -185,7 +184,7 @@ async function handleSearchKeydown(event: KeyboardEvent) {
       break;
     case 'Enter':
       event.stopPropagation()
-      if (searchPhrase.value.length < 2)
+      if (apiQueryParamData[dataTabValue.value].Filter.length < 2)
         return
       allHadith.value = false
       await runSearch(ChangeFilterType.SearchPhrase)
@@ -224,7 +223,8 @@ function resetData(filterType: ChangeFilterType, deactiveWatchFilters: boolean =
       resultDataOnState[dataTabValue.value].selectedFacets = {}
       apiQueryParamData[dataTabValue.value].resetDynamicFields()
       apiQueryParamData[dataTabValue.value].IsFullText = false
-      apiQueryParamData[dataTabValue.value].Filter = searchPhrase.value
+
+      //   apiQueryParamData[dataTabValue.value].Filter = searchPhrase.value
       apiQueryParamData[dataTabValue.value].PageNumber = 1
       apiQueryParamData[dataTabValue.value].SearchIn = 1
       resultDataOnState[dataTabValue.value].resetCollections()
@@ -249,7 +249,7 @@ function resetData(filterType: ChangeFilterType, deactiveWatchFilters: boolean =
 
 async function showAllHadith() {
   allHadith.value = true
-  searchPhrase.value = ''
+  apiQueryParamData[dataTabValue.value].Filter = ''
 
   await runSearch(ChangeFilterType.SearchPhrase)
 }
@@ -322,52 +322,23 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
       <template #default>
         <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
           <MCSearchResultBox
-            v-model:is-expanded="maximizBoxOverlay" :box-type="dataTabValue" :search-phrase="searchPhrase" expandable :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id"
+            v-model:is-expanded="maximizBoxOverlay" :box-type="dataTabValue" :search-phrase="apiQueryParamData[dataTabValue].Filter" expandable :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id"
             :selected-node="selectedNode" @content-to-node-added="contentToNodeAdded" @message-has-occured="searchResultBoxMessageHandle"
             @dataitemhaschanged="(value) => { currentitem = value }"
           />
         </div>
       </template>
     </VOverlay>
-    <VRow dense class="align-center">
+    <!--
+      <VRow dense class="align-center">
       <VCol cols="12" md="3" />
-      <VCol cols="12" md="6" class="mx-auto">
-        <VTextField
-          v-model="searchPhrase" :placeholder="$t('search')" class="search-bar" single-line clearable persistent-clear
-          :loading="resultDataOnState[dataTabValue].loading"
-          @keydown="handleSearchKeydown" @click:clear="resetData(ChangeFilterType.Clear)" @keydown.esc="resetData(ChangeFilterType.Clear)"
-        >
-          <template #append-inner>
-            <VBtn icon size="small" variant="text" @click="runSearch(ChangeFilterType.SearchPhrase)">
-              <VIcon icon="tabler-search" size="22" />
-            </VBtn>
-            <VBtn icon size="small" :color="currentSearchConfig !== SearchConfig.All ? 'success' : 'primary'" variant="text" @click="dialogSearchConfigVisible = true">
-              <VTooltip
-                activator="parent"
-                location="top center"
-              >
-                {{ $t(`searchconfig.${SearchConfig[currentSearchConfig]}`) }}
-              </VTooltip>
-              <VIcon icon="tabler-settings" size="22" />
-            </VBtn>
-            <VBtn icon size="small" variant="text" @click="">
-              <VIcon icon="tabler-history" size="22" />
-            </VBtn>
-          </template>
-          <!--
-            <template #append>
-            <VBtn icon size="small" @click="">
-            ai
-            </VBtn>
-            </template>
-          -->
-        </VTextField>
-      </VCol>
+      <VCol cols="12" md="6" class="mx-auto" />
       <VCol cols="12" md="3" />
-    </VRow>
+      </VRow>
+    -->
     <!-- v-for="(item, i) in testfacetlist" :key="i"  -->
-    <VRow no-gutters dense class="align-center" justify="space-between">
-      <VTabs v-model="dataTabValue" density="compact" hide-slider class="data-collection-tabs">
+    <VRow no-gutters dense class="align-center " justify="space-between">
+      <VTabs v-model="dataTabValue" density="compact" hide-slider class="data-collection-tabs" slider-color="transparent">
         <VTab :value="DataBoxType.hadith" variant="elevated" rounded="sm">
           {{ $t('hadith') }} <span v-if="resultDataOnState[DataBoxType.hadith].totalItems > 0" class="pr-1">({{ resultDataOnState[DataBoxType.hadith].totalItems.toString() }})</span>
         </VTab>
@@ -378,15 +349,46 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
           {{ $t('word') }}
         </VTab>
       </VTabs>
-      <VBtn v-if="dataTabValue === DataBoxType.hadith" icon size="26" variant="text" @click="showAllHadith">
-        <VIcon icon="tabler-book" size="22" />
-        <VTooltip
-          activator="parent"
-          location="top center"
-        >
-          {{ $t('allHadith') }}
-        </VTooltip>
-      </VBtn>
+      <VTextField
+        v-model.lazy="apiQueryParamData[dataTabValue].Filter" :placeholder="$t('search')" class="pr-5 pb-1 pl-2" single-line clearable
+        persistent-clear
+        :loading="resultDataOnState[dataTabValue].loading"
+        @keydown="handleSearchKeydown" @click:clear="resetData(ChangeFilterType.Clear)" @keydown.esc="resetData(ChangeFilterType.Clear)"
+      >
+        <template #append-inner>
+          <VBtn icon size="small" variant="text" @click="() => { if (apiQueryParamData[dataTabValue].Filter.length > 1) runSearch(ChangeFilterType.SearchPhrase) }">
+            <VIcon icon="tabler-search" size="22" />
+          </VBtn>
+          <VBtn icon size="small" :color="currentSearchConfig !== SearchConfig.All ? 'success' : 'primary'" variant="text" @click="dialogSearchConfigVisible = true">
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t(`searchconfig.${SearchConfig[currentSearchConfig]}`) }}
+            </VTooltip>
+            <VIcon icon="tabler-settings" size="22" />
+          </VBtn>
+          <VBtn icon size="small" variant="text" @click="">
+            <VIcon icon="tabler-history" size="22" />
+          </VBtn>
+          <VBtn v-if="dataTabValue === DataBoxType.hadith" icon size="small" variant="text" @click="showAllHadith">
+            <VIcon icon="tabler-book" size="22" />
+            <VTooltip
+              activator="parent"
+              location="top center"
+            >
+              {{ $t('allHadith') }}
+            </VTooltip>
+          </VBtn>
+        </template>
+        <!--
+          <template #append>
+          <VBtn icon size="small" @click="">
+          ai
+          </VBtn>
+          </template>
+        -->
+      </VTextField>
     </VRow>
     <VDivider />
     <MCLoading :showloading="resultDataOnState[dataTabValue].loading" :loadingsize="SizeType.MD" />
@@ -395,61 +397,59 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
       <VTabsWindow v-model="dataTabValue" class="h-100 w-100">
         <VTabsWindowItem :value="DataBoxType.hadith" :transition="false" class="h-100">
           <VFadeTransition>
-            <div v-if="dataTabValue === DataBoxType.hadith" ref="mainDataResultHadith" class="mc-data-scrolly">
-              <VRow v-if="resultDataOnState[DataBoxType.hadith].results.length > 0 && !resultDataOnState[DataBoxType.hadith].loading" dense>
-                <VCol md="3">
-                  <div v-if="resultDataOnState[DataBoxType.hadith].facets.length > 0" class="pt-2">
-                    <MCFacetBox
-                      v-for="item in resultDataOnState[DataBoxType.hadith].facets"
-                      :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.hadith].selectedFacets[item.key]" :istree="item.isTree"
-                      :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
-                      :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
-                    />
-                  </div>
-                </VCol>
-                <VCol md="9">
-                  <div class="pl-2 py-2">
-                    <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmorestarthadith" />
-                    <MCSearchResultBox
-                      v-for="item in resultDataOnState[DataBoxType.hadith].results"
-                      :key="item.id" :box-type="DataBoxType.hadith" expandable
-                      :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
-                      @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
-                    />
-                    <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmoreendhadith" />
-                  </div>
-                </VCol>
-              </VRow>
+            <div v-if="dataTabValue === DataBoxType.hadith && resultDataOnState[DataBoxType.hadith].results.length > 0 && !resultDataOnState[DataBoxType.hadith].loading" class="d-flex flex-row overflow-hidden h-100">
+              <div v-if="resultDataOnState[DataBoxType.hadith].facets.length > 0" style="width:25%" class="mc-data-scrolly">
+                <MCFacetBox
+                  v-for="item in resultDataOnState[DataBoxType.hadith].facets"
+                  :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.hadith].selectedFacets[item.key]" :istree="item.isTree"
+                  :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
+                  :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
+                />
+              </div>
+              <div ref="mainDataResultHadith" style="width:75%" class="mc-data-scrolly ">
+                <div class="pl-2 py-2">
+                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmorestarthadith" />
+                  <MCSearchResultBox
+                    v-for="item in resultDataOnState[DataBoxType.hadith].results"
+                    :key="item.id" :box-type="DataBoxType.hadith" expandable
+                    :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="apiQueryParamData[dataTabValue].Filter"
+                    @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
+                  />
+                  <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmoreendhadith" />
+                </div>
+              </div>
             </div>
           </VFadeTransition>
         </VTabsWindowItem>
         <VTabsWindowItem :value="DataBoxType.quran" :transition="false" class="h-100">
           <VFadeTransition>
-            <div v-if="dataTabValue === DataBoxType.quran" ref="mainDataResultQuran" class="mc-data-scrolly">
+            <!--
+              <div v-if="dataTabValue === DataBoxType.quran" ref="mainDataResultQuran" class="mc-data-scrolly">
               <VRow v-if="resultDataOnState[DataBoxType.quran].results.length > 0 && !resultDataOnState[DataBoxType.quran].loading" dense>
-                <VCol md="3">
-                  <div v-if="resultDataOnState[DataBoxType.quran].facets.length > 0">
-                    <MCFacetBox
-                      v-for="item in resultDataOnState[DataBoxType.quran].facets"
-                      :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.quran].selectedFacets[item.key]" :istree="item.isTree"
-                      :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
-                      :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
-                    />
-                  </div>
-                </VCol>
-                <VCol md="9">
-                  <div class="pl-2 py-2">
-                    <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmorestartquran" />
-                    <MCSearchResultBox
-                      v-for="item in resultDataOnState[DataBoxType.quran].results"
-                      :key="item.id" :box-type="DataBoxType.quran" expandable
-                      :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="searchPhrase"
-                      @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
-                    />
-                    <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmoreendquran" />
-                  </div>
-                </VCol>
-              </VRow>
+              <VCol md="3">
+              <div v-if="resultDataOnState[DataBoxType.quran].facets.length > 0">
+            -->
+            <div v-if="dataTabValue === DataBoxType.quran && resultDataOnState[DataBoxType.quran].results.length > 0 && !resultDataOnState[DataBoxType.quran].loading" class="d-flex flex-row overflow-hidden h-100">
+              <div v-if="resultDataOnState[DataBoxType.quran].facets.length > 0" style="width:25%" class="mc-data-scrolly">
+                <MCFacetBox
+                  v-for="item in resultDataOnState[DataBoxType.quran].facets"
+                  :key="item.key" v-model:selected-items="resultDataOnState[DataBoxType.quran].selectedFacets[item.key]" :istree="item.isTree"
+                  :scroll-item-count="item.scrollSize" :searchable="item.itemList.length > 5 ? true : false"
+                  :dataitems="item.itemList" :facettitle="item.title" class="mb-2"
+                />
+              </div>
+              <div ref="mainDataResultQuran" style="width:75%" class="mc-data-scrolly ">
+                <div class="pl-2 py-2">
+                  <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmorestartquran" />
+                  <MCSearchResultBox
+                    v-for="item in resultDataOnState[DataBoxType.quran].results"
+                    :key="item.id" :box-type="DataBoxType.quran" expandable
+                    :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="apiQueryParamData[dataTabValue].Filter"
+                    @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
+                  />
+                  <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmoreendquran" />
+                </div>
+              </div>
             </div>
           </VFadeTransition>
         </VTabsWindowItem>
