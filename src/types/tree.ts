@@ -223,6 +223,14 @@ export interface ITreeExcerpt extends ITree {
   nodes: ISimpleNestedNodeExcerptActionable[]
 }
 
+export interface TreeWorkReport {
+  fullName: string
+  userId: string
+  domain: string
+  createdCount: number
+  updatedCount: number
+  deletedCount: number
+}
 export enum NodeRelationType {
   relation = 1,
   reference = 2,

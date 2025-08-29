@@ -113,11 +113,11 @@ watch(searchResult, () => {
         clearable persistent-clear density="compact" :loading="loadingdata" @click:clear="onReset" @keydown.esc="onReset"
       >
         <template #append>
-          <VBtn :variant="isRegex ? 'tonal' : 'plain'" icon="tabler-regex" size="small" rounded="lg" @click="isRegex = !isRegex" />
+          <!-- <VBtn :variant="isRegex ? 'tonal' : 'plain'" icon="tabler-regex" size="small" rounded="lg" @click="isRegex = !isRegex" /> -->
           <!-- <VBtn :variant="ismatchCase ? 'tonal' : 'plain'" icon="tabler-abc" size="small" rounded="lg" @click="ismatchCase = !ismatchCase" /> -->
           <VBtn :variant="iswholeWord ? 'tonal' : 'plain'" icon="tabler-alphabet-latin" size="small" rounded="lg" @click="iswholeWord = !iswholeWord" />
           <VDivider vertical />
-          <!-- <VBtn variant="plain" :icon="showReplace ? 'tabler-chevron-down' : 'tabler-chevron-right'" size="small" @click="showReplace = !showReplace" /> -->
+          <VBtn variant="plain" :icon="showReplace ? 'tabler-chevron-down' : 'tabler-chevron-right'" size="small" @click="showReplace = !showReplace" />
         </template>
       </VTextField>
       <VExpandTransition>
@@ -127,7 +127,14 @@ watch(searchResult, () => {
           clearable density="compact" @click:clear="onReset"
         >
           <template #append>
-            <VBtn variant="plain" icon="tabler-replace" rounded="lg" size="small" />
+            <VBtn variant="plain" icon="tabler-replace" rounded="lg" size="small">
+              <VTooltip
+                activator="parent"
+                location="top center"
+              >
+                {{ $t('tree.preview') }}
+              </VTooltip>
+            </VBtn>
             <!-- <VBtn variant="plain" icon="tabler-replace-filled" rounded="lg" size="small" /> -->
           </template>
         </VTextField>

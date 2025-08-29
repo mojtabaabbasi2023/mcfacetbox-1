@@ -83,7 +83,7 @@ const onReset = () => {
   <VDialog v-model="isDialogVisible" width="auto" persistent>
     <template #activator="{ props: activatorProps }">
       <VTextField
-        v-bind="activatorProps" :value="props.selectedDate" width="250px"
+        v-bind="activatorProps" :value="props.selectedDate" width="150px" class="px-1" style="height: 45px;"
         :placeholder="$t('$vuetify.datePicker.title')" required clearable
       />
     </template>

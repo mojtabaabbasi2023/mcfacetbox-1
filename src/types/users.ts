@@ -69,6 +69,7 @@ export interface ITokenProfile extends IToken {
 }
 
 export class UserModel implements IUser {
+  details: Record<string, any>[] = [];
   [x: string]: any;
   isSelected = false
   isLoading: boolean = false

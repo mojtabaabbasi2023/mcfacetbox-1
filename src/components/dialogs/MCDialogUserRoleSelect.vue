@@ -3,6 +3,7 @@ import { VForm } from 'vuetify/components/VForm'
 import type { GridResult, ISimpleDTO } from '@/types/baseModels'
 import { SimpleDTOModel, SizeType } from '@/types/baseModels'
 import type { IUserBase } from '@/types/users'
+import { loadRoles, loadUsers } from '@/services/publicServices'
 
 interface Prop {
   isDialogVisible: boolean
@@ -27,23 +28,9 @@ interface Emit {
   (e: 'userRoleHasBeenAdded', treeid: number): void
 }
 
-watch(() => selectedUser, () => {
-  console.log('selecteduser', selectedUser.value)
-})
-
-const loadRoles = async () => {
-  const roleDataResult = await $api<GridResult<ISimpleDTO<string>>>(`app/role/simple?gateId=${props.gateId}`)
-
-  roles.splice(0)
-  roles.push(...roleDataResult.items)
-}
-
-const loadUsers = async () => {
-  const userDataResult = await $api<ISimpleDTO<string>[]>(`app/gate/${props.gateId}/user/simple`)
-
-  users.splice(0)
-  users.push(...userDataResult)
-}
+// watch(() => selectedUser, () => {
+//   console.log('selecteduser', selectedUser.value)
+// })
 
 const addTreeUserRole = async () => {
   try {
@@ -71,8 +58,14 @@ const addTreeUserRole = async () => {
 onMounted(async () => {
   try {
     opening.value = true
-    await loadRoles()
-    await loadUsers()
+
+    const rolesResult = await loadRoles(props.gateId)
+    const usersResult = await loadUsers(props.gateId)
+
+    roles.splice(0)
+    roles.push(...rolesResult.items)
+    users.splice(0)
+    users.push(...usersResult)
     opening.value = false
   }
   catch (error) {

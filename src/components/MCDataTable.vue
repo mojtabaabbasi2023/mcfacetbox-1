@@ -181,45 +181,26 @@ defineExpose({ refreshData })
 
 <template>
   <VCard>
-    <div class="d-flex flex-wrap gap-1">
-      <div class="d-flex align-center flex-wrap gap-4 ma-2">
-        <!-- 👉 Search  -->
-        <AppTextField
-          v-if="props.showsearch"
-          v-model="searchQuery"
-          :placeholder="searchLabelDefault"
-          style="inline-size: 15.625rem;"
-          clearable
-          @click:clear="() => { searchQuery = '';searchQueryFinal = '' }"
-        />
+    <div class="d-flex flex-row gap-1 py-2">
+      <!-- 👉 Search  -->
+      <AppTextField
+        v-if="props.showsearch"
+        v-model="searchQuery"
+        :placeholder="searchLabelDefault"
+        style="inline-size: 15.625rem;"
+        clearable
+        @click:clear="() => { searchQuery = '';searchQueryFinal = '' }"
+      />
 
-        <!--
-          <AppSelect
-          v-model="selectedRole" placeholder="Select Role" :items="roles" clearable
-          clear-icon="tabler-x" style="inline-size: 10rem;"
-          />
-        -->
-
-        <VSpacer />
-      </div>
-
-      <div class="d-flex gap-2 align-center ma-2 ms-auto ">
-        <p class="text-body-1 mb-0">
-          {{ $t('Show') }}
-        </p>
+      <!--
         <AppSelect
-          :model-value="pageSize"
-          :items="[
-            { value: 10, title: '5' },
-            { value: 25, title: '25' },
-            { value: 50, title: '50' },
-            { value: 100, title: '100' },
-            { value: 1000, title: '1000' },
-
-          ]"
-          style="inline-size: 5.5rem;"
-          @update:model-value="pageSize = parseInt($event, 10)"
+        v-model="selectedRole" placeholder="Select Role" :items="roles" clearable
+        clear-icon="tabler-x" style="inline-size: 10rem;"
         />
+      -->
+
+      <div>
+        <slot name="tools" />
       </div>
     </div>
 
@@ -321,11 +302,31 @@ defineExpose({ refreshData })
         {{ index + 1 + ((pageNumber - 1) * pageSize) }}
       </template>
       <template #bottom>
-        <TablePagination
-          v-model:page="pageNumber"
-          :items-per-page="pageSize"
-          :total-items="resultData?.totalCount === undefined ? 0 : resultData?.totalCount"
-        />
+        <div class="d-flex flex-row">
+          <TablePagination
+            v-model:page="pageNumber"
+            :items-per-page="pageSize"
+            :total-items="resultData?.totalCount === undefined ? 0 : resultData?.totalCount"
+          />
+          <div class="d-flex gap-2 align-center ma-2 ms-auto ">
+            <p class="text-body-1 mb-0">
+              {{ $t('Show') }}
+            </p>
+            <AppSelect
+              :model-value="pageSize"
+              :items="[
+                { value: 10, title: '10' },
+                { value: 25, title: '25' },
+                { value: 50, title: '50' },
+                { value: 100, title: '100' },
+                { value: 1000, title: '1000' },
+
+              ]"
+              style="inline-size: 5.5rem;"
+              @update:model-value="pageSize = parseInt($event, 10)"
+            />
+          </div>
+        </div>
       </template>
       <template #no-data>
         <div class="pt-5">

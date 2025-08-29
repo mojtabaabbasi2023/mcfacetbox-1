@@ -147,9 +147,11 @@ const gateDataUpdated = () => {
               <IconBtn @click="routeWithGateId('project', value.id, value.title)">
                 <VIcon icon="mdi-file-tree-outline" />
               </IconBtn>
-              <IconBtn @click="updateCharts(value.id)">
+              <!--
+                <IconBtn @click="updateCharts(value.id)">
                 <VIcon icon="tabler-chart-bar" />
-              </IconBtn>
+                </IconBtn>
+              -->
             </template>
           </MCDataTable>
         </VCard>

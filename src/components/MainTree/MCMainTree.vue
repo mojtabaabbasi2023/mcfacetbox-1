@@ -730,7 +730,7 @@ const treeViewStyle = computed(() => ({
             activator="parent"
             location="top center"
           >
-            {{ $t('tree.preview') }}
+            {{ $t('replace') }}
           </VTooltip>
         </VBtn>
       </div>

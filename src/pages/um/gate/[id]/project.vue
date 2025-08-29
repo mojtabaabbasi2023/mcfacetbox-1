@@ -13,6 +13,8 @@ const dialogTree = ref(VDialog)
 const isAddNewTreeDialogVisible = shallowRef(false)
 const dialogAddTreeUserRole = shallowRef(false)
 const dialogSelectBookVisible = shallowRef(false)
+const dialogTreeWordReport = shallowRef(false)
+
 const treeApiUrl = 'app/tree'
 const router = useRoute('um-gate-id-project')
 
@@ -26,7 +28,6 @@ const currentTreeId = shallowRef<number>(0)
 const currentUserId = shallowRef<string>('0')
 const toast = useToast()
 const selectedFile = ref(null)
-const currentdate = ref('')
 
 const treeHeaders = [
   { text: '0', value: 'num', sortable: false },
@@ -223,6 +224,15 @@ function userRoleHasBeenAdded(treeid: number) {
               {{ usePersianDate(value.creationTime) }}
             </div>
           </template>
+          <template #item.isActive="{ value }">
+            <VChip
+              :color="resolveActiveColor(value.isActive)"
+              :class="`text-${resolveActiveColor(value.isActive)}`" size="small"
+              class="font-weight-medium"
+            >
+              {{ $t(resolveActiveTitle(value.isActive)) }}
+            </VChip>
+          </template>
           <template #action="{ value }">
             <!--
               <IconBtn @click="selectBook(value.id)">
@@ -260,16 +270,16 @@ function userRoleHasBeenAdded(treeid: number) {
                 {{ `${formatString($t('tree.getlastword'))} ${usePersianDate(value.wordCreationTime)}` }}
               </VTooltip>
             </IconBtn>
+            <IconBtn @click="() => { currentTreeId = value.id, dialogTreeWordReport = true }">
+              <VTooltip location="right center">
+                <template #activator="{ props }">
+                  <VIcon icon="tabler-chart-bar" v-bind="props" />
+                </template>
+                {{ $t('workReport') }}
+              </VTooltip>
+            </IconBtn>
           </template>
-          <template #item.isActive="{ value }">
-            <VChip
-              :color="resolveActiveColor(value.isActive)"
-              :class="`text-${resolveActiveColor(value.isActive)}`" size="small"
-              class="font-weight-medium"
-            >
-              {{ $t(resolveActiveTitle(value.isActive)) }}
-            </VChip>
-          </template>
+
           <template #item.data-table-expand="{ value, internalItem, isExpanded, onToggleExpand }">
             <IconBtn @click="() => { onToggleExpand(internalItem); onToggleExpandRow(value, isExpanded(internalItem), false) }">
               <VTooltip location="right center">
@@ -366,5 +376,6 @@ function userRoleHasBeenAdded(treeid: number) {
       v-if="dialogSelectBookVisible" v-model:is-dialog-visible="dialogSelectBookVisible" :treeid="currentTreeId" :user-id="currentUserId"
       @set-book-permission-has-occured="fetchRowDetails" @handlemessage="handleMessages"
     />
+    <MCDialogTreeWorkReport v-if="dialogTreeWordReport" v-model:is-dialog-visible="dialogTreeWordReport" :gateid="currentGateId" :serviceurl="`app/tree/${currentTreeId}/user/logs`" @handlemessage="handleMessages" />
   </div>
 </template>
