@@ -165,7 +165,7 @@ async function checkRoute() {
     currentNodeId.value = 0
     apiQueryParamData.nodeId = 0
     currentTreeId.value = routerTreeId.value
-    apiQueryParamData.treeId = currentTreeId.value
+    apiQueryParamData.TreeId = currentTreeId.value
     if (routerNodeId.value > 0) {
       currentNodeId.value = routerNodeId.value
       apiQueryParamData.nodeId = routerNodeId.value

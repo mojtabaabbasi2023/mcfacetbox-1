@@ -223,6 +223,9 @@ export interface ITreeExcerpt extends ITree {
   nodes: ISimpleNestedNodeExcerptActionable[]
 }
 
+/**
+ * ساختار گزارش عملکرد کاربر در درخت
+ */
 export interface TreeWorkReport {
   fullName: string
   userId: string

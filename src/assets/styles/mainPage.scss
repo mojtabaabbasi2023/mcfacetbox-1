@@ -624,3 +624,12 @@
 .v-table--fixed-height>.v-table__wrapper {
     @include mcvariables.custom-scrollbar;
 }
+
+.search-highlight em {
+    font-style: normal;
+    background-color: #FFF9C4;
+    padding: 0 3px;
+    border-radius: 3px;
+    color: #D32F2F;
+    font-weight: 400;
+}

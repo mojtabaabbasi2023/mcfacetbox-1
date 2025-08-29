@@ -30,3 +30,9 @@ export function createFootnoteTag(id: string, text: string) {
 export function removeHtmlTags(htmlString: string): string {
   return htmlString.replace(/<[^>]*>/g, '')
 }
+
+export function replaceTag(text: string, tag: string, replacement: string): string {
+  const regex = new RegExp(`<${tag}>(.*?)<\/${tag}>`, 'g')
+
+  return text.replace(regex, replacement)
+}

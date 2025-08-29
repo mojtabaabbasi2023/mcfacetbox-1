@@ -55,7 +55,7 @@ const dialogTransferNodeVisible = shallowRef(false)
 const dialogNodeRelationVisible = shallowRef(false)
 const dialogTreeNodeStats = shallowRef(false)
 const dialogNodeRelationListVisible = shallowRef(false)
-const treeBlockSize = ref(220)
+const treeBlockSize = ref(230)
 const dialognoderelationlist = ref(VDialog)
 
 const activeTooltipPath = shallowRef('')
@@ -234,22 +234,23 @@ function nodeEditCancel(nodeitem: ISimpleNestedNodeActionable) {
   nodeitem.title = useCloned(nodeitem.tempData).cloned.value
   treeview.value.$el.focus()
 }
-async function nodeEditProgress(nodeitem: ISimpleNestedNodeActionable) {
+async function nodeEditProgress(nodeitem: ISimpleNestedNodeActionable, nodetitle: string) {
   nodeitem.loading = true
   try {
     await $api(`app/node/${nodeitem.id}/title`, {
       method: 'PUT',
-      body: JSON.parse(JSON.stringify({ title: nodeTempTitleForEdit.value })),
+      body: JSON.parse(JSON.stringify({ title: nodetitle })),
       ignoreResponseError: false,
     })
 
     nodeitem.loading = nodeitem.editing = false
     setTimeout(() => {
-      treeIndex[nodeitem.id].title = nodeTempTitleForEdit.value
+      treeIndex[nodeitem.id].title = nodetitle
       if (selectedNode.id > 0 && nodeitem.id === selectedNode.id)
-        selectedNode.title = nodeTempTitleForEdit.value
+        selectedNode.title = nodetitle
 
       treeview.value.$el.focus()
+      gotoNode(nodeitem.id, false)
     }, 1000)
   }
   catch (error) {
@@ -267,7 +268,7 @@ function handleEditableNodeKeydown(event: KeyboardEvent, item: ISimpleNestedNode
       break;
     case 'Enter':
       event.stopPropagation()
-      nodeEditProgress(item)
+      nodeEditProgress(item, nodeTempTitleForEdit.value)
       break;
     case 'Escape':
       if (item.loading)
@@ -283,9 +284,9 @@ function gotoNode(nodeId: number, mustSelectNode: boolean = true) {
     treeIndex[nodeId].selected = mustSelectNode
     openParents(treeData, nodeId)
     nextTick(() => {
-      const activeNode = document.querySelector('.v-list-item--active')
+      const activeNode = document.querySelector('.tree-view-scroll .v-list .v-list-item--active')
       if (activeNode)
-        activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        activeNode.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
   }
 }
@@ -649,9 +650,9 @@ function showNodeRelationList(nodeid: number, relationtype: NodeRelationType) {
 }
 watch(() => searchBoxHeight.value, () => {
   if (activeSearch.value)
-    treeBlockSize.value = 220 + searchBoxHeight.value
+    treeBlockSize.value = 230 + searchBoxHeight.value
   else
-    treeBlockSize.value = 220
+    treeBlockSize.value = 230
 })
 
 const treeViewStyle = computed(() => ({
@@ -739,8 +740,8 @@ const treeViewStyle = computed(() => ({
       <div v-if="activeSearch" ref="searchbox" class="mt-0 mb-2 flex-shrink-0">
         <MCSearchApiTree
           v-model:selected-items="searchResultSelectedNodes"
-          auto-focus :max-height="200" :api-url="`app/node/simple?treeid=${currentTreeId}`" :selection-type="SelectionType.Single" class="pt-1"
-          @error-has-occured="toast.error"
+          auto-focus :max-height="200" :api-url="`app/node/simple?treeid=${currentTreeId}&IncludeHighlight=true`" :selection-type="SelectionType.Single" class="pt-1"
+          :on-update-node-title="nodeEditProgress" @error-has-occured="toast.error"
         />
         <VDivider thickness="2" color="primary" />
       </div>

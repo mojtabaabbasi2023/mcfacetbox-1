@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 // !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
 
+import { useTree } from '@/store/treeStore'
 import type { GridResult, ISimpleSelectableDTO } from '@/types/baseModels'
 import { SelectionType } from '@/types/baseModels'
+import type { ISimpleNestedNodeActionable } from '@/types/tree'
+import { replaceTag } from '@/utils/htmlUtils'
 
 interface Prop {
   apiUrl: string
@@ -11,6 +14,7 @@ interface Prop {
   maxHeight?: number
   fillSearchPhraseWithSelected?: boolean
   showParentTitle?: boolean
+  onUpdateNodeTitle: (node: ISimpleNestedNodeActionable, nodenewtitle: string) => Promise<any>
 }
 
 const props = defineProps<Prop>()
@@ -24,18 +28,18 @@ interface Emit {
 
 }
 const { t } = useI18n({ useScope: 'global' })
-
-const page = ref(1)
+const { treeIndex } = useTree()
 const selectedItemsLocal = ref<number[]>([])
 const searchResult = reactive<ISimpleSelectableDTO<number>[]>([])
 const searchPhrase = ref('')
 const replacePhrase = ref('')
 
+const replaceloading = shallowRef(false)
 const actionInprogress = ref(false)
-const showReplace = ref(false)
-const isRegex = ref(false)
-const iswholeWord = ref(false)
-const ismatchCase = ref(false)
+const showReplace = shallowRef(false)
+const isRegex = shallowRef(false)
+const iswholeWord = shallowRef(false)
+const ismatchCase = shallowRef(false)
 
 let timeout: ReturnType<typeof setTimeout> | null = null
 
@@ -87,7 +91,7 @@ watch(selectedItemsLocal, () => {
   emit('update:selectedItems', selectedItemsLocal.value)
 })
 watch(searchPhrase, () => {
-  if (searchPhrase.value.length > 2) {
+  if (searchPhrase.value.trim().length > 2) {
     if (timeout)
       clearTimeout(timeout)
 
@@ -101,6 +105,20 @@ watch(searchPhrase, () => {
 watch(searchResult, () => {
   emit('loadingStateChanged', loadingdata.value, searchResult.length)
 })
+
+/**
+ * جایگذاری در حال حاضر فقط تک انتخابی را پشتیبانی میکند
+ */
+async function replaceNodeTitle() {
+  replaceloading.value = true
+
+  const selectedItem = searchResult.findLast(item => item.id === selectedItemsLocal.value[0])
+  if (selectedItem) {
+    await props.onUpdateNodeTitle(treeIndex[selectedItemsLocal.value[0]], replaceTag(selectedItem.title, 'em', replacePhrase.value))
+    selectedItem.title = replaceTag(selectedItem.title, 'em', replacePhrase.value)
+  }
+  replaceloading.value = false
+}
 </script>
 
 <template>
@@ -124,15 +142,17 @@ watch(searchResult, () => {
         <VTextField
           v-if="showReplace"
           v-model:model-value="replacePhrase" :placeholder="$t('replace')"
-          clearable density="compact" @click:clear="onReset"
+          clearable density="compact" :loading="replaceloading"
+          @click:clear="onReset"
         >
           <template #append>
-            <VBtn variant="plain" icon="tabler-replace" rounded="lg" size="small">
+            <VBtn variant="plain" :disabled="replaceloading" icon="tabler-replace" size="small" @click="replaceNodeTitle">
+              <VIcon icon="tabler-replace" size="22" />
               <VTooltip
                 activator="parent"
                 location="top center"
               >
-                {{ $t('tree.preview') }}
+                {{ $t('replace') }}
               </VTooltip>
             </VBtn>
             <!-- <VBtn variant="plain" icon="tabler-replace-filled" rounded="lg" size="small" /> -->
@@ -151,8 +171,10 @@ watch(searchResult, () => {
       <!-- <VVirtualScroll :items="filteredItems" :height="(props.scrollItemCount ?? 10) * 20"> -->
       <VListItem v-for="item in searchResult" :key="item.id" :title="item.title" :value="item.id">
         <template #title>
-          <span v-if="item.parentTitle && item.parentTitle.length > 0" class="opacity-60">{{ item.parentTitle }} / </span>
-          <div v-html="item.title" />
+          <div class="d-flex flex-row ">
+            <span v-if="item.parentTitle && item.parentTitle.length > 0" class="opacity-60">{{ item.parentTitle }} / </span>
+            <div class="search-highlight" v-html="item.title" />
+          </div>
           <!-- <span>{{ item.title }}</span> -->
         </template>
         <template #prepend="{ isSelected }">
