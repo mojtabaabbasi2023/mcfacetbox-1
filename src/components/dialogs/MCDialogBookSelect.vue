@@ -5,7 +5,7 @@ import { BookSearchRequestModel, SelectableBookInfo } from '@/types/book'
 import type { IFacetBox, IFacetItem } from '@/types/SearchResult'
 import { removeHtmlTags } from '@/utils/htmlUtils'
 import { MessageType } from '@/types/baseModels'
-import type { ISimpleDTO } from '@/types/baseModels'
+import type { IRootServiceError, ISimpleDTO } from '@/types/baseModels'
 
 const props = defineProps({
   isDialogVisible: { type: Boolean, default: false },
@@ -39,20 +39,22 @@ const resetBookSearchModel = () => {
   bookSearchModel.sort = 'title-asc'
   bookSearchModel.origin = 'noorlib.web.app'
   bookSearchModel.query = ''
+  bookSearchModel.specialId = '399'
+  bookSearchModel.specialIndex = 18
 
   // Clear dynamic properties
   for (const key in bookSearchModel) {
     // Check if it's a property added to the instance
-    if (!['language', 'page_size', 'page_number', 'sort', 'origin', 'query'].includes(key))
+    if (!['language', 'page_size', 'page_number', 'sort', 'origin', 'query', 'specialId', 'specialIndex'].includes(key))
       delete bookSearchModel[key]
   }
 }
 
-const { execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useFetch(createUrl('https://noorlib.ir/presentation/api/v2/library/getLibraryBookList', {
+const { data: resultData, execute: fetchData, isFetching: loadingdata, onFetchResponse, onFetchError } = useFetch(createUrl('https://noorlib.ir/presentation/api/v2/library/getLibraryBookList', {
   query: bookSearchModel,
 }), {
-  immediate: false,
-}).get()
+  immediate: false, refetch: false,
+}).json()
 
 const totalPageNumber = computed(() => {
   return ((((resultbookItems.value?.resultListTotalCount ?? 0) / (resultbookItems.value?.pageSize ?? 0)) | 0) + (((resultbookItems.value?.resultListTotalCount ?? 0) % (resultbookItems.value?.pageSize ?? 0)) > 0 ? 1 : 0))
@@ -74,12 +76,17 @@ const totalPageNumber = computed(() => {
 //   },
 // }).post()
 
-onFetchResponse(response => {
-  response.json().then(value => {
+onFetchResponse(() => {
+  try {
+    //   response.json().then(value => {
     resultbookItems.value = { facetList: [], pageNumber: 0, pageSize: 0, resultList: [], resultListTotalCount: 0 }
 
+    const result = resultData.value.data as IBookSearchResult
+
+    resultbookItems.value = { facetList: result.facetList, pageNumber: result.pageNumber, pageSize: result.pageSize, resultList: result.resultList, resultListTotalCount: result.resultListTotalCount }
+
     // setTimeout(() => {
-    resultbookItems.value = value.data
+    //   resultbookItems.value = resultData.value
     if ((resultbookItems.value?.resultList.length ?? 0) === 0) {
       emit('handlemessage', t('alert.resultNotFound'), MessageType.error)
     }
@@ -89,15 +96,28 @@ onFetchResponse(response => {
           resultitem.selected = true
       })
     }
+  }
+  catch (error) {
+    emit('handlemessage', t('alert.probleminLoadInformation'), MessageType.error)
+  }
 
-    // }, 1000)
+  // }, 1000)
 
-    // console.log('resultbookitems', resultbookItems.value)
-  })
+  // console.log('resultbookitems', resultbookItems.value)
+//   })
 })
 
 onFetchError(() => {
-  emit('handlemessage', t('alert.probleminGetInformation'), MessageType.error)
+  try {
+    const result = resultData.value as IRootServiceError
+    if (result && result.error && result.error.message)
+      emit('handlemessage', result.error.message, MessageType.error)
+    else
+      emit('handlemessage', t('alert.probleminGetInformation'), MessageType.error)
+  }
+  catch (customerror) {
+    emit('handlemessage', t('alert.probleminLoadInformation'), MessageType.error)
+  }
 })
 
 const onReset = (closedialog: boolean = false) => {
@@ -106,29 +126,40 @@ const onReset = (closedialog: boolean = false) => {
   bookSearchModel.query = ''
   searchbooktitle.value = ''
   resultbookItems.value = { facetList: [], pageNumber: 0, pageSize: 0, resultList: [], resultListTotalCount: 0 }
+  for (const key in selectedFacetItems) {
+    // Check if it's a property added to the instance
+    delete selectedFacetItems[key]
+  }
 
   //   selectedBooks.value = {}
   resetBookSearchModel()
 }
 
+const searchinBook = async () => {
+  if (searchbooktitle.value.length < 2)
+    return
+  bookSearchModel.query = searchbooktitle.value
+  await fetchData(false)
+}
+
 const prevPage = async () => {
   if (bookSearchModel.page_number > 1)
     bookSearchModel.page_number -= 1
+  await searchinBook()
 }
 
 const nextPage = async () => {
   if (bookSearchModel.page_number < totalPageNumber.value)
     bookSearchModel.page_number += 1
-
-  // await fetchData(false)
+  await searchinBook()
 }
 
-watch(bookSearchModel, () => {
-  resultStateMessage.value = ''
-  if (bookSearchModel.query.length >= 2)
-    fetchData(false)
-})
-watch(selectedFacetItems, newval => {
+// watch(bookSearchModel, async () => {
+//   resultStateMessage.value = ''
+//   if (bookSearchModel.query.length >= 2)
+//     await fetchData(false)
+// })
+watch(selectedFacetItems, async newval => {
   const result = Object.keys(newval).map(key => ({
     titleKey: key,
     items: newval[key],
@@ -137,6 +168,9 @@ watch(selectedFacetItems, newval => {
   result.forEach(item => {
     bookSearchModel[item.titleKey] = item.items
   })
+
+  if (!loadingdata.value)
+    await searchinBook()
 })
 
 const isTree = (items: IFacetBox) => {
@@ -163,19 +197,12 @@ const isTree = (items: IFacetBox) => {
   return false
 }
 
-const searchinBook = async () => {
-  bookSearchModel.query = searchbooktitle.value
-}
-
 const selectBook = (item: ISelectableBookInfo) => {
-  console.log('selectbook', item)
   item.selected = !(item.selected ?? false)
   if (item.selected)
     selectedBooks.value[item.bookId] = item
   else
     delete selectedBooks.value[item.bookId]
-
-  console.log('selectbook', selectedBooks.value)
 }
 
 const saveBookPermission = async () => {
@@ -272,11 +299,11 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
             </VTextField>
           </div>
         </div>
-        <div v-if="resultbookItems?.resultList.length ?? 0 > 0" class="d-flex flex-row overflow-hidden" style="height:80%">
-          <div class="mc-data-scrolly-float flex-shrink-1" style="width:35%;--block-size-offset: 4px">
+        <div class="d-flex flex-row overflow-hidden" style="height:80%">
+          <div v-show="(resultbookItems?.facetList.length ?? 0 > 0) && !loadingdata" class="mc-data-scrolly-float flex-shrink-1" style="width:35%;--block-size-offset: 4px">
             <MCFacetBox
               v-for="item in resultbookItems?.facetList"
-              v-show="!loadingdata" :key="item.key"
+              :key="item.key"
               v-model:selected-items="selectedFacetItems[item.key]" :istree="isTree(item)"
               :scroll-item-count="item.scrollSize" :searchable="item.hasSearchBox" :dataitems="item.itemList"
               :facettitle="item.title" class="mb-2 w-100"
@@ -341,7 +368,7 @@ const formattedField = (list: Record<string, any>[], fieldName: string) => {
               </template>
               <template #footer="">
                 <VFooter>
-                  <div class="d-flex align-center justify-center pa-4 w-100">
+                  <div v-show="resultbookItems?.resultListTotalCount ?? 0 > 0" class="d-flex align-center justify-center pa-4 w-100">
                     <div class="d-flex align-center">
                       <VBtn
                         :disabled="isUndefined(resultbookItems?.pageNumber) || resultbookItems?.pageNumber <= 1" density="comfortable" icon="tabler-arrow-right"

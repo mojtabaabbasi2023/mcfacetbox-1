@@ -396,19 +396,7 @@
         padding-block: 4px;
         padding-inline: 0;
 
-        &::-webkit-scrollbar {
-            inline-size: 4px;
-        }
-
-        &::-webkit-scrollbar-track {
-            border-radius: 2.5px;
-            background: #ccd0dc;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            border-radius: 2.5px;
-            background: #576363;
-        }
+        @include mcvariables.custom-scrollbar;
 
         .v-input {
             .v-selection-control {
@@ -631,5 +619,5 @@
     padding: 0 3px;
     border-radius: 3px;
     color: #D32F2F;
-    font-weight: 400;
+    font-weight: 00;
 }

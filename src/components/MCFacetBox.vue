@@ -73,6 +73,8 @@ watch(filteredItems, () => {
     !(props.istree ?? false) ? selectedFacetItems.value.push(...(props.selectedItems?.map(item => item.toString()) ?? [])) : selectedTreeFacetItems.value.push(...(props.selectedItems?.map(item => item.toString()) ?? []))
 }, { immediate: true })
 watch((selectedTreeFacetItems), newval => {
+  console.log('treefacetitem', newval)
+
   emit('update:selectedItems', newval.map(item => item.toString()))
 })
 watch((selectedFacetItems), newval => {
@@ -143,12 +145,14 @@ function searchinfacet(e: any) {
       </VListItem>
     </VList>
 
-    <VTreeview
-      v-else-if="(props.istree || props.facettype === FacetType.tree)"
-      v-model:activated="selectedTreeFacetItems" :items="treeItems" expand-icon="mdi-menu-left" item-value="facetKey"
-      item-title="title" min-height="300px" activatable
-      density="compact" active-strategy="single-independent"
-    />
+    <div v-else-if="(props.istree || props.facettype === FacetType.tree)" class="mc-data-scrolly-float" style="--block-size-offset:5px">
+      <VTreeview
+
+        v-model:activated="selectedTreeFacetItems" :items="treeItems" expand-icon="mdi-menu-left" item-value="facetKey"
+        item-title="title" min-height="300px" activatable
+        density="compact" active-strategy="single-independent"
+      />
+    </div>
     <div v-else class="d-flex align-center justify-space-between">
       <span class="mx-2">
         {{ `${dataitems[0].title}(${dataitems[0].count})` }}
