@@ -60,7 +60,7 @@ const routeWithGateId = (page: string, gateid: number, gatetitle: string) => {
   currentGate.value.id = gateid
   currentGate.value.title = gatetitle
   nextTick(() => {
-    router.replace(`gate/${gateid}/${page}`)
+    router.push(`gate/${gateid}/${page}`)
   })
 }
 
@@ -81,39 +81,41 @@ const gateDataUpdated = () => {
       </VBtn>
     </VRow>
 
-    <VRow id="apex-chart-wrapper">
+    <!--
+      <VRow id="apex-chart-wrapper">
       <VCol cols="12" md="4">
-        <VCard title="کاربران فعال / سال" variant="flat">
-          <VDivider />
+      <VCard title="کاربران فعال / سال" variant="flat">
+      <VDivider />
 
-          <VCardText>
-            <ApexChartStatistics />
-          </VCardText>
-        </VCard>
+      <VCardText>
+      <ApexChartStatistics />
+      </VCardText>
+      </VCard>
       </VCol>
       <VCol cols="12" md="8">
-        <VCard variant="flat">
-          <VCardItem class="d-flex flex-wrap justify-space-between gap-4">
-            <VCardTitle>کاربران فعال / سال / ماه</VCardTitle>
+      <VCard variant="flat">
+      <VCardItem class="d-flex flex-wrap justify-space-between gap-4">
+      <VCardTitle>کاربران فعال / سال / ماه</VCardTitle>
 
-            <template #append>
-              <div class="date-picker-wrapper">
-                <AppDateTimePicker
-                  model-value="2022-06-09" prepend-inner-icon="tabler-calendar"
-                  placeholder="Select Date"
-                  :config="$vuetify.display.smAndDown ? { position: 'auto center' } : { position: 'auto right' }"
-                />
-              </div>
-            </template>
-          </VCardItem>
-          <VDivider />
+      <template #append>
+      <div class="date-picker-wrapper">
+      <AppDateTimePicker
+      model-value="2022-06-09" prepend-inner-icon="tabler-calendar"
+      placeholder="Select Date"
+      :config="$vuetify.display.smAndDown ? { position: 'auto center' } : { position: 'auto right' }"
+      />
+      </div>
+      </template>
+      </VCardItem>
+      <VDivider />
 
-          <VCardText>
-            <ApexChartAreaChart />
-          </VCardText>
-        </VCard>
+      <VCardText>
+      <ApexChartAreaChart />
+      </VCardText>
+      </VCard>
       </VCol>
-    </VRow>
+      </VRow>
+    -->
 
     <!-- 👉 Statistics -->
     <VRow>
