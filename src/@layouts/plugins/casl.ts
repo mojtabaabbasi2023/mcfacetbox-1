@@ -1,5 +1,6 @@
 import { useAbility } from '@casl/vue'
 import type { RouteLocationNormalized } from 'vue-router'
+import { isUndefined } from '@sindresorhus/is'
 import type { NavGroup } from '@layouts/types'
 import type { Actions, Subjects } from '@/plugins/casl/ability'
 
@@ -31,16 +32,16 @@ export const can = (action: Actions | undefined, subject: Subjects | undefined) 
  * @param {object} item navigation object item
  */
 export const canViewNavMenuGroup = (item: NavGroup) => {
-  const hasAnyVisibleChild = item.children.some(i => can(i.action, i.subject))
+  const hasAnyVisibleChild = item.children.some(i => can(i.action, i.subject) || (isUndefined(i.action) && isUndefined(i.subject)))
 
-  // console.log('menuability', hasAnyVisibleChild, can(item.action, item.subject), item);
+  console.log('menuability', hasAnyVisibleChild, can(item.action, item.subject), item)
 
   // If subject and action is defined in item => Return based on children visibility (Hide group if no child is visible)
   // Else check for ability using provided subject and action along with checking if has any visible child
   if (!(item.action && item.subject))
     return hasAnyVisibleChild
 
-  return can(item.action, item.subject) && hasAnyVisibleChild
+  return (can(item.action, item.subject) || (isUndefined(item.action) && isUndefined(item.subject))) && hasAnyVisibleChild
 }
 
 export const canNavigate = (to: RouteLocationNormalized) => {

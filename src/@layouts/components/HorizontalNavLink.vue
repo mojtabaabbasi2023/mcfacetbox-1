@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { isUndefined } from '@sindresorhus/is'
 import { layoutConfig } from '@layouts'
 import { can } from '@layouts/plugins/casl'
 import { type NavLink, NavLinkStateName } from '@layouts/types'
@@ -24,7 +25,7 @@ function handleNavLinkClick(event: MouseEvent, item: NavLink) {
 
 <template>
   <li
-    v-if="can(item.action, item.subject)"
+    v-if="can(item.action, item.subject) || (isUndefined(item.action) && isUndefined(item.subject))"
     class="nav-link"
     :class="[{
       'sub-item': props.isSubItem,

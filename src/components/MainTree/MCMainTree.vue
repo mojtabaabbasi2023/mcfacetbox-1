@@ -49,7 +49,6 @@ const editableNode = ref()
 const activeSearch = shallowRef(false)
 const dialogAddNewNodeVisible = ref(false)
 const dialogMergeNodeVisible = ref(false)
-const dialogTreePreviewVisible = ref(false)
 const dialogDescriptionVisible = shallowRef(false)
 const dialogTransferNodeVisible = shallowRef(false)
 const dialogNodeRelationVisible = shallowRef(false)
@@ -716,22 +715,13 @@ const treeViewStyle = computed(() => ({
           </VTooltip>
         </VBtn>
         <VBtn size="small" variant="text" :disabled="!can('Cleanup', 'Node')" @click="dialogTreeNodeStats = (true && (can('Cleanup', 'Node') ?? false))">
-          <VIcon icon="tabler-eraser" size="22" />
+          <VIcon icon="tabler-chart-bar" size="22" />
 
           <VTooltip
             activator="parent"
             location="top center"
           >
             {{ $t('tree.stats') }}
-          </VTooltip>
-        </VBtn>
-        <VBtn icon size="small" variant="text" :disabled="!can('Preview', 'Node')" @click="dialogTreePreviewVisible = (true && (can('Preview', 'Node') ?? false))">
-          <VIcon icon="tabler-list-tree" size="22" />
-          <VTooltip
-            activator="parent"
-            location="top center"
-          >
-            {{ $t('replace') }}
           </VTooltip>
         </VBtn>
       </div>
@@ -852,7 +842,6 @@ const treeViewStyle = computed(() => ({
       v-if="dialogDescriptionVisible" v-model:is-dialog-visible="dialogDescriptionVisible" :description="activeTooltipPath"
       :loc-x="cursorX" :loc-y="cursorY"
     />
-    <MCDialogTreePreview v-if="dialogTreePreviewVisible" v-model:is-dialog-visible="dialogTreePreviewVisible" :description="activeTooltipPath" :treeid="currentTreeId" />
     <MCDialogTreeNodeStats v-if="dialogTreeNodeStats" v-model:is-dialog-visible="dialogTreeNodeStats" :serviceurl="`app/node?TreeId=${currentTreeId}`" />
   </div>
 </template>

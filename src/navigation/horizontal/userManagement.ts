@@ -1,9 +1,9 @@
 export default [
-  {
-    title: 'gate.management',
-    icon: { icon: 'mdi-airplane-takeoff' },
-    to: 'um-gate',
-  },
+//   {
+//     title: 'gate.management',
+//     icon: { icon: 'mdi-airplane-takeoff' },
+//     to: 'um-gate',
+//   },
 
   //   {
   //     title: 'user.management',
@@ -15,17 +15,17 @@ export default [
   //     icon: { icon: 'mdi-file-tree-outline' },
   //     to: 'um-project',
   //   },
-  {
-    title: 'workReport',
-    icon: { icon: 'mdi-text-box-search-outline' },
-    to: 'forms-slider',
-    subject: 'Report',
-    action: 'read',
-    children: [
-      {
-        title: 'Dashboard',
-        to: 'forms-slider',
-      },
-    ],
-  },
+//   {
+//     title: 'workReport',
+//     icon: { icon: 'mdi-text-box-search-outline' },
+//     to: 'forms-slider',
+//     subject: 'Report',
+//     action: 'read',
+//     children: [
+//       {
+//         title: 'Dashboard',
+//         to: 'forms-slider',
+//       },
+//     ],
+//   },
 ]

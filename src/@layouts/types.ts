@@ -137,4 +137,8 @@ export enum NavLinkStateName {
   datatransImport = 1,
   datatransferExport = 2,
   settingsContentTypeStyle = 3,
+  showTree = 4,
+  showGathering = 5,
+  showExcerpt = 6,
+  showTreePreview = 7,
 }

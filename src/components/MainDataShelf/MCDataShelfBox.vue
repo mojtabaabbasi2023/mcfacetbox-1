@@ -575,6 +575,10 @@ watch(isDialogDataShelfBoxEdit, () => {
   selectedbox.value = isDialogDataShelfBoxEdit.value
 }, { deep: false })
 
+// watch(showTools, () => {
+//   selectedbox.value = showTools.value
+// })
+
 // mc-data-shelf-box
 </script>
 

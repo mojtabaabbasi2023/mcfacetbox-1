@@ -2,49 +2,50 @@ import { NavLinkStateName } from '@/@layouts/types'
 
 export default [
   {
-    title: 'tree.title',
-    icon: { icon: 'mdi-file-tree-outline' },
-    children: [
-      {
-        title: 'tree.changeTree',
-      },
-    ],
-  },
-  {
     title: 'view',
     icon: { icon: 'tabler-eye-up' },
-  },
-  {
-    title: 'datatransfer',
-    icon: { icon: 'tabler-transfer' },
     children: [
       {
-        title: 'import',
-        changeStateName: NavLinkStateName.datatransImport,
+        title: 'tree.tree',
+        changeStateName: NavLinkStateName.showTree,
+        icon: { icon: 'tabler-binary-tree' },
       },
       {
-        title: 'export',
-        changeStateName: NavLinkStateName.datatransferExport,
+        title: 'gathering',
+        changeStateName: NavLinkStateName.showGathering,
+        icon: { icon: 'tabler-cloud-search' },
+
+      },
+      {
+        title: 'excerpts',
+        changeStateName: NavLinkStateName.showExcerpt,
+        icon: { icon: 'tabler-notebook' },
 
       },
     ],
   },
   {
-    title: 'statistics',
-    icon: { icon: 'tabler-chart-pie' },
-    to: 'tables-data-table',
+    title: 'facilities',
+    icon: { icon: 'tabler-tools' },
+
+    // to: 'tables-data-table',
 
     // subject: "Report",
     // action: "read",
     children: [
       {
-        title: 'Dashboard',
-        to: 'forms-slider',
+        title: 'tree.preview',
+        changeStateName: NavLinkStateName.showTreePreview,
+        action: 'Preview',
+        subject: 'Node',
+        icon: { icon: 'tabler-list-tree' },
+
+        // to: 'forms-slider',
       },
     ],
   },
   {
     title: 'settings',
-    icon: { icon: 'mdi-file-tree-outline' },
+    icon: { icon: 'tabler-settings' },
   },
 ]
