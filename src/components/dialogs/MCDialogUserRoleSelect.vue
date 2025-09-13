@@ -95,7 +95,7 @@ const onSubmit = () => {
     <VCard variant="flat" :loading="opening" :min-height="200" class="pa-1">
       <MCLoading :loadingsize="SizeType.MD" :showloading="opening" />
       <VCardTitle class="primary white--text">
-        {{ $t('datashelfbox.about') }}
+        {{ $t('project.adduser') }}
         <VSpacer />
       </VCardTitle>
       <VDivider />
