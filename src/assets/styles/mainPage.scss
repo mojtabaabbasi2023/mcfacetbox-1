@@ -163,9 +163,11 @@
         }
 
         .shelf-box-body {
+            display: flex;
+            flex-direction: row;
             position: relative;
-            padding: 8px;
-            block-size: 105px;
+            padding: 1px;
+            // block-size: 105px;
 
             p {
                 overflow: hidden;

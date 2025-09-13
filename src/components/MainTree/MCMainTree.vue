@@ -147,13 +147,13 @@ function checkTreeRoute(deselectAll: boolean) {
     return
   }
   if (currentTreeId.value === routerTreeId.value) {
-    if (selectedNode.id > 0)
+    if (selectedNode.id !== 0)
       treeIndex[selectedNode.id].selected = false
     else if (deselectAll)
       deselectAllTreeNodes()
     if (routerNodeId.value === 0) {
-      selectNode(treeIndex[-9])
-      gotoNode(useToNumber(-9).value)
+      selectNode(treeIndex[-currentTreeId.value])
+      gotoNode(useToNumber(-currentTreeId.value).value)
     }
     else {
       selectNode(treeIndex[routerNodeId.value])
@@ -477,8 +477,11 @@ const refreshTree = async () => {
 
     activatedNode.value.splice(0)
     clearTreeData()
+
     selectedTreeStore.id = data.value.id
     selectedTreeStore.title = data?.value.title
+    if (!data.value.nodes || data.value.nodes <= 0)
+      return
 
     treeData.push(...data.value.nodes)
     updateTreeIndex(treeData)
@@ -497,6 +500,8 @@ const refreshTree = async () => {
 }
 
 const addcomment = async (nodeItem: ISimpleNestedNodeActionable) => {
+  console.log('nodeitem', nodeItem)
+
   let resultTree: ISingleNodeView | null = null
 
   try {
@@ -621,8 +626,6 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleNestedNodeActionable) => 
         icon: 'tabler-arrow-merge-alt-left',
 
         onClick: () => {
-          console.log('treeindex', treeIndex)
-
           selectTreeNode(nodeItem)
           dialogTransferNodeVisible.value = true
         },

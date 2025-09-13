@@ -8,6 +8,7 @@ import type { IDataShelfBoxNew, IDataShelfBoxView, IOrderChangedResponse, LinkDe
 import { DataBoxType, MessageType, SizeType, SupervisionStatus } from '@/types/baseModels'
 import { type ISearchResultItem, SearchResultItemModel } from '@/types/SearchResult'
 import { useDataShelfPriorityChanged } from '@/store/databoxStore'
+import PropertyArea from '@/views/wizard-examples/property-listing/PropertyArea.vue'
 
 const props = defineProps<{
   itemIndex: number
@@ -47,6 +48,15 @@ const databox = ref()
 const highlightClass = ref([`mc-data-shelf-box${props.readonlyMode ? 'mc-data-shelf-box--readonly' : ''}`])
 const loadinglocal = ref(false)
 const btnlabel = ref()
+
+const rowFontSize = (rowindex: number) => {
+  if (rowindex < 100)
+    return '12px'
+  else if (rowindex < 1000)
+    return '10px'
+  else
+    return '8px'
+}
 
 const { x: btnlabelX, y: btnlabelY }
         = useElementBounding(btnlabel)
@@ -591,26 +601,29 @@ watch(isDialogDataShelfBoxEdit, () => {
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
 
     <div :class="`${selectedbox ? 'selectedbox h-auto shelf-box-body' : 'h-auto shelf-box-body'}`">
-      <VRow no-gutters class="justify-start align-start box">
-        <span v-if="!readonlyMode">{{ props.itemIndex + 1 }}</span>
-        <VCheckbox v-if="!readonlyMode" v-model="isSelected" density="compact" />
-        <VCol>
-          <div class="text pb-1" v-html="databoxItem?.content" />
-          <VDivider v-if="((databoxItem?.footNotes && databoxItem?.footNotes.length) ?? 0) > 0" class="w-50" />
-          <div v-for="(item, index) in databoxItem?.footNotes" :key="item.id" class="d-flex flex-column">
-            <div>
-              <span class="footenote-index">{{ item.order === undefined ? index + 1 : item.order }} -</span>
-              <span class="no-select foot-note">{{ item.title }}</span>
-              <!--
-                <VBtn icon size="small" variant="text" @click.left="deletefootnote">
-                <VIcon icon="tabler-trash" color="error" size="20" />
-                </VBtn>
-              -->
-            </div>
+      <!-- <VRow no-gutters class="justify-start align-start box"> -->
+      <div class="d-flex flex-column align-center justify-center" :style="{ 'border-radius': '0 6px 6px 0', 'cursor': 'pointer', 'background': isSelected ? 'rgba(var(--v-theme-primary), 0.40)' : '', 'width': '20px', 'fontSize': rowFontSize((props.itemIndex + 1)) }" @click.left="isSelected = !isSelected">
+        <span v-if="!readonlyMode" :class="`${isSelected ? 'font-weight-black' : ''} px-1 responsive-text`">{{ props.itemIndex + 1 }}</span>
+        <!-- <VCheckbox v-if="!readonlyMode" v-model="isSelected" max-width="10" density="compact" /> -->
+      </div>
+      <VDivider vertical />
+      <div class="pa-2">
+        <div class="text pb-1" v-html="databoxItem?.content" />
+        <VDivider v-if="((databoxItem?.footNotes && databoxItem?.footNotes.length) ?? 0) > 0" class="w-50" />
+        <div v-for="(item, index) in databoxItem?.footNotes" :key="item.id" class="d-flex flex-column">
+          <div>
+            <span class="footenote-index">{{ item.order === undefined ? index + 1 : item.order }} -</span>
+            <span class="no-select foot-note">{{ item.title }}</span>
+            <!--
+              <VBtn icon size="small" variant="text" @click.left="deletefootnote">
+              <VIcon icon="tabler-trash" color="error" size="20" />
+              </VBtn>
+            -->
           </div>
-        </VCol>
-        <!-- position-absolute px-2 d-flex flex-column top-0 left-0 -->
-      </VRow>
+        </div>
+      </div>
+      <!-- position-absolute px-2 d-flex flex-column top-0 left-0 -->
+      <!-- </VRow> -->
     </div>
     <div v-if="!readonlyMode">
       <VBtn

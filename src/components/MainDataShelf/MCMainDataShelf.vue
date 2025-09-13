@@ -248,6 +248,8 @@ async function refreshDataShelf(changescroll: boolean) {
     }
   }
   catch (error) {
+    console.log('errorindatashelf')
+
     toast.error(t('alert.probleminLoadExcerpt'))
   }
   finally {
