@@ -199,7 +199,7 @@
 
         .box-state-toolbar {
             position: absolute;
-            bottom: -10px;
+            top: -20px;
             left: 15px;
             background: rgba(255, 255, 255, 0.95);
             padding: 0px;
@@ -209,6 +209,10 @@
             flex-direction: row;
             align-items: center;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            border-width: 1px 1px 0 1px;
+            /* بالا راست پایین چپ */
+            border-style: solid;
+            border-color: rgb(var(--v-theme-primary));
         }
 
         .box-unpin-item {

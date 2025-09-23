@@ -61,10 +61,11 @@
     "today": "امروز",
     "fromdate": "از تاریخ",
     "todate": "تا تاریخ",
+    "text": "متن",
     "searchconfig": {
         "OneOrMore": "یکی از کلمات",
         "All": "تمام کلمات",
-        "Exact": "عین عبارت"
+        "Exact": "عین عبارت",
     },
     "projectcount": "تعداد پروژه ها",
     "gate": {
@@ -388,6 +389,7 @@
         "probleminSetPermissions": "در اعمال دسترسی ها مشکل بوجود امد، صفحه را بروزرسانی کرده و مجدد تلاش کنید",
         "specificNodeAdded": "گره (0) اضافه شد",
         "specificItemDeleted": "آیا مورد '(0)' حذف شود؟",
+        "refreshtobaseaccepted": "آیا (0) انتخاب شده به نسخه اصلی تغییر یابد؟",
         "contentisduplicate": "'(0)' مورد نظر در گره موجود میباشد، آیا میخواهید مجدد اضافه شود؟",
         "tryagainmin": "چند دقیقه دیگر تلاش کنید",
         "youmustselectoneperm": "باید حتما یک دسترسی را انتخاب کنید",

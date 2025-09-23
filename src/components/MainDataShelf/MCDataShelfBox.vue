@@ -332,6 +332,45 @@ const disconnectSelectedExcerpt = async () => {
   selectedbox.value = false
 }
 
+const refreshToBase = async () => {
+  selectedbox.value = true
+
+  const serviceError = shallowRef()
+
+  const result = await confirmSwal(
+    formatString(t('alert.refreshtobaseaccepted'), t(DataBoxType[databoxItem.value?.excerptType.id ?? 4])),
+    '',
+    t('$vuetify.confirmEdit.ok'),
+    t('$vuetify.confirmEdit.cancel'),
+    true, 'warning',
+    async () => {
+      try {
+        await $api(`app/excerpt/${databoxItem.value.id}/restore`, {
+          method: 'PUT',
+        })
+      }
+      catch (error) {
+        serviceError.value = error
+      }
+
+      return { serviceError }
+    },
+  )
+
+  if (result.isConfirmed) {
+    const err = serviceError.value
+    if (err) {
+      if (err instanceof CustomFetchError && err.message)
+        emits('handlemessage', serviceError.value.message, MessageType.error)
+      else emits('handlemessage', t('httpstatuscodes.0'), MessageType.error)
+    }
+    else {
+      emits('handlemessage', t('alert.deleteDataSuccess'), MessageType.success)
+    }
+  }
+  selectedbox.value = false
+}
+
 const deleteSelectedExcerpt = async () => {
   if (!can('Delete', 'Excerpt'))
     return
@@ -596,11 +635,11 @@ watch(isDialogDataShelfBoxEdit, () => {
   <div
     ref="databox" :class="[highlightClass]"
     :style="{ 'overflow': 'visible !important', 'margin-block-end': itemsHasLink ? '3px' : '10px', 'margin-right': itemsHasLink ? '10px' : '0px', 'background-color': itemsHasLink ? 'rgba(var(--v-shadow-key-umbra-color), 0.10)' : '' }" @mouseenter="showTools = true"
-    @mouseleave="showTools = false" @contextmenu="onContextMenu"
+    @mouseleave="showTools = false"
   >
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
 
-    <div :class="`${selectedbox ? 'selectedbox h-auto shelf-box-body' : 'h-auto shelf-box-body'}`">
+    <div :class="`${selectedbox || showTools ? 'selectedbox h-auto shelf-box-body' : 'h-auto shelf-box-body'}`">
       <!-- <VRow no-gutters class="justify-start align-start box"> -->
       <div class="d-flex flex-column align-center justify-center" :style="{ 'border-radius': '0 6px 6px 0', 'cursor': 'pointer', 'background': isSelected ? 'rgba(var(--v-theme-primary), 0.40)' : '', 'width': '20px', 'max-width': '20px', 'min-width': '20px', 'fontSize': rowFontSize((props.itemIndex + 1)) }" @click.left="isSelected = !isSelected">
         <span v-if="!readonlyMode" :class="`${isSelected ? 'font-weight-black' : ''}`">{{ props.itemIndex + 1 }}</span>
@@ -624,20 +663,6 @@ watch(isDialogDataShelfBoxEdit, () => {
       </div>
       <!-- position-absolute px-2 d-flex flex-column top-0 left-0 -->
       <!-- </VRow> -->
-    </div>
-    <div v-if="!readonlyMode">
-      <VBtn
-        v-if="databoxItem.hasLink" icon size="25" color="error" :disabled="!can('Link', 'Excerpt') || props.hasFiltered"
-        variant="text" class="box-unpin-item" @click="unlinkdatabox"
-      >
-        <VIcon icon="tabler-link-minus" size="20" />
-        <VTooltip
-          activator="parent"
-          location="top center"
-        >
-          {{ $t('datashelfbox.unlink') }}
-        </VTooltip>
-      </VBtn>
     </div>
     <VFabTransition>
       <div v-if="showTools && !readonlyMode" class="box-state-container">
@@ -666,7 +691,19 @@ watch(isDialogDataShelfBoxEdit, () => {
     <!-- <VFadeTransition> -->
     <div v-if="showTools && !readonlyMode" class="box-state-toolbar">
       <div :style="databoxItem.state.id === SupervisionStatus.accept ? { pointerEvents: 'none', opacity: '0.5' } : {}">
-        <VBtn v-if="!databoxItem.hasLink" icon size="25" variant="text" :disabled="!can('Link', 'Excerpt') || props.hasFiltered" @click="linkdatabox">
+        <VBtn
+          v-if="databoxItem.hasLink" icon size="25" color="error" :disabled="!can('Link', 'Excerpt') || props.hasFiltered"
+          variant="text" @click="unlinkdatabox"
+        >
+          <VIcon icon="tabler-link-minus" size="20" />
+          <VTooltip
+            activator="parent"
+            location="top center"
+          >
+            {{ $t('datashelfbox.unlink') }}
+          </VTooltip>
+        </VBtn>
+        <VBtn v-else icon size="25" variant="text" :disabled="!can('Link', 'Excerpt') || props.hasFiltered" @click="linkdatabox">
           <VIcon icon="tabler-link-plus" size="20" />
           <VTooltip
             activator="parent"
@@ -746,6 +783,15 @@ watch(isDialogDataShelfBoxEdit, () => {
             location="top center"
           >
             {{ $t('datashelfbox.showrelateddata') }}
+          </VTooltip>
+        </VBtn>
+        <VBtn v-if="databoxItem.excerptType.id === DataBoxType.quran || databoxItem.excerptType.id === DataBoxType.hadith" icon size="25" variant="text" @click="refreshToBase">
+          <VIcon icon="tabler-refresh" size="20" />
+          <VTooltip
+            activator="parent"
+            location="top center"
+          >
+            {{ $t('datashelfbox.refreshtobase') }}
           </VTooltip>
         </VBtn>
         <VBtn v-if="databoxItem.excerptType.id === DataBoxType.quran || databoxItem.excerptType.id === DataBoxType.hadith" icon size="25" variant="text" @click="dialogResourceHistory = true">

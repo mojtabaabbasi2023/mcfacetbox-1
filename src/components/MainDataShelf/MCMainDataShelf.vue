@@ -546,9 +546,9 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
         <!-- </VToolbar> -->
       </VCol>
     </VRow>
-    <VRow ref="mainDataResult" class="mc-data-scrolly">
+    <VRow ref="mainDataResult" no-gutters class="mc-data-scrolly">
       <MCLoading :showloading="loadingdata" :loadingsize="SizeType.MD" />
-      <VCol md="12">
+      <VCol class="pt-5 px-3" md="12">
         <VFadeTransition>
           <VRow v-if="resultdataItems.length > 0 || facetboxItems.length > 0" style="padding-block-end: 5px;">
             <VCol v-if="activefilter" md="3">
