@@ -270,6 +270,7 @@ const transfertoNode = async (nodeid: number) => {
       method: 'PUT',
     })
     emits('handlemessage', t('alert.dataActionSuccess'), MessageType.success)
+    emits('refreshdatashelf')
   }
   catch (error) {
     if (error instanceof CustomFetchError && error.code !== '0')
