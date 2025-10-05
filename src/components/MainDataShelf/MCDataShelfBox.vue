@@ -17,7 +17,9 @@ const props = defineProps<{
   nextItemPriority: number
   prevItemPriority: number
   hasFiltered: boolean
-  readonlyMode?: boolean }>()
+  readonlyMode?: boolean
+  nextItemHasLink?: boolean
+}>()
 
 const emits = defineEmits<Emits>()
 const isDialogDataShelfBoxEdit = ref(false)
@@ -635,7 +637,7 @@ watch(isDialogDataShelfBoxEdit, () => {
 <template>
   <div
     ref="databox" :class="[highlightClass]"
-    :style="{ 'overflow': 'visible !important', 'margin-block-end': itemsHasLink ? '3px' : '10px', 'margin-right': itemsHasLink ? '10px' : '0px', 'background-color': itemsHasLink ? 'rgba(var(--v-shadow-key-umbra-color), 0.10)' : '' }" @mouseenter="showTools = true"
+    :style="{ 'overflow': 'visible !important', 'margin-block-end': (itemsHasLink && nextItemHasLink) ? '3px' : '10px', 'margin-right': itemsHasLink ? '10px' : '0px', 'background-color': itemsHasLink ? 'rgba(var(--v-shadow-key-umbra-color), 0.10)' : '' }" @mouseenter="showTools = true"
     @mouseleave="showTools = false"
   >
     <MCLoading :showloading="loadinglocal" :loadingsize="SizeType.MD" />
