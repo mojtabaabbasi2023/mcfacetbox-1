@@ -137,7 +137,7 @@ watch(searchPhrase, () => {
     timeout = setTimeout(() => {
       actionInprogress.value = false
       fetchData(false)
-    }, 2000)
+    }, 1000)
   }
 
   emit('searchPhraseChanged', searchPhrase.value)
