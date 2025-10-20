@@ -253,3 +253,8 @@ export enum NodeRelationType {
   relation = 1,
   reference = 2,
 }
+
+export enum NodeSelectionType {
+  highlighted = 1,
+  selected = 2,
+}

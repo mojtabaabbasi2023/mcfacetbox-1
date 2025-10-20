@@ -6,7 +6,7 @@ import MCLoading from '../MCLoading.vue'
 import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import MCDialogNodeRelationList from '../dialogs/MCDialogNodeRelationList.vue'
 import { type IRootServiceError, MessageType, SelectionType, SizeType } from '@/types/baseModels'
-import { NodeType, SimpleNestedNodeAcionableModel, getNodeTypeNameSpace } from '@/types/tree'
+import { NodeSelectionType, NodeType, SimpleNestedNodeAcionableModel, getNodeTypeNameSpace } from '@/types/tree'
 import type { ISimpleFlatNodeActionable, ISimpleNestedNodeActionable, ISingleNodeView, ITree, NodeRelationType } from '@/types/tree'
 import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import { useSelectedTree } from '@/store/treeStore'
@@ -43,16 +43,16 @@ const treeStore = useTreeStoreV3()
 // ============================================
 // STATE
 // ============================================
-const treeview = ref()
+
 const searchbox = ref()
 const editableNode = ref()
 
 const activatedNode = ref<number[]>([])
 const openedNode = ref<number[]>([])
 const isLoading = ref(false)
-const treeElement = ref()
+const treeElement = shallowRef()
+const rootElement = shallowRef()
 
-const nodeTempTitleForEdit = ref('')
 const searchResultSelectedNodes = ref<number[]>([])
 
 // Drag and drop state
@@ -84,6 +84,13 @@ const selectedTreeStore = useSelectedTree()
 const { routerTreeId, routerNodeId, clearUnNeededQueryItems, addTreeIdToQuery, addNodeIdToQuery } = useRouterForGlobalVariables()
 const { lastShortcutTriggered } = useShortcutManager()
 const { x: cursorX, y: cursorY } = usePointer()
+const { focused: rootFocused } = useFocus(rootElement, { initialValue: true })
+
+// const activeElement = useActiveElement()
+
+// watch(activeElement, el => {
+//   console.log('focus changed to', el)
+// })
 
 // ============================================
 // COMPUTED
@@ -173,10 +180,10 @@ function checkTreeRoute() {
     //   treeStore.deselectAll()
 
     if (routerNodeId.value === 0)
-      gotoNode(-treeStore.currentTreeId)
+      gotoNode(-treeStore.currentTreeId, NodeSelectionType.selected)
 
     else
-      gotoNode(routerNodeId.value)
+      gotoNode(routerNodeId.value, NodeSelectionType.selected)
   }
 
   // Set current tree ID in store
@@ -187,7 +194,7 @@ function checkTreeRoute() {
 /**
  * Navigate to a specific node (expand parents, scroll into view)
  */
-async function gotoNode(nodeId: number, mustSelectNode: boolean = true) {
+async function gotoNode(nodeId: number, selectionType: NodeSelectionType, mustSelectNode: boolean = true) {
   const node = treeStore.getNode(nodeId)
   if (!node)
     return
@@ -200,12 +207,24 @@ async function gotoNode(nodeId: number, mustSelectNode: boolean = true) {
   // Expand all parents sequentially
   for (const parentId of parentIds)
     treeStore.expandNode(parentId)
+  scrolltoNode(selectionType)
 
   // Scroll into view
-  if (treeStore.selecteNodeScrollPosition > 0)
-    treeElement.value.$el.scrollTop = treeStore.selecteNodeScrollPosition
 
   await nextTick()
+}
+
+function scrolltoNode(nodeselectionType: NodeSelectionType) {
+  if (nodeselectionType === NodeSelectionType.highlighted) {
+    const nodeIndex = treeStore.flatVisibleNodes.findIndex(item => item.highlighted)
+    if (nodeIndex > 0)
+      treeElement.value.scrollToIndex(nodeIndex)
+  }
+  if (nodeselectionType === NodeSelectionType.selected) {
+    const nodeIndex = treeStore.flatVisibleNodes.findIndex(item => item.selected)
+    if (nodeIndex > 0)
+      treeElement.value.scrollToIndex(nodeIndex)
+  }
 }
 
 // ============================================
@@ -216,11 +235,9 @@ async function gotoNode(nodeId: number, mustSelectNode: boolean = true) {
  * Start editing node title
  */
 function nodeEditStart() {
-  if (!isValidActivateNode())
-    return
-
   //   nodeTempTitleForEdit.value = node.title
   treeStore.startEditing(treeStore.highlightedNodeId)
+  gotoNode(treeStore.highlightedNodeId, NodeSelectionType.highlighted, false)
 }
 
 /**
@@ -228,7 +245,7 @@ function nodeEditStart() {
  */
 function nodeEditCancel(nodeitem: any) {
   treeStore.cancelEditing(nodeitem.id)
-  treeElement.value.$el.focus()
+  focusToRootElemet()
 }
 
 /**
@@ -247,8 +264,7 @@ async function nodeEditProgress(nodeitem: any, nodetitle: string) {
     treeStore.completeEditing(nodeitem.id, nodetitle)
 
     setTimeout(() => {
-      treeview.value.$el.focus()
-      gotoNode(nodeitem.id, false)
+      rootElement.value.$el.focus()
     }, 1000)
   }
   catch (error) {
@@ -609,6 +625,9 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleFlatNodeActionable) => {
 // HELPER FUNCTIONS
 // ============================================
 
+function focusToRootElemet() {
+  rootElement.value.focus()
+}
 function isValidActivateNode(): boolean {
   return !!(activatedNode.value.length > 0 && treeStore.getNode(activatedNode.value[0]))
 }
@@ -632,16 +651,14 @@ function selectSearchTree() {
   activeSearch.value = !activeSearch.value
 }
 
-function handleKeydown(event: KeyboardEvent) {
+function handleTreeKeydown(event: KeyboardEvent) {
+  if (event.key === 'F2' && treeStore.highlightedNodeId > 0)
+    nodeEditStart()
   if (event.key === 'Escape')
     resetMouseDraggable()
 }
 
 function handleTreeNodeKeydown(event: KeyboardEvent) {
-  console.log('hifg', treeStore.highlightedNodeId)
-
-  if (event.key === 'F2' && treeStore.highlightedNodeId > 0)
-    nodeEditStart()
 
   // Reserved for future use
 }
@@ -667,7 +684,7 @@ const parentNodeTitle = (nodeid: number | null): string => {
 
 const nodeMerged = (sourceNodeId: number, destinationNodeID: number) => {
   if (treeStore.getNode(destinationNodeID))
-    gotoNode(destinationNodeID)
+    gotoNode(destinationNodeID, NodeSelectionType.highlighted)
 }
 
 const nodeTransfered = (sourceNodeId: number, destinationNodeID: number) => {
@@ -717,7 +734,16 @@ const setPermissions = async (): Promise<boolean> => {
 // ============================================
 // WATCHERS
 // ============================================
+watch(activeSearch, (newval, oldVal) => {
+  if ((newval !== oldVal) && !newval)
+    focusToRootElemet()
+})
 
+// watch(rootFocused, () => {
+//   if (rootFocused.value)
+//     console.log('tree element focused')
+//   else console.log('input element has lost focus')
+// })
 watch(() => searchBoxHeight.value, () => {
   if (activeSearch.value)
     treeBlockSize.value = 500 + searchBoxHeight.value
@@ -740,7 +766,7 @@ watch(() => treeStore.currentTreeId, async (newval, oldVal) => {
 watch(searchResultSelectedNodes, () => {
   activatedNode.value.splice(0)
   activatedNode.value.push(...searchResultSelectedNodes.value)
-  gotoNode(searchResultSelectedNodes.value[0], false)
+  gotoNode(searchResultSelectedNodes.value[0], NodeSelectionType.highlighted, false)
 })
 
 watch(route, () => {
@@ -760,7 +786,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mc-main-tree d-flex flex-column justify-space-between" @keydown="handleKeydown" @keypress="handleTreeNodeKeydown">
+  <div ref="rootElement" class="mc-main-tree d-flex flex-column justify-space-between no-outline" tabindex="0" @keydown="handleTreeKeydown">
     <MCLoading :showloading="isLoading" :loadingsize="SizeType.XL" />
 
     <!-- Dialogs -->
@@ -873,8 +899,12 @@ onMounted(async () => {
         <template #default="{ item }">
           <div
             :class="{
-              'tree-node--highlighted': item.highlighted, 'tree-node--selected': item.selected,
-            }" class="tree-node" :style="{ paddingRight: `${item.depth * 15}px`, cursor: 'default' }"
+              'tree-node--highlighted': item.highlighted,
+              'tree-node--selected': item.selected,
+              'tree-node--inactive': !rootFocused,
+            }"
+            class="tree-node"
+            :style="{ paddingRight: `${item.depth * 15}px`, cursor: 'default' }" @keydown="handleTreeNodeKeydown"
           >
             <div class="tree-node__icon" :style="{ width: '16px', cursor: item.hasChildren ? 'pointer' : 'default' }" @contextmenu="onContextMenu($event, item)" @click="toggleNodeExpansion(item)">
               <!--
@@ -917,7 +947,7 @@ onMounted(async () => {
       v-if="selectedNode && selectedNode.id > 0"
       class="selected-node pr-1 pl-1 text-body-2"
       variant="text"
-      @click="gotoNode(selectedNode.id, false)"
+      @click="gotoNode(selectedNode.id, NodeSelectionType.selected, false)"
     >
       <p>
         {{ $t('tree.selectednode') }}: <span>{{ selectedNode.title }}</span>

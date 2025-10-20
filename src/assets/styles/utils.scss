@@ -9,6 +9,20 @@
     /* IE/Edge */
 }
 
+.no-outline {
+    outline: none !important;
+}
+
+.no-outline:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* برای حالت‌های مختلف مرورگر */
+.no-outline:focus-visible {
+    outline: none !important;
+}
+
 .animate__fadeIn {
     animation: fadeIn 0.5s;
 }
