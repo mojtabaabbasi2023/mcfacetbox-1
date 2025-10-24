@@ -1,7 +1,7 @@
 import { computed, markRaw, reactive, shallowReactive } from 'vue'
 import { defineStore } from 'pinia'
+import { NodeLocationType } from '@/types/tree'
 import type { ISimpleFlatNodeActionable, ISimpleNestedNodeActionable, ITree } from '@/types/tree'
-import { NodeType } from '@/types/tree'
 
 /**
  * Flat visible node for virtual scrolling
@@ -52,7 +52,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     })
 
     // Sort by priority
-    return children.sort((a, b) => a.priority - b.priority)
+    return children.sort((a, b) => b.priority - a.priority)
   }
 
   /**
@@ -94,6 +94,15 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     }
 
     return path.join(' \\ ')
+  }
+
+  const getParentNode = (nodeId: number): ISimpleFlatNodeActionable | undefined => {
+    const currentNode = nodes.get(nodeId)
+    if (currentNode && currentNode.parentId !== null)
+      return nodes.get(currentNode.parentId)
+
+    else
+      return undefined
   }
 
   /**
@@ -258,9 +267,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
 
     if (data.nodes && data.nodes.length > 0)
       flattenTree(data.nodes)
-
-    console.log('Loaded tree with', nodes.size, 'nodes')
-    console.log('nodes', nodes)
   }
 
   /**
@@ -331,10 +337,31 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
   /**
    * Create a new node
    */
-  const createNode = (nodeData: Partial<ISimpleFlatNodeActionable> & { id: number; parentId: number | null; title: string }) => {
+  const createNode = (nodeData: Partial<ISimpleFlatNodeActionable> & { id: number; parentId: number | null; title: string }, targetNodeId: number, nodelocationType: NodeLocationType) => {
+    const targetNode = nodes.get(targetNodeId)
+    if (!targetNode && nodelocationType !== NodeLocationType.Children)
+      return null
+
+    let parentId: number | null
+
+    // let priority: number
+    switch (nodelocationType) {
+    case NodeLocationType.Children:
+        parentId = nodeData.parentId
+        setNodeChildrenState(parentId, true)
+      break
+    case NodeLocationType.SiblingBefore:
+    case NodeLocationType.SiblingAfter:
+        parentId = targetNode?.parentId
+      break
+
+    default:
+      return null
+    }
+
     const newNode: ISimpleFlatNodeActionable = markRaw({
       id: nodeData.id,
-      parentId: nodeData.parentId,
+      parentId,
       title: nodeData.title,
       priority: nodeData.priority || 0,
       hasDescription: nodeData.hasDescription || false,
@@ -377,6 +404,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
   const deleteNode = (nodeId: number) => {
     // Find all descendants recursively
     const nodesToDelete: number[] = [nodeId]
+    const parentNode = getParentNode(nodeId)
 
     const findDescendants = (parentId: number) => {
       nodes.forEach(node => {
@@ -398,6 +426,10 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     // Clear selection if deleted
     if (nodesToDelete.includes(selectedNodeId.value))
       selectedNodeId.value = -1
+    console.log('parentnode', parentNode, hasChildren(parentNode?.id || 0))
+
+    if (parentNode)
+      updateNode(parentNode.id, { hasChildren: hasChildren(parentNode.id) })
 
     return nodesToDelete
   }
@@ -408,7 +440,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
   const moveNode = (
     nodeId: number,
     destinationId: number,
-    moveType: NodeType,
+    moveType: NodeLocationType,
   ): boolean => {
     const sourceNode = nodes.get(nodeId)
     const destNode = nodes.get(destinationId)
@@ -424,13 +456,13 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     let newPriority: number
 
     switch (moveType) {
-      case NodeType.Children:
+      case NodeLocationType.Children:
       // Move as child of destination
         newParentId = destinationId
         newPriority = getChildren(destinationId).length
         break
 
-      case NodeType.SiblingBefore:
+      case NodeLocationType.SiblingBefore:
       // Move as sibling before destination
         newParentId = destNode.parentId
         newPriority = destNode.priority
@@ -439,7 +471,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
         incrementSiblingPriorities(newParentId, destNode.priority)
         break
 
-      case NodeType.SiblingAfter:
+      case NodeLocationType.SiblingAfter:
       // Move as sibling after destination
         newParentId = destNode.parentId
         newPriority = destNode.priority + 1
@@ -608,6 +640,10 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
       loading: false,
       failed: false,
     })
+  }
+
+  const setNodeChildrenState = (nodeId: number, haschildren: boolean) => {
+    updateNode(nodeId, { hasChildren: haschildren })
   }
 
   /**

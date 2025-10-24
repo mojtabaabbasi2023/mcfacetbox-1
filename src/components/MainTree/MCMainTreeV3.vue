@@ -6,8 +6,8 @@ import MCLoading from '../MCLoading.vue'
 import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import MCDialogNodeRelationList from '../dialogs/MCDialogNodeRelationList.vue'
 import { type IRootServiceError, MessageType, SelectionType, SizeType } from '@/types/baseModels'
-import { NodeSelectionType, NodeType, SimpleNestedNodeAcionableModel, getNodeTypeNameSpace } from '@/types/tree'
-import type { ISimpleFlatNodeActionable, ISimpleNestedNodeActionable, ISingleNodeView, ITree, NodeRelationType } from '@/types/tree'
+import { NodeLocationType, NodeSelectionType, SimpleFlatNodeActionable, getNodeTypeNameSpace } from '@/types/tree'
+import type { ISimpleFlatNodeActionable, ISingleNodeView, ITree, NodeRelationType } from '@/types/tree'
 import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import { useSelectedTree } from '@/store/treeStore'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
@@ -45,7 +45,6 @@ const treeStore = useTreeStoreV3()
 // ============================================
 
 const searchbox = ref()
-const editableNode = ref()
 
 const activatedNode = ref<number[]>([])
 const openedNode = ref<number[]>([])
@@ -75,6 +74,15 @@ const dialognoderelationlist = ref(VDialog)
 
 const treeBlockSize = ref(500)
 const activeTooltipPath = shallowRef('')
+
+// در بخش stateها اضافه کنید
+const dragState = ref({
+  isDragging: false,
+  draggedNode: null as ISimpleFlatNodeActionable | null,
+  dropTarget: null as ISimpleFlatNodeActionable | null,
+  dropPosition: NodeLocationType.Children,
+  validDrop: false,
+})
 
 const { height: searchBoxHeight } = useElementSize(searchbox)
 const { height: rootElementHeight } = useElementSize(rootElement)
@@ -368,7 +376,6 @@ const deleteSelectedNode = async (nodeItem: any) => {
         toast.error(t('httpstatuscodes.0'))
     }
     else {
-      clearActivateNode()
       toast.success(t('alert.deleteDataSuccess'))
     }
   }
@@ -451,13 +458,135 @@ const addcomment = async (nodeItem: any) => {
 /**
  * Transfer node with drag and drop
  */
+
+// توابع جدید برای مدیریت Drag & Drop
+function onDragStart(event: DragEvent, nodeItem: ISimpleFlatNodeActionable) {
+  if (!can('Move', 'Node')) {
+    event.preventDefault()
+
+    return
+  }
+
+  dragState.value.isDragging = true
+  dragState.value.draggedNode = nodeItem
+
+  // ایجاد ghost element برای نمایش هنگام drag
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', nodeItem.id.toString())
+
+    // ایجاد ghost element از المنت اصلی
+
+    // حذف بعد از اتمام
+    // setTimeout(() => {
+    //   if (document.body.contains(ghostEl))
+    //     document.body.removeChild(ghostEl)
+    // }, 0)
+  }
+}
+
+function onDragOver(event: DragEvent, nodeItem: ISimpleFlatNodeActionable) {
+  if (!dragState.value.isDragging || !dragState.value.draggedNode)
+    return
+
+  event.preventDefault()
+
+  // بررسی امکان جابجایی
+  const canDrop = validateDrop(dragState.value.draggedNode, nodeItem)
+
+  dragState.value.validDrop = canDrop
+
+  if (canDrop && event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move'
+
+    // تعیین موقعیت drop (بالا، پایین، یا داخل)
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    const mouseY = event.clientY
+    const relativeY = mouseY - rect.top
+    const heightThird = rect.height / 3
+
+    if (relativeY < heightThird)
+      dragState.value.dropPosition = NodeLocationType.SiblingBefore
+    else if (relativeY > heightThird * 2)
+      dragState.value.dropPosition = NodeLocationType.SiblingAfter
+    else
+      dragState.value.dropPosition = NodeLocationType.Children
+
+    dragState.value.dropTarget = nodeItem
+  }
+  else if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'none'
+  }
+}
+
+function onDragLeave(event: DragEvent) {
+  dragState.value.dropTarget = null
+}
+
+function onDrop(event: DragEvent, nodeItem: ISimpleFlatNodeActionable) {
+  event.preventDefault()
+
+  if (!dragState.value.draggedNode || !dragState.value.validDrop) {
+    resetDragState()
+
+    return
+  }
+
+  const sourceNode = dragState.value.draggedNode
+  const targetNode = nodeItem
+
+  // تعیین نوع انتقال بر اساس موقعیت
+  let transferType: NodeLocationType
+
+  switch (dragState.value.dropPosition) {
+    case NodeLocationType.SiblingBefore:
+      transferType = NodeLocationType.SiblingBefore
+      break
+    case NodeLocationType.SiblingAfter:
+      transferType = NodeLocationType.SiblingAfter
+      break
+    case NodeLocationType.Children:
+      transferType = NodeLocationType.Children
+      break
+  }
+
+  // اجرای انتقال
+  transferNodeWithDraggableMouse(transferType, sourceNode, targetNode)
+  resetDragState()
+}
+
+function validateDrop(sourceNode: ISimpleFlatNodeActionable, targetNode: ISimpleFlatNodeActionable): boolean {
+  if (!can('Move', 'Node'))
+    return false
+
+  // جلوگیری از انتقال به خود یا والدین
+  if (sourceNode.id === targetNode.id)
+    return false
+
+  // جلوگیری از انتقال به فرزندان خود
+  const isDescendant = treeStore.getAncestorIds(targetNode.id).includes(sourceNode.id)
+  if (isDescendant)
+    return false
+
+  // بررسی مجوزها
+
+  return true
+}
+
+function resetDragState() {
+  dragState.value.isDragging = false
+  dragState.value.draggedNode = null
+  dragState.value.dropTarget = null
+  dragState.value.validDrop = false
+}
+
 async function transferNodeWithDraggableMouse(
-  transfertype: NodeType,
+  transfertype: NodeLocationType,
   sourceNodeItem: any,
   destinationNodeItem: any,
 ) {
   const title = formatString(
-    t(`${transfertype === NodeType.Children ? 'alert.transfernodeaschild' : (transfertype === NodeType.SiblingAfter ? 'alert.transfernodeasbrotherafter' : 'alert.transfernodeasbrotherbefore')}`),
+    t(`${transfertype === NodeLocationType.Children ? 'alert.transfernodeaschild' : (transfertype === NodeLocationType.SiblingAfter ? 'alert.transfernodeasbrotherafter' : 'alert.transfernodeasbrotherbefore')}`),
     sourceNodeItem.title,
     destinationNodeItem.title,
   )
@@ -537,26 +666,26 @@ function treeItemMouseEnter(mouseEvent: MouseEvent, treeItem: any) {
 
 function treeItemMouseUp(mouseEvent: MouseEvent, treeItem: any) {
   if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
-    transferNodeWithDraggableMouse(NodeType.Children, sourceDraggableItem.value, activeDraggableItem.value)
+    transferNodeWithDraggableMouse(NodeLocationType.Children, sourceDraggableItem.value, activeDraggableItem.value)
 }
 
-function treeDividerMouseEnter(transfertype: NodeType) {
-  if (transfertype === NodeType.SiblingBefore)
+function treeDividerMouseEnter(transfertype: NodeLocationType) {
+  if (transfertype === NodeLocationType.SiblingBefore)
     hasDividerDraggableBefore.value = true
 
-  if (transfertype === NodeType.SiblingAfter)
+  if (transfertype === NodeLocationType.SiblingAfter)
     hasDividerDraggableAfter.value = true
 }
 
-function treeDividerMouseLeave(mouseEvent: MouseEvent, transfertype: NodeType) {
-  if (transfertype === NodeType.SiblingBefore)
+function treeDividerMouseLeave(mouseEvent: MouseEvent, transfertype: NodeLocationType) {
+  if (transfertype === NodeLocationType.SiblingBefore)
     hasDividerDraggableBefore.value = false
 
-  if (transfertype === NodeType.SiblingAfter)
+  if (transfertype === NodeLocationType.SiblingAfter)
     hasDividerDraggableAfter.value = false
 }
 
-function treeDividerMouseUp(mouseEvent: MouseEvent, treeItem: any, transfertype: NodeType) {
+function treeDividerMouseUp(mouseEvent: MouseEvent, treeItem: any, transfertype: NodeLocationType) {
   if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
     transferNodeWithDraggableMouse(transfertype, sourceDraggableItem.value, activeDraggableItem.value)
 }
@@ -697,7 +826,7 @@ function handleTreeNodeKeydown(event: KeyboardEvent) {
   // Reserved for future use
 }
 
-const nodeItemAdded = (nodeItem: ISimpleNestedNodeActionable) => {
+const nodeItemAdded = (nodeItem: ISimpleFlatNodeActionable) => {
   toast.success(formatString(t('alert.specificNodeAdded'), nodeItem.title))
 }
 
@@ -828,7 +957,7 @@ onMounted(async () => {
       v-if="dialogAddNewNodeVisible"
       v-model:is-dialog-visible="dialogAddNewNodeVisible"
       :selected-tree-id="treeStore.currentTreeId"
-      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleNestedNodeAcionableModel(-1, '', -1)"
+      :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', -1)"
       @node-added="nodeItemAdded"
       @node-added-failed="nodeaddfailed"
     />
@@ -838,7 +967,7 @@ onMounted(async () => {
       v-model:is-dialog-visible="dialogMergeNodeVisible"
       :selected-tree-id="treeStore.currentTreeId"
       :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)"
-      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleNestedNodeAcionableModel(-1, '', -1)"
+      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleFlatNodeActionable(-1, '', -1)"
       @nodemerged="nodeMerged"
       @node-merge-failed="nodeaddfailed"
     />
@@ -848,7 +977,7 @@ onMounted(async () => {
       v-model:is-dialog-visible="dialogTransferNodeVisible"
       :selected-tree-id="treeStore.currentTreeId"
       :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)"
-      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleNestedNodeAcionableModel(-1, '', -1)"
+      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleFlatNodeActionable(-1, '', -1)"
       @node-transfered="nodeTransfered"
       @node-transfer-faild="nodeaddfailed"
     />
@@ -858,7 +987,7 @@ onMounted(async () => {
       v-model:is-dialog-visible="dialogNodeRelationVisible"
       :selected-tree-id="treeStore.currentTreeId"
       :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)"
-      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleNestedNodeAcionableModel(-1, '', -1)"
+      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleFlatNodeActionable(-1, '', -1)"
       @message-has-occured="handleDataBoxMessages"
     />
 
@@ -937,10 +1066,21 @@ onMounted(async () => {
               'tree-node--highlighted': item.highlighted,
               'tree-node--selected': item.selected,
               'tree-node--inactive': !rootFocused,
+              'tree-node--dragging': dragState.isDragging && dragState.draggedNode?.id === item.id,
+              'tree-node--drop-zone': dragState.dropTarget?.id === item.id && dragState.validDrop,
+              'tree-node--drop-before': dragState.dropTarget?.id === item.id && dragState.validDrop && dragState.dropPosition === NodeLocationType.SiblingBefore,
+              'tree-node--drop-after': dragState.dropTarget?.id === item.id && dragState.validDrop && dragState.dropPosition === NodeLocationType.SiblingAfter,
+              'tree-node--drop-inside': dragState.dropTarget?.id === item.id && dragState.validDrop && dragState.dropPosition === NodeLocationType.Children,
             }"
             class="tree-node"
             :style="{ paddingRight: `${item.depth * 15}px`, cursor: 'default' }"
-            @keydown="handleTreeNodeKeydown" @contextmenu="onContextMenu($event, item)"
+            draggable="true" @keydown="handleTreeNodeKeydown"
+            @contextmenu="onContextMenu($event, item)"
+            @dragstart="onDragStart($event, item)"
+            @dragover="onDragOver($event, item)"
+            @dragleave="onDragLeave"
+            @drop="onDrop($event, item)"
+            @dragend="resetDragState"
           >
             <div class="tree-node__icon" :style="{ width: '16px', cursor: item.hasChildren ? 'pointer' : 'default' }" @click="toggleNodeExpansion(item)">
               <!--
@@ -952,15 +1092,23 @@ onMounted(async () => {
                 />
               -->
               <VIcon size="16">
-                {{ item.isExpanded ? 'tabler-chevron-down' : (item.hasChildren ? 'tabler-chevron-left' : '') }}
+                {{ item.hasChildren ? (item.isExpanded ? 'tabler-chevron-down' : 'tabler-chevron-left') : '' }}
               </VIcon>
             </div>
+            <!--
+              <div
+              v-if="dragState.dropTarget?.id === item.id && dragState.validDrop"
+              class="drop-indicator"
+              :class="`drop-indicator--${dragState.dropPosition}`"
+              />
+            -->
             <div class="w-100" @click="treeStore.highlightNode(item.id)" @dblclick="selectTreeNode(item)">
               <div>
-                <span v-if="!item.editing" class="tree-node__title no-select">{{ item.title }}</span>
+                <span v-if="!item.editing" class="tree-node__title no-select">{{ item.title }}
+
+                </span>
                 <VTextField
                   v-else
-                  ref="editableNode"
                   v-model:model-value="item.tempData"
                   :color="item.failed ? 'error' : 'primary'"
                   autofocus
@@ -1014,5 +1162,69 @@ onMounted(async () => {
   position: fixed;
   bottom: 15px;
   right: 10px;
+}
+// اضافه کردن استایل‌های جدید
+.tree-node {
+  &--dragging {
+    opacity: 0.6;
+    background-color: rgb(var(--v-theme-primary)) !important;
+    color: white;
+  }
+
+  &--drop-zone {
+    background-color: rgb(var(--v-theme-surface-light)) !important;
+    border: 2px dashed rgb(var(--v-theme-scondary));
+  }
+
+  &--drop-before {
+    border-top: 4px solid rgb(var(--v-theme-primary));
+  }
+
+  &--drop-after {
+    border-bottom: 4px solid rgb(var(--v-theme-primary));
+  }
+
+  &--drop-inside {
+    background-color: rgb(var(--v-theme-primary)) !important;
+    color: white;
+  }
+}
+
+.drag-ghost {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+  opacity: 0.9 !important;
+  transform: rotate(3deg) scale(0.98) !important;
+  background: rgb(var(--v-theme-primary)) !important;
+  color: white !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  max-width: 250px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+
+  // حذف استایل‌های داخلی که ممکن است تداخل ایجاد کنند
+  .tree-node__icon,
+  .v-text-field {
+    display: none !important;
+  }
+}
+.tree-node {
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(var(--v-theme-primary), 0.04);
+  }
 }
 </style>

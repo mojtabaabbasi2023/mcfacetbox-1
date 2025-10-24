@@ -1,7 +1,7 @@
 import { createGlobalState } from '@vueuse/core'
 import type { ISimpleDTO } from '@/types/baseModels'
 import { SimpleDTOModel, SimpleTreeModel } from '@/types/baseModels'
-import { NodeRelationType, NodeType, SimpleNestedNodeAcionableModel } from '@/types/tree'
+import { NodeLocationType, NodeRelationType, SimpleNestedNodeAcionableModel } from '@/types/tree'
 import type { type ISimpleNestedNodeActionable } from '@/types/tree'
 
 export const useSelectedNode = createGlobalState(
@@ -28,7 +28,7 @@ const selectedNode = reactive<ISimpleNestedNodeActionable>(new SimpleNestedNodeA
 
 // const selecedTree = reactive<ISimpleDTO<number>>({id:0,title:0})
 export function useTree() {
-  const addNewNode = (nodeItem: ISimpleNestedNodeActionable, destinationNodeID: number, newNodeType: NodeType) => {
+  const addNewNode = (nodeItem: ISimpleNestedNodeActionable, destinationNodeID: number, newNodeType: NodeLocationType) => {
     /**
      * در مرحله اول بررسی میشود که نود جدید میخواد در ریشه اضافه شود و یا در فرزندان نودهای ریشه
      * اگر در ریشه باشد از treeData برای مدیریت استفاده میکنیم وگرنه از treeIndex استفاده میکنیم
@@ -49,37 +49,37 @@ export function useTree() {
     if (destinationNodeID >= 1 && treeIndex[destinationNodeID].parentId && treeIndex[destinationNodeID].parentId > 0) {
       destArrayIndex = treeIndex[treeIndex[destinationNodeID].parentId].children?.findIndex(item => item.id === destinationNodeID) ?? 0
 
-      if (newNodeType === NodeType.Children) {
+      if (newNodeType === NodeLocationType.Children) {
         if (!treeIndex[destinationNodeID].children)
           treeIndex[destinationNodeID].children = []
         treeIndex[destinationNodeID].children?.push(nodeItem)
         nodeItem.parentId = treeIndex[destinationNodeID].id
       }
       else { nodeItem.parentId = treeIndex[destinationNodeID].parentId }
-      if (newNodeType === NodeType.SiblingAfter)
+      if (newNodeType === NodeLocationType.SiblingAfter)
         treeIndex[treeIndex[destinationNodeID].parentId].children?.splice(destArrayIndex + 1, 0, nodeItem)
-      if (newNodeType === NodeType.SiblingBefore)
+      if (newNodeType === NodeLocationType.SiblingBefore)
         treeIndex[treeIndex[destinationNodeID].parentId].children?.splice(destArrayIndex, 0, nodeItem)
     }
     else {
       destArrayIndex = treeData.findIndex(item => item.id === destinationNodeID) ?? 0
 
       //   console.log('destarray', destArrayIndex, destinationNodeID)
-      if (newNodeType === NodeType.Children) {
+      if (newNodeType === NodeLocationType.Children) {
         if (!treeData[destArrayIndex].children)
           treeData[destArrayIndex].children = []
         treeData[destArrayIndex].children?.push(nodeItem)
         nodeItem.parentId = destinationNodeID >= 0 ? treeIndex[destinationNodeID].id : -1
       }
       else { nodeItem.parentId = destinationNodeID >= 0 ? treeIndex[destinationNodeID].parentId : -1 }
-      if (newNodeType === NodeType.SiblingAfter)
+      if (newNodeType === NodeLocationType.SiblingAfter)
         treeData.splice(destArrayIndex > 0 ? destArrayIndex + 1 : treeData.length, 0, nodeItem)
-      if (newNodeType === NodeType.SiblingBefore)
+      if (newNodeType === NodeLocationType.SiblingBefore)
         treeData.splice(destArrayIndex > 0 ? destArrayIndex : 0, 0, nodeItem)
     }
   }
 
-  const addNode = (nodeItem: ISimpleNestedNodeActionable, destinationNodeID: number, newNodeType: NodeType): boolean => {
+  const addNode = (nodeItem: ISimpleNestedNodeActionable, destinationNodeID: number, newNodeType: NodeLocationType): boolean => {
     // console.log('nodeitem', nodeItem)
 
     // if (nodeItem.parentId && nodeItem.parentId > 0) {
@@ -235,7 +235,7 @@ export function useTree() {
     }
   }
 
-  const transferNode = (sourceNodeID: number, destinationNodeID: number, transfertype: NodeType) => {
+  const transferNode = (sourceNodeID: number, destinationNodeID: number, transfertype: NodeLocationType) => {
     // NOTE - 1- چک کردن اینکه مبدا و مقصد وجود داشته باشند
     // NOTE - 2- حذف نود مبدا
     // NOTE - 4- افزودن نود مبدا به بچه ها یا برادر مقصد
@@ -253,31 +253,31 @@ export function useTree() {
       //   if (treeIndex[destinationNodeID].parentId && treeIndex[destinationNodeID].parentId > 0 && treeIndex[sourceNodeID]) {
       //     destArrayIndex = treeIndex[treeIndex[destinationNodeID].parentId].children?.findIndex(item => item.id === destinationNodeID) ?? 0
 
-      //     if (transfertype === NodeType.Children) {
+      //     if (transfertype === NodeLocationType.Children) {
       //       if (!treeIndex[destinationNodeID].children)
       //         treeIndex[destinationNodeID].children = []
       //       treeIndex[destinationNodeID].children?.push(treeIndex[sourceNodeID])
       //       treeIndex[sourceNodeID].parentId = treeIndex[destinationNodeID].id
       //     }
       //     else { treeIndex[sourceNodeID].parentId = treeIndex[destinationNodeID].parentId }
-      //     if (transfertype === NodeType.SiblingAfter)
+      //     if (transfertype === NodeLocationType.SiblingAfter)
       //       treeIndex[treeIndex[destinationNodeID].parentId].children?.splice(destArrayIndex + 1, 0, treeIndex[sourceNodeID])
-      //     if (transfertype === NodeType.SiblingBefore)
+      //     if (transfertype === NodeLocationType.SiblingBefore)
       //       treeIndex[treeIndex[destinationNodeID].parentId].children?.splice(destArrayIndex, 0, treeIndex[sourceNodeID])
       //   }
       //   else {
       //     destArrayIndex = treeData.findIndex(item => item.id === destinationNodeID) ?? 0
 
-      //     if (transfertype === NodeType.Children) {
+      //     if (transfertype === NodeLocationType.Children) {
       //       if (!treeData[destArrayIndex].children)
       //         treeData[destArrayIndex].children = []
       //       treeData[destArrayIndex].children?.push(treeIndex[sourceNodeID])
       //       treeIndex[sourceNodeID].parentId = treeIndex[destinationNodeID].id
       //     }
       //     else { treeIndex[sourceNodeID].parentId = treeIndex[destinationNodeID].parentId }
-      //     if (transfertype === NodeType.SiblingAfter)
+      //     if (transfertype === NodeLocationType.SiblingAfter)
       //       treeData.splice(destArrayIndex + 1, 0, treeIndex[sourceNodeID])
-      //     if (transfertype === NodeType.SiblingBefore)
+      //     if (transfertype === NodeLocationType.SiblingBefore)
       //       treeData.splice(destArrayIndex, 0, treeIndex[sourceNodeID])
       //   }
 

@@ -4,7 +4,7 @@
 import { useTree } from '@/store/treeStore'
 import type { ISimpleNestedNodeActionable } from '@/types/tree'
 import { SelectionType } from '@/types/baseModels'
-import { NodeType, getNodeTypeNameSpace } from '@/types/tree'
+import { NodeLocationType, getNodeTypeNameSpace } from '@/types/tree'
 
 interface Prop {
   isDialogVisible: boolean
@@ -20,7 +20,7 @@ const activeActions = ref(false)
 const nodeTitle = ref('')
 const loading = ref(false)
 const { transferNode } = useTree()
-const transfertype = ref(NodeType.SiblingAfter)
+const transfertype = ref(NodeLocationType.SiblingAfter)
 const { t } = useI18n({ useScope: 'global' })
 
 interface Emit {
@@ -91,10 +91,10 @@ const transferNodeLocal = async () => {
       <template #actions>
         <div v-if="selectedNodes.length > 0" class="w-100 d-flex justify-center py-2 px-2">
           <VRadioGroup v-model="transfertype" inline>
-            <VRadio :label="$t('before')" :value="NodeType.SiblingBefore" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
-            <VRadio :label="$t('after')" :value="NodeType.SiblingAfter" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
+            <VRadio :label="$t('before')" :value="NodeLocationType.SiblingBefore" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
+            <VRadio :label="$t('after')" :value="NodeLocationType.SiblingAfter" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
 
-            <VRadio :label="$t('tree.childnode')" :value="NodeType.Children" false-icon="tabler-circle" true-icon="tabler-circle-filled" :disabled="selectedNode.id === -1" />
+            <VRadio :label="$t('tree.childnode')" :value="NodeLocationType.Children" false-icon="tabler-circle" true-icon="tabler-circle-filled" :disabled="selectedNode.id === -1" />
           </VRadioGroup>
 
           <VBtn type="submit" class="me-3" :loading="loading" @click="transferNodeLocal">

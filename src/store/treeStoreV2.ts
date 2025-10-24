@@ -1,7 +1,7 @@
 import { computed, markRaw, reactive, shallowReactive } from 'vue'
 import { defineStore } from 'pinia'
+import { NodeLocationType } from '@/types/tree'
 import type { ISimpleFlatNodeActionable, ISimpleNestedNodeActionable, ITree } from '@/types/tree'
-import { NodeType } from '@/types/tree'
 
 /**
  * Flat visible node for virtual scrolling
@@ -395,7 +395,7 @@ export const useTreeStoreV2 = defineStore('treeV2', () => {
   const moveNode = (
     nodeId: number,
     destinationId: number,
-    moveType: NodeType,
+    moveType: NodeLocationType,
   ): boolean => {
     const sourceNode = nodes.get(nodeId)
     const destNode = nodes.get(destinationId)
@@ -411,13 +411,13 @@ export const useTreeStoreV2 = defineStore('treeV2', () => {
     let newPriority: number
 
     switch (moveType) {
-      case NodeType.Children:
+      case NodeLocationType.Children:
       // Move as child of destination
         newParentId = destinationId
         newPriority = getChildren(destinationId).length
         break
 
-      case NodeType.SiblingBefore:
+      case NodeLocationType.SiblingBefore:
       // Move as sibling before destination
         newParentId = destNode.parentId
         newPriority = destNode.priority
@@ -426,7 +426,7 @@ export const useTreeStoreV2 = defineStore('treeV2', () => {
         incrementSiblingPriorities(newParentId, destNode.priority)
         break
 
-      case NodeType.SiblingAfter:
+      case NodeLocationType.SiblingAfter:
       // Move as sibling after destination
         newParentId = destNode.parentId
         newPriority = destNode.priority + 1

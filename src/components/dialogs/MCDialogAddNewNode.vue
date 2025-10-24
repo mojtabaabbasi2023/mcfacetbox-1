@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 // !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
 
-import { useTree } from '@/store/treeStore'
-import type { ISimpleNestedNodeActionable } from '@/types/tree'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
+import type { INodeChangePriority, ISimpleFlatNodeActionable } from '@/types/tree'
 import { SelectionType } from '@/types/baseModels'
-import { NodeType, SimpleNestedNodeAcionableModel, SingleNodeNewModel, getNodeTypeNameSpace } from '@/types/tree'
+import { NodeLocationType, SimpleFlatNodeActionable, SingleNodeNewModel, getNodeTypeNameSpace } from '@/types/tree'
 
 interface Prop {
   isDialogVisible: boolean
-  selectedNode: ISimpleNestedNodeActionable
+  selectedNode: ISimpleFlatNodeActionable
   selectedTreeId: number
 }
 
@@ -16,16 +16,16 @@ const props = defineProps<Prop>()
 const emit = defineEmits<Emit>()
 const selectedNodes = ref<number[]>([])
 const activeActions = ref(false)
-const nodeAddingType = ref(NodeType.SiblingAfter)
+const nodeAddingType = ref(NodeLocationType.SiblingAfter)
 const nodeTitle = ref('')
 const loading = ref(false)
-const { addNode } = useTree()
+const treeStore = useTreeStoreV3()
 const { t } = useI18n({ useScope: 'global' })
 
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
   (e: 'errorHasOccured', message: string): void
-  (e: 'nodeAdded', node: ISimpleNestedNodeActionable): void
+  (e: 'nodeAdded', node: ISimpleFlatNodeActionable): void
   (e: 'nodeAddedFailed', message: string): void
 
 }
@@ -48,23 +48,23 @@ function dataEntryChanged(phrase: string) {
 }
 
 const addNewNode = async () => {
-  const result = ref(false)
-
   loading.value = true
   try {
-    const resultid = await $api(`app/node/${getNodeTypeNameSpace(nodeAddingType.value)}`, {
+    const resultData = await $api<INodeChangePriority>(`app/node/${getNodeTypeNameSpace(nodeAddingType.value)}`, {
       method: 'POST',
       body: JSON.parse(JSON.stringify(new SingleNodeNewModel(props.selectedTreeId, props.selectedNode.id, nodeTitle.value))),
       ignoreResponseError: false,
     })
 
-    addNode({ id: resultid, title: nodeTitle.value, parentId: props.selectedNode.id, tempData: null, priority: 0 }, props.selectedNode.id, nodeAddingType.value)
+    const result = treeStore.createNode({ id: resultData.id, title: nodeTitle.value, parentId: props.selectedNode.id, tempData: null, priority: resultData.priority }, props.selectedNode.id, nodeAddingType.value)
 
-    // if (nodeAddingType.value === 'Children')
-    //   result.value = addNode({ id: resultid, title: nodeTitle.value, parentId: props.selectedNode.id, tempData: null, priority: 0 })
-    // else
-    //   result.value = addNode({ id: resultid, title: nodeTitle.value, parentId: props.selectedNode.parentId, tempData: null, priority: 0 })
-    emit('nodeAdded', new SimpleNestedNodeAcionableModel(resultid, nodeTitle.value, props.selectedNode.id))
+    if (!result) {
+      emit('nodeAddedFailed', t('alert.probleminnodeaddrefreshpage'))
+
+      return
+    }
+
+    emit('nodeAdded', new SimpleFlatNodeActionable(resultData.id, nodeTitle.value, props.selectedNode.id))
     loading.value = false
   }
   catch (error) {
@@ -100,10 +100,10 @@ defineExpose({ addRootNode })
       <template #actions>
         <div v-if="activeActions" class="w-100 d-flex justify-center py-2 px-2">
           <VRadioGroup v-model="nodeAddingType" inline>
-            <VRadio :label="$t('before')" :value="NodeType.SiblingBefore" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
-            <VRadio :label="$t('after')" :value="NodeType.SiblingAfter" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
+            <VRadio :label="$t('before')" :value="NodeLocationType.SiblingBefore" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
+            <VRadio :label="$t('after')" :value="NodeLocationType.SiblingAfter" false-icon="tabler-circle" true-icon="tabler-circle-filled" />
 
-            <VRadio :label="$t('tree.childnode')" :value="NodeType.Children" false-icon="tabler-circle" true-icon="tabler-circle-filled" :disabled="selectedNode.id === -1" />
+            <VRadio :label="$t('tree.childnode')" :value="NodeLocationType.Children" false-icon="tabler-circle" true-icon="tabler-circle-filled" :disabled="selectedNode.id === -1" />
           </VRadioGroup>
           <VBtn type="submit" class="me-3" :loading="loading" @click="addNewNode">
             <span>

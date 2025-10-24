@@ -7,7 +7,7 @@ import MCLoading from '../MCLoading.vue'
 import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import MCDialogNodeRelationList from '../dialogs/MCDialogNodeRelationList.vue'
 import { type IRootServiceError, type ISimpleTree, MessageType, SizeType } from '@/types/baseModels'
-import { NodeRelationType, NodeType, SimpleNestedNodeAcionableModel, createTreeIndex, getNodeTypeNameSpace } from '@/types/tree'
+import { NodeLocationType, NodeRelationType, SimpleNestedNodeAcionableModel, createTreeIndex, getNodeTypeNameSpace } from '@/types/tree'
 import type { ISimpleNestedNodeActionable, ISingleNodeView, ITree } from '@/types/tree'
 import { useSelectTreeNode, useSelectedTree, useTree } from '@/store/treeStore'
 import { SelectionType } from '@/types/baseModels'
@@ -444,21 +444,21 @@ const nodeTransfered = (sourceNodeId: number, destinationNodeID: number) => {
 //   }
 }
 
-function treeDividerMouseLeave(mouseEvent: MouseEvent, transfertype: NodeType) {
-  if (transfertype === NodeType.SiblingBefore)
+function treeDividerMouseLeave(mouseEvent: MouseEvent, transfertype: NodeLocationType) {
+  if (transfertype === NodeLocationType.SiblingBefore)
     hasDividerDraggableBefore.value = false
 
-  if (transfertype === NodeType.SiblingAfter)
+  if (transfertype === NodeLocationType.SiblingAfter)
     hasDividerDraggableAfter.value = false
 }
-function treeDividerMouseEnter(transfertype: NodeType) {
-  if (transfertype === NodeType.SiblingBefore)
+function treeDividerMouseEnter(transfertype: NodeLocationType) {
+  if (transfertype === NodeLocationType.SiblingBefore)
     hasDividerDraggableBefore.value = true
 
-  if (transfertype === NodeType.SiblingAfter)
+  if (transfertype === NodeLocationType.SiblingAfter)
     hasDividerDraggableAfter.value = true
 }
-function treeDividerMouseUp(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable, transfertype: NodeType) {
+function treeDividerMouseUp(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable, transfertype: NodeLocationType) {
   if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
     transferNodeWithDraggableMouse(transfertype, sourceDraggableItem.value, activeDraggableItem.value)
 }
@@ -491,10 +491,10 @@ function treeItemMouseEnter(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeA
 }
 function treeItemMouseUp(mouseEvent: MouseEvent, treeItem: ISimpleNestedNodeActionable) {
   if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
-    transferNodeWithDraggableMouse(NodeType.Children, sourceDraggableItem.value, activeDraggableItem.value)
+    transferNodeWithDraggableMouse(NodeLocationType.Children, sourceDraggableItem.value, activeDraggableItem.value)
 }
-async function transferNodeWithDraggableMouse(transfertype: NodeType, sourceNodeItem: ISimpleNestedNodeActionable, destinationNodeItem: ISimpleNestedNodeActionable) {
-  const title = formatString(t(`${transfertype === NodeType.Children ? 'alert.transfernodeaschild' : (transfertype === NodeType.SiblingAfter ? 'alert.transfernodeasbrotherafter' : 'alert.transfernodeasbrotherbefore')}`), sourceNodeItem.title, destinationNodeItem.title)
+async function transferNodeWithDraggableMouse(transfertype: NodeLocationType, sourceNodeItem: ISimpleNestedNodeActionable, destinationNodeItem: ISimpleNestedNodeActionable) {
+  const title = formatString(t(`${transfertype === NodeLocationType.Children ? 'alert.transfernodeaschild' : (transfertype === NodeLocationType.SiblingAfter ? 'alert.transfernodeasbrotherafter' : 'alert.transfernodeasbrotherbefore')}`), sourceNodeItem.title, destinationNodeItem.title)
   const serviceError = shallowRef()
 
   const result = await confirmSwal(
@@ -928,8 +928,8 @@ const treeViewStyle = computed(() => ({
               <VCol cols="11" class="tree-title d-flex flex-column">
                 <div
                   v-if="(activeDraggableItem && activeDraggableItem.id === item.id)"
-                  class="d-flex align-center" style="height: 10px;" @mouseup="treeDividerMouseUp($event, treeIndex[item.id], NodeType.SiblingBefore)" @mouseenter="treeDividerMouseEnter(NodeType.SiblingBefore)"
-                  @mouseleave="treeDividerMouseLeave($event, NodeType.SiblingBefore)"
+                  class="d-flex align-center" style="height: 10px;" @mouseup="treeDividerMouseUp($event, treeIndex[item.id], NodeLocationType.SiblingBefore)" @mouseenter="treeDividerMouseEnter(NodeLocationType.SiblingBefore)"
+                  @mouseleave="treeDividerMouseLeave($event, NodeLocationType.SiblingBefore)"
                 >
                   <div :class="`w-100 ${hasDividerDraggableBefore ? 'draggablebox' : ''}`" style="height: 5px;" />
                 </div>
@@ -972,8 +972,8 @@ const treeViewStyle = computed(() => ({
                 </div>
                 <div
                   v-if="(activeDraggableItem && activeDraggableItem.id === item.id && isLastNode(treeIndex[item.id]))"
-                  class="d-flex align-center" style="height: 10px;" @mouseup="treeDividerMouseUp($event, treeIndex[item.id], NodeType.SiblingAfter)" @mouseenter="treeDividerMouseEnter(NodeType.SiblingAfter)"
-                  @mouseleave="treeDividerMouseLeave($event, NodeType.SiblingAfter)"
+                  class="d-flex align-center" style="height: 10px;" @mouseup="treeDividerMouseUp($event, treeIndex[item.id], NodeLocationType.SiblingAfter)" @mouseenter="treeDividerMouseEnter(NodeLocationType.SiblingAfter)"
+                  @mouseleave="treeDividerMouseLeave($event, NodeLocationType.SiblingAfter)"
                 >
                   <div :class="`w-100 ${hasDividerDraggableAfter ? 'draggablebox' : ''}`" style="height: 5px;" />
                 </div>

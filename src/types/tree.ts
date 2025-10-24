@@ -16,20 +16,24 @@ export function createTreeIndex(tree: ISimpleTree[]): Record<number, ISimpleTree
 
   return index
 }
-export enum NodeType {
+export interface INodeChangePriority {
+  id: number
+  priority: number
+}
+export enum NodeLocationType {
   Sibling = 2,
   Children = 1,
   SiblingAfter = 3,
   SiblingBefore = 4,
 }
-export function getNodeTypeNameSpace(nodetype: NodeType) {
-  if (nodetype === NodeType.Children)
+export function getNodeTypeNameSpace(nodetype: NodeLocationType) {
+  if (nodetype === NodeLocationType.Children)
     return 'children'
 
-  else if (nodetype === NodeType.SiblingAfter)
+  else if (nodetype === NodeLocationType.SiblingAfter)
     return 'after'
 
-  else if (nodetype === NodeType.SiblingBefore)
+  else if (nodetype === NodeLocationType.SiblingBefore)
     return 'before'
 
   else
@@ -158,6 +162,37 @@ export interface INodeRelation<T extends stringnumber> extends ISimpleDTO<T>, ba
   parentId: number
   parentTitle: string
   nodeId: number
+}
+
+/**
+ * مدل ساختار تک سطحی درخت با پشتیبانی از فیلدهای مورد نیاز
+ */
+export class SimpleFlatNodeActionable implements ISimpleFlatNodeActionable {
+  priority: number = 0
+  parentId: number = -1
+  id: number = -1
+  title: string = ''
+  editing?: boolean | undefined = false
+  loading?: boolean | undefined = false
+  selected?: boolean | undefined = false
+  tempData: any = null
+  selectable?: boolean | undefined = false
+  disabled?: boolean | undefined = false
+  constructor(id: number = 0, title: string = '', parentid: number = 0) {
+    this.id = id
+    this.title = title
+    this.parentId = parentid
+  }
+
+  hasDescription?: boolean | undefined
+  relationCount?: number | undefined
+  referenceCount?: number | undefined
+  hasChildren: boolean = false
+  depth: number = 0
+  isExpanded: boolean = false
+  isLoaded: boolean = false
+  highlighted?: boolean | undefined
+  failed?: boolean | null | undefined
 }
 
 /**
