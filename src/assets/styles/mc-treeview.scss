@@ -1,5 +1,6 @@
 /* ساختار کلی نود */
 .tree-node {
+    position: relative;
     display: flex;
     align-items: center;
     height: 36px;
@@ -9,6 +10,38 @@
     transition: background-color 0.2s ease, color 0.2s ease;
     color: rgb(var(--v-theme-on-surface));
     cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: rgba(var(--v-theme-primary), 0.04);
+    }
+
+}
+
+.tree-node {
+    &--dragging {
+        opacity: 0.6;
+        background-color: rgb(var(--v-theme-primary)) !important;
+        color: white;
+    }
+
+    &--drop-zone {
+        background-color: rgb(var(--v-theme-surface-light)) !important;
+        border: 2px dashed rgb(var(--v-theme-scondary));
+    }
+
+    &--drop-before {
+        border-top: 4px solid rgb(var(--v-theme-primary));
+    }
+
+    &--drop-after {
+        border-bottom: 4px solid rgb(var(--v-theme-primary));
+    }
+
+    &--drop-inside {
+        background-color: rgb(var(--v-theme-primary)) !important;
+        color: white;
+    }
 }
 
 /* آیکون و متن */

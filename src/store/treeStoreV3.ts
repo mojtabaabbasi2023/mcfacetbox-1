@@ -339,9 +339,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
    */
   const createNode = (nodeData: Partial<ISimpleFlatNodeActionable> & { id: number; parentId: number | null; title: string }, targetNodeId: number, nodelocationType: NodeLocationType) => {
     const targetNode = nodes.get(targetNodeId)
-    if (!targetNode && nodelocationType !== NodeLocationType.Children)
-      return null
-
     let parentId: number | null
 
     // let priority: number
@@ -352,7 +349,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
       break
     case NodeLocationType.SiblingBefore:
     case NodeLocationType.SiblingAfter:
-        parentId = targetNode?.parentId
+        parentId = targetNode?.parentId || null
       break
 
     default:
@@ -426,7 +423,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     // Clear selection if deleted
     if (nodesToDelete.includes(selectedNodeId.value))
       selectedNodeId.value = -1
-    console.log('parentnode', parentNode, hasChildren(parentNode?.id || 0))
 
     if (parentNode)
       updateNode(parentNode.id, { hasChildren: hasChildren(parentNode.id) })
@@ -440,6 +436,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
   const moveNode = (
     nodeId: number,
     destinationId: number,
+    destinationPriority: number,
     moveType: NodeLocationType,
   ): boolean => {
     const sourceNode = nodes.get(nodeId)
@@ -453,31 +450,18 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
       return false
 
     let newParentId: number | null
-    let newPriority: number
+
+    // let newPriority: number
 
     switch (moveType) {
       case NodeLocationType.Children:
       // Move as child of destination
         newParentId = destinationId
-        newPriority = getChildren(destinationId).length
         break
 
       case NodeLocationType.SiblingBefore:
-      // Move as sibling before destination
-        newParentId = destNode.parentId
-        newPriority = destNode.priority
-
-      // Increment priority of siblings after
-        incrementSiblingPriorities(newParentId, destNode.priority)
-        break
-
       case NodeLocationType.SiblingAfter:
-      // Move as sibling after destination
         newParentId = destNode.parentId
-        newPriority = destNode.priority + 1
-
-      // Increment priority of siblings after
-        incrementSiblingPriorities(newParentId, destNode.priority + 1)
         break
 
       default:
@@ -486,7 +470,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
 
     updateNode(nodeId, {
       parentId: newParentId,
-      priority: newPriority,
+      priority: destinationPriority,
     })
 
     return true
@@ -689,6 +673,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     getAncestorIds,
     isLastSibling,
     buildDisplayNode,
+    getParentNode,
 
     // Actions: Data
     loadTree,

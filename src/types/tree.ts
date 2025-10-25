@@ -169,7 +169,7 @@ export interface INodeRelation<T extends stringnumber> extends ISimpleDTO<T>, ba
  */
 export class SimpleFlatNodeActionable implements ISimpleFlatNodeActionable {
   priority: number = 0
-  parentId: number = -1
+  parentId: number | null
   id: number = -1
   title: string = ''
   editing?: boolean | undefined = false
@@ -178,7 +178,7 @@ export class SimpleFlatNodeActionable implements ISimpleFlatNodeActionable {
   tempData: any = null
   selectable?: boolean | undefined = false
   disabled?: boolean | undefined = false
-  constructor(id: number = 0, title: string = '', parentid: number = 0) {
+  constructor(id: number = 0, title: string = '', parentid: number | null) {
     this.id = id
     this.title = title
     this.parentId = parentid

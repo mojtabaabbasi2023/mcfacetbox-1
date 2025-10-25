@@ -7,7 +7,7 @@ import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import MCDialogNodeRelationList from '../dialogs/MCDialogNodeRelationList.vue'
 import { type IRootServiceError, MessageType, SelectionType, SizeType } from '@/types/baseModels'
 import { NodeLocationType, NodeSelectionType, SimpleFlatNodeActionable, getNodeTypeNameSpace } from '@/types/tree'
-import type { ISimpleFlatNodeActionable, ISingleNodeView, ITree, NodeRelationType } from '@/types/tree'
+import type { INodeChangePriority, ISimpleFlatNodeActionable, ISingleNodeView, ITree, NodeRelationType } from '@/types/tree'
 import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import { useSelectedTree } from '@/store/treeStore'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
@@ -47,19 +47,11 @@ const treeStore = useTreeStoreV3()
 const searchbox = ref()
 
 const activatedNode = ref<number[]>([])
-const openedNode = ref<number[]>([])
 const isLoading = ref(false)
 const treeElement = shallowRef()
 const rootElement = shallowRef()
 
 const searchResultSelectedNodes = ref<number[]>([])
-
-// Drag and drop state
-const hasDraggableState = ref(false)
-const hasDividerDraggableBefore = ref(false)
-const hasDividerDraggableAfter = ref(false)
-const sourceDraggableItem = ref<any | null>(null)
-const activeDraggableItem = ref<any | null>(null)
 
 // Dialog visibility
 const activeSearch = shallowRef(false)
@@ -106,15 +98,9 @@ const { focused: rootFocused } = useFocus(rootElement, { initialValue: true })
 // ============================================
 
 // Tree data from store (reactive and optimized)
-// const treeData = computed(() => treeStore.treeData)
 
 // Currently selected node
 const selectedNode = computed(() => treeStore.selectedNode)
-
-// Tree view style
-const treeViewStyle = computed(() => ({
-  '--tree-block-size-offset': `${treeBlockSize.value}px`,
-}))
 
 // ============================================
 // LAZY LOADING
@@ -148,8 +134,6 @@ const refreshTree = async () => {
 
       return
     }
-
-    activatedNode.value.splice(0)
 
     selectedTreeStore.id = data.value.id
     selectedTreeStore.title = data?.value.title
@@ -582,8 +566,8 @@ function resetDragState() {
 
 async function transferNodeWithDraggableMouse(
   transfertype: NodeLocationType,
-  sourceNodeItem: any,
-  destinationNodeItem: any,
+  sourceNodeItem: ISimpleFlatNodeActionable,
+  destinationNodeItem: ISimpleFlatNodeActionable,
 ) {
   const title = formatString(
     t(`${transfertype === NodeLocationType.Children ? 'alert.transfernodeaschild' : (transfertype === NodeLocationType.SiblingAfter ? 'alert.transfernodeasbrotherafter' : 'alert.transfernodeasbrotherbefore')}`),
@@ -602,11 +586,12 @@ async function transferNodeWithDraggableMouse(
     'warning',
     async () => {
       try {
-        await $api(`app/node/${sourceNodeItem.id}/move/${getNodeTypeNameSpace(transfertype)}/${destinationNodeItem.id}`, {
+        const result = await $api<INodeChangePriority>(`app/node/${sourceNodeItem.id}/move/${getNodeTypeNameSpace(transfertype)}/${destinationNodeItem.id}`, {
           method: 'PUT',
           ignoreResponseError: false,
         })
-        treeStore.moveNode(sourceNodeItem.id, destinationNodeItem.id, transfertype)
+
+        treeStore.moveNode(sourceNodeItem.id, destinationNodeItem.id, result.priority, transfertype)
       }
       catch (error) {
         serviceError.value = error
@@ -625,77 +610,9 @@ async function transferNodeWithDraggableMouse(
         toast.error(t('alert.probleminnodeaddrefreshpage'))
     }
     else {
-      resetMouseDraggable()
+      resetDragState()
     }
   }
-}
-
-// ============================================
-// DRAG & DROP HANDLERS
-// ============================================
-
-function treeItemMouseDown(mouseEvent: MouseEvent, treeItem: any) {
-  hasDraggableState.value = true
-  sourceDraggableItem.value = treeItem
-}
-
-function treeItemMouseLeave(mouseEvent: MouseEvent, treeItem: any) {
-  if (mouseEvent.buttons === 0)
-    resetMouseDraggable()
-
-  if (sourceDraggableItem.value && sourceDraggableItem.value.id === treeItem.id) {
-    activatedNode.value.splice(0)
-    activatedNode.value.push(treeItem.id)
-  }
-}
-
-function treeItemMouseEnter(mouseEvent: MouseEvent, treeItem: any) {
-  if (mouseEvent.buttons === 0)
-    resetMouseDraggable()
-  if (!can('Move', 'Node'))
-    return
-
-  if (hasDraggableState.value) {
-    activeDraggableItem.value = treeItem
-    setTimeout(() => {
-      if (activeDraggableItem.value?.id === treeItem.id && !openedNode.value.includes(treeItem.id))
-        openedNode.value.push(treeItem.id)
-    }, 2000)
-  }
-}
-
-function treeItemMouseUp(mouseEvent: MouseEvent, treeItem: any) {
-  if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
-    transferNodeWithDraggableMouse(NodeLocationType.Children, sourceDraggableItem.value, activeDraggableItem.value)
-}
-
-function treeDividerMouseEnter(transfertype: NodeLocationType) {
-  if (transfertype === NodeLocationType.SiblingBefore)
-    hasDividerDraggableBefore.value = true
-
-  if (transfertype === NodeLocationType.SiblingAfter)
-    hasDividerDraggableAfter.value = true
-}
-
-function treeDividerMouseLeave(mouseEvent: MouseEvent, transfertype: NodeLocationType) {
-  if (transfertype === NodeLocationType.SiblingBefore)
-    hasDividerDraggableBefore.value = false
-
-  if (transfertype === NodeLocationType.SiblingAfter)
-    hasDividerDraggableAfter.value = false
-}
-
-function treeDividerMouseUp(mouseEvent: MouseEvent, treeItem: any, transfertype: NodeLocationType) {
-  if (sourceDraggableItem.value && sourceDraggableItem.value.id !== treeItem.id && activeDraggableItem.value)
-    transferNodeWithDraggableMouse(transfertype, sourceDraggableItem.value, activeDraggableItem.value)
-}
-
-function resetMouseDraggable() {
-  hasDraggableState.value = false
-  hasDividerDraggableBefore.value = false
-  hasDividerDraggableAfter.value = false
-  sourceDraggableItem.value = null
-  activeDraggableItem.value = null
 }
 
 // ============================================
@@ -703,7 +620,7 @@ function resetMouseDraggable() {
 // ============================================
 
 const onContextMenu = (e: MouseEvent, nodeItem: ISimpleFlatNodeActionable) => {
-  resetMouseDraggable()
+  resetDragState()
   e.preventDefault()
   treeStore.highlightNode(nodeItem.id)
 
@@ -791,14 +708,6 @@ const treeSizeHeight = computed(() => {
 function focusToRootElemet() {
   rootElement.value.focus()
 }
-function isValidActivateNode(): boolean {
-  return !!(activatedNode.value.length > 0 && treeStore.getNode(activatedNode.value[0]))
-}
-
-function clearActivateNode() {
-  treeStore.deselectAll()
-  activatedNode.value.splice(0)
-}
 
 const selectTreeNode = (item: ISimpleFlatNodeActionable) => {
   const newQuery = { ...route.query }
@@ -818,7 +727,7 @@ function handleTreeKeydown(event: KeyboardEvent) {
   if (event.key === 'F2' && treeStore.highlightedNodeId > 0)
     nodeEditStart()
   if (event.key === 'Escape')
-    resetMouseDraggable()
+    resetDragState()
 }
 
 function handleTreeNodeKeydown(event: KeyboardEvent) {
@@ -837,10 +746,7 @@ const nodeaddfailed = (message: string) => {
 const parentNodeTitle = (nodeid: number | null): string => {
   if (!nodeid)
     return ''
-  const node = treeStore.getNode(nodeid)
-  if (!node || !node.parentId)
-    return ''
-  const parent = treeStore.getNode(node.parentId)
+  const parent = treeStore.getParentNode(nodeid)
 
   return parent?.title || ''
 }
@@ -927,8 +833,7 @@ watch(() => treeStore.currentTreeId, async (newval, oldVal) => {
 })
 
 watch(searchResultSelectedNodes, () => {
-  activatedNode.value.splice(0)
-  activatedNode.value.push(...searchResultSelectedNodes.value)
+  treeStore.highlightedNodeId = searchResultSelectedNodes.value[0]
   gotoNode(searchResultSelectedNodes.value[0], NodeSelectionType.highlighted, false)
 })
 
@@ -957,7 +862,7 @@ onMounted(async () => {
       v-if="dialogAddNewNodeVisible"
       v-model:is-dialog-visible="dialogAddNewNodeVisible"
       :selected-tree-id="treeStore.currentTreeId"
-      :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', -1)"
+      :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', null)"
       @node-added="nodeItemAdded"
       @node-added-failed="nodeaddfailed"
     />
@@ -966,8 +871,8 @@ onMounted(async () => {
       v-if="dialogMergeNodeVisible"
       v-model:is-dialog-visible="dialogMergeNodeVisible"
       :selected-tree-id="treeStore.currentTreeId"
-      :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)"
-      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleFlatNodeActionable(-1, '', -1)"
+      :parent-node-title="parentNodeTitle(treeStore.highlightedNodeId)"
+      :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', null)"
       @nodemerged="nodeMerged"
       @node-merge-failed="nodeaddfailed"
     />
@@ -976,8 +881,8 @@ onMounted(async () => {
       v-if="dialogTransferNodeVisible"
       v-model:is-dialog-visible="dialogTransferNodeVisible"
       :selected-tree-id="treeStore.currentTreeId"
-      :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)"
-      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleFlatNodeActionable(-1, '', -1)"
+      :parent-node-title="parentNodeTitle(treeStore.highlightedNodeId)"
+      :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', null)"
       @node-transfered="nodeTransfered"
       @node-transfer-faild="nodeaddfailed"
     />
@@ -986,8 +891,8 @@ onMounted(async () => {
       v-if="dialogNodeRelationVisible"
       v-model:is-dialog-visible="dialogNodeRelationVisible"
       :selected-tree-id="treeStore.currentTreeId"
-      :parent-node-title="parentNodeTitle(activatedNode.length > 0 ? activatedNode[0] : null)"
-      :selected-node="isValidActivateNode() ? treeStore.getNode(activatedNode[0]) : new SimpleFlatNodeActionable(-1, '', -1)"
+      :parent-node-title="parentNodeTitle(treeStore.highlightedNodeId)"
+      :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', null)"
       @message-has-occured="handleDataBoxMessages"
     />
 
@@ -1164,67 +1069,8 @@ onMounted(async () => {
   right: 10px;
 }
 // اضافه کردن استایل‌های جدید
-.tree-node {
-  &--dragging {
-    opacity: 0.6;
-    background-color: rgb(var(--v-theme-primary)) !important;
-    color: white;
-  }
 
-  &--drop-zone {
-    background-color: rgb(var(--v-theme-surface-light)) !important;
-    border: 2px dashed rgb(var(--v-theme-scondary));
-  }
-
-  &--drop-before {
-    border-top: 4px solid rgb(var(--v-theme-primary));
-  }
-
-  &--drop-after {
-    border-bottom: 4px solid rgb(var(--v-theme-primary));
-  }
-
-  &--drop-inside {
-    background-color: rgb(var(--v-theme-primary)) !important;
-    color: white;
-  }
-}
-
-.drag-ghost {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 9999 !important;
-  pointer-events: none !important;
-  opacity: 0.9 !important;
-  transform: rotate(3deg) scale(0.98) !important;
-  background: rgb(var(--v-theme-primary)) !important;
-  color: white !important;
-  padding: 8px 12px !important;
-  border-radius: 6px !important;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
-  max-width: 250px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-
-  // حذف استایل‌های داخلی که ممکن است تداخل ایجاد کنند
-  .tree-node__icon,
-  .v-text-field {
-    display: none !important;
-  }
-}
-.tree-node {
-  position: relative;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgba(var(--v-theme-primary), 0.04);
-  }
-}
+// .tree-node {
+//
+// }
 </style>

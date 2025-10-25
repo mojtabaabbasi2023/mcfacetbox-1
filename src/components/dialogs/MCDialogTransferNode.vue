@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 // !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
 
-import { useTree } from '@/store/treeStore'
-import type { ISimpleNestedNodeActionable } from '@/types/tree'
+import type { INodeChangePriority, ISimpleNestedNodeActionable } from '@/types/tree'
 import { SelectionType } from '@/types/baseModels'
 import { NodeLocationType, getNodeTypeNameSpace } from '@/types/tree'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
 
 interface Prop {
   isDialogVisible: boolean
@@ -19,7 +19,7 @@ const selectedNodes = ref<number[]>([])
 const activeActions = ref(false)
 const nodeTitle = ref('')
 const loading = ref(false)
-const { transferNode } = useTree()
+const treeStore = useTreeStoreV3()
 const transfertype = ref(NodeLocationType.SiblingAfter)
 const { t } = useI18n({ useScope: 'global' })
 
@@ -48,12 +48,12 @@ function dataEntryChanged(phrase: string) {
 const transferNodeLocal = async () => {
   loading.value = true
   try {
-    await $api(`app/node/${props.selectedNode.id}/move/${getNodeTypeNameSpace(transfertype.value)}/${selectedNodes.value[0]}`, {
+    const result = await $api<INodeChangePriority>(`app/node/${props.selectedNode.id}/move/${getNodeTypeNameSpace(transfertype.value)}/${selectedNodes.value[0]}`, {
       method: 'PUT',
       ignoreResponseError: false,
     })
 
-    transferNode(props.selectedNode.id, selectedNodes.value[0], transfertype.value)
+    treeStore.moveNode(props.selectedNode.id, selectedNodes.value[0], result.priority, transfertype.value)
     loading.value = false
     emit('update:isDialogVisible', false)
 
