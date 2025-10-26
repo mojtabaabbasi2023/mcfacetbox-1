@@ -3,7 +3,7 @@ import ContextMenu from '@imengyu/vue3-context-menu'
 import HadithView from './MCHadithViewBox.vue'
 import QuranView from './MCAyahViewBox.vue'
 import VocabView from './MCVocabViewBox.vue'
-import type { ISimpleNestedNodeActionable } from '@/types/tree'
+import type { ISimpleFlatNodeActionable } from '@/types/tree'
 import { DataBoxType, MessageType, SizeType } from '@/types/baseModels'
 import { DataShelfBoxModelNew } from '@/types/dataShelf'
 import type { IDataShelfBoxNew } from '@/types/dataShelf'
@@ -12,7 +12,7 @@ import type { ISearchResultItem, SearchResultItemModel } from '@/types/SearchRes
 interface Props {
   dataitem: ISearchResultItem // در حالت واقعی بهتر است این از یک interface عمومی مثل ISearchResultItem باشد
   selectedTreeId?: number
-  selectedNode?: ISimpleNestedNodeActionable
+  selectedNode?: ISimpleFlatNodeActionable
   searchPhrase?: string
   boxType: DataBoxType
   isExpanded?: boolean

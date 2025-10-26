@@ -2,7 +2,7 @@
 import { useToast } from 'vue-toastification'
 import { VBtn } from 'vuetify/lib/components/index.mjs'
 import MCDataShelfBox from './MCDataShelfBox.vue'
-import { useTree } from '@/store/treeStore'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import type { GridResultFacet, IRootServiceError } from '@/types/baseModels'
 import { DataBoxType, MessageType, QueryRequestModel, SelectAllState, SizeType } from '@/types/baseModels'
 import type { IDataShelfBoxView, LinkDetailModel, UnlinkDataModel } from '@/types/dataShelf'
@@ -61,7 +61,7 @@ const relatedData_CurrentItem = ref<ISearchResultItem>(new SearchResultItemModel
 const { lastShortcutTriggered } = useShortcutManager()
 
 const toast = useToast()
-const { selectedNode } = useTree()
+const treeStore = useTreeStoreV3()
 const shelfState = useDataShelfStateChanged()
 const route = useRoute()
 const router = useRouter()
@@ -211,7 +211,7 @@ function resetData() {
   selectAll.value.count = 0
   resultdataItems.value.splice(0)
   facetboxItems.value.splice(0)
-  currentNodeId.value = selectedNode.id
+  currentNodeId.value = treeStore.selectedNodeId
 }
 async function refreshDataShelf(changescroll: boolean) {
   loadingdata.value = true
@@ -443,7 +443,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
         <div v-if="relatedData_Overlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
           <MCSearchResultBox
             v-model:is-expanded="relatedData_Overlay" search-phrase="" :box-type="relatedData_Type" expandable :dataitem="relatedData_CurrentItem" :selected-tree-id="currentTreeId"
-            :selected-node="selectedNode" @content-to-node-added="contentToNodeAdded"
+            :selected-node="treeStore.selectedNode" @content-to-node-added="contentToNodeAdded"
             @dataitemhaschanged="(value) => { relatedData_CurrentItem = value }"
           />
         </div>
@@ -532,7 +532,7 @@ function unlinkdatabox(unlinkdata: UnlinkDataModel) {
             </div>
           </div>
           <div class="right-0">
-            <span class="ma-2">{{ selectedNode.title }}
+            <span class="ma-2">{{ treeStore.selectedNode?.title || '' }}
               <VTooltip
                 activator="parent"
                 location="top center"

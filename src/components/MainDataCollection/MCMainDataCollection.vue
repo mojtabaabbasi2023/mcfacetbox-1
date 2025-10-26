@@ -6,7 +6,7 @@ import { DataBoxType, MessageType, QueryRequestModel, SearchConfig, SizeType } f
 import type { ISearchResultItem, SearchResultConfigModel } from '@/types/SearchResult'
 import { FacetBoxModel, SearchResultItemModel, TabSearchStateResultModel } from '@/types/SearchResult'
 import { HadithSearchResultItemModel } from '@/types/hadithResult'
-import { useSelectedTree, useTree } from '@/store/treeStore'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import { useDataShelfStateChanged } from '@/store/databoxStore'
 import { AyahSearchResultItemModel } from '@/types/ayahResult'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
@@ -23,8 +23,8 @@ enum ChangeFilterType {
   Facet = 'Facet',
   Clear = 'Clear',
 }
-const { selectedNode } = useTree()
-const selectedTreeItem = useSelectedTree()
+const treeStore = useTreeStoreV3()
+
 const shelfState = useDataShelfStateChanged()
 const ispaginationFullSize = ref(false)
 const { t } = useI18n({ useScope: 'global' })
@@ -336,8 +336,8 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
       <template #default>
         <div v-if="maximizBoxOverlay" class="flex flex-col justify-center my-2 mx-3 h-100 w-100">
           <MCSearchResultBox
-            v-model:is-expanded="maximizBoxOverlay" :box-type="dataTabValue" :search-phrase="apiQueryParamData[dataTabValue].Filter" expandable :dataitem="currentitem" :selected-tree-id="selectedTreeItem.id"
-            :selected-node="selectedNode" @content-to-node-added="contentToNodeAdded" @message-has-occured="searchResultBoxMessageHandle"
+            v-model:is-expanded="maximizBoxOverlay" :box-type="dataTabValue" :search-phrase="apiQueryParamData[dataTabValue].Filter" expandable :dataitem="currentitem" :selected-tree-id="treeStore.currentTreeId"
+            :selected-node="treeStore.selectedNode" @content-to-node-added="contentToNodeAdded" @message-has-occured="searchResultBoxMessageHandle"
             @dataitemhaschanged="(value) => { currentitem = value }"
           />
         </div>
@@ -426,7 +426,7 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
                   <MCSearchResultBox
                     v-for="item in resultDataOnState[DataBoxType.hadith].results"
                     :key="item.id" :box-type="DataBoxType.hadith" expandable
-                    :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="apiQueryParamData[dataTabValue].Filter"
+                    :selected-node="treeStore.selectedNode" :selected-tree-id="treeStore.currentTreeId" :dataitem="item" :search-phrase="apiQueryParamData[dataTabValue].Filter"
                     @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
                   />
                   <div v-show="!resultDataOnState[DataBoxType.hadith].loading" ref="loadmoreendhadith" />
@@ -458,7 +458,7 @@ const maximizeSearchTabBox = (tabBoxItem: ISearchResultItem) => {
                   <MCSearchResultBox
                     v-for="item in resultDataOnState[DataBoxType.quran].results"
                     :key="item.id" :box-type="DataBoxType.quran" expandable
-                    :selected-node="selectedNode" :selected-tree-id="selectedTreeItem.id" :dataitem="item" :search-phrase="apiQueryParamData[dataTabValue].Filter"
+                    :selected-node="treeStore.selectedNode" :selected-tree-id="treeStore.currentTreeId" :dataitem="item" :search-phrase="apiQueryParamData[dataTabValue].Filter"
                     @message-has-occured="searchResultBoxMessageHandle" @content-to-node-added="contentToNodeAdded" @maximize-search-tab-box="maximizeSearchTabBox" @dataitemhaschanged="searchResultItemChaneged"
                   />
                   <div v-show="!resultDataOnState[DataBoxType.quran].loading" ref="loadmoreendquran" />

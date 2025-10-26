@@ -87,20 +87,9 @@ const { lastShortcutTriggered } = useShortcutManager()
 const { x: cursorX, y: cursorY } = usePointer()
 const { focused: rootFocused } = useFocus(rootElement, { initialValue: true })
 
-// const activeElement = useActiveElement()
-
-// watch(activeElement, el => {
-//   console.log('focus changed to', el)
-// })
-
 // ============================================
 // COMPUTED
 // ============================================
-
-// Tree data from store (reactive and optimized)
-
-// Currently selected node
-const selectedNode = computed(() => treeStore.selectedNode)
 
 // ============================================
 // LAZY LOADING
@@ -1033,13 +1022,13 @@ onMounted(async () => {
     <!-- Selected Node Info -->
     <div>
       <VBtn
-        v-if="selectedNode && selectedNode.id > 0"
+        v-if="treeStore.selectedNode && treeStore.selectedNode.id > 0"
         class="selected-node pr-1 pl-1 text-body-2"
         variant="text"
-        @click="gotoNode(selectedNode.id, NodeSelectionType.selected, false)"
+        @click="gotoNode(treeStore.selectedNode.id, NodeSelectionType.selected, false)"
       >
         <p>
-          {{ $t('tree.selectednode') }}: <span>{{ selectedNode.title }}</span>
+          {{ $t('tree.selectednode') }}: <span>{{ treeStore.selectedNode.title }}</span>
         </p>
       </VBtn>
     </div>
