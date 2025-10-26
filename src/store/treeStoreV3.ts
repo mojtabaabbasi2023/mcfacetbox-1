@@ -544,11 +544,11 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
    */
   const highlightNode = (nodeId: number) => {
     // Deselect previous
-    if (highlightedNodeId.value > 0)
+    if (highlightedNodeId.value > 0 || highlightedNodeId.value === -currentTreeId.value)
       updateNode(highlightedNodeId.value, { highlighted: false })
 
     // Select new
-    if (nodeId > 0 && nodes.has(nodeId)) {
+    if (nodes.has(nodeId)) {
       updateNode(nodeId, { highlighted: true })
       highlightedNodeId.value = nodeId
     }
@@ -562,11 +562,11 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
    */
   const selectNode = (nodeId: number, scrollPosition: number = 0) => {
     // Deselect previous
-    if (selectedNodeId.value > 0)
+    if (selectedNodeId.value > 0 || selectedNodeId.value === -currentTreeId.value)
       updateNode(selectedNodeId.value, { selected: false })
 
     // Select new
-    if (nodeId > 0 && nodes.has(nodeId)) {
+    if (nodes.has(nodeId)) {
       updateNode(nodeId, { selected: true })
       selectedNodeId.value = nodeId
       selecteNodeScrollPosition.value = scrollPosition
@@ -581,7 +581,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
    * Deselect all nodes
    */
   const deselectAll = () => {
-    if (selectedNodeId.value > 0)
+    if (selectedNodeId.value > 0 || selectedNodeId.value === -currentTreeId.value)
       updateNode(selectedNodeId.value, { selected: false })
 
     selectedNodeId.value = -1

@@ -242,6 +242,9 @@ function scrolltoNode(nodeselectionType: NodeSelectionType) {
  * Start editing node title
  */
 function nodeEditStart() {
+  if (!can('Update', 'Node') || !isValidActionOnNode(treeStore.highlightedNodeId))
+    return false
+
   //   nodeTempTitleForEdit.value = node.title
   treeStore.startEditing(treeStore.highlightedNodeId)
   gotoNode(treeStore.highlightedNodeId, NodeSelectionType.highlighted, false)
@@ -314,7 +317,10 @@ function handleEditableNodeKeydown(event: KeyboardEvent, item: ISimpleFlatNodeAc
 /**
  * Delete node (with confirmation)
  */
-const deleteSelectedNode = async (nodeItem: any) => {
+const deleteSelectedNode = async (nodeItem: ISimpleFlatNodeActionable) => {
+  if (!can('Delete', 'Node') || !isValidActionOnNode(nodeItem.id))
+    return false
+
   const title = formatString(t('alert.specificItemDeleted'), nodeItem.title)
   const serviceError = shallowRef()
 
@@ -357,7 +363,9 @@ const deleteSelectedNode = async (nodeItem: any) => {
 /**
  * Add comment/description to node
  */
-const addcomment = async (nodeItem: any) => {
+const addcomment = async (nodeItem: ISimpleFlatNodeActionable) => {
+  if (!can('Description', 'Node') || !isValidActionOnNode(nodeItem.id))
+    return false
   let resultTree: ISingleNodeView | null = null
 
   try {
@@ -529,7 +537,7 @@ function onDrop(event: DragEvent, nodeItem: ISimpleFlatNodeActionable) {
 }
 
 function validateDrop(sourceNode: ISimpleFlatNodeActionable, targetNode: ISimpleFlatNodeActionable): boolean {
-  if (!can('Move', 'Node'))
+  if (!can('Move', 'Node') || !isValidActionOnNode(sourceNode.id) || !isValidActionOnNode(targetNode.id))
     return false
 
   // جلوگیری از انتقال به خود یا والدین
@@ -612,7 +620,8 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleFlatNodeActionable) => {
   resetDragState()
   e.preventDefault()
   treeStore.highlightNode(nodeItem.id)
-
+  if (!isValidActionOnNode(nodeItem.id))
+    return
   ContextMenu.showContextMenu({
     x: e.x,
     y: e.y,
@@ -686,6 +695,11 @@ const onContextMenu = (e: MouseEvent, nodeItem: ISimpleFlatNodeActionable) => {
 // HELPER FUNCTIONS
 // ============================================
 
+const isValidActionOnNode = (nodeId: number): boolean => {
+  // this condition is for draft Node
+  return !(nodeId === -treeStore.currentTreeId)
+}
+
 const treeSizeHeight = computed(() => {
   const toolbarHeight = 38
   const treeStatusBar = 36
@@ -703,7 +717,7 @@ const selectTreeNode = (item: ISimpleFlatNodeActionable) => {
 
   clearUnNeededQueryItems(newQuery)
   addTreeIdToQuery(treeStore.currentTreeId, newQuery)
-  if (item.id > 0)
+  if (item.id > 0 || item.id === -treeStore.currentTreeId)
     addNodeIdToQuery(item.id, newQuery)
   router.replace({ query: newQuery })
 }
