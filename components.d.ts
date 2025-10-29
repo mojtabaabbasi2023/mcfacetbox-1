@@ -346,6 +346,7 @@ declare module 'vue' {
     DropZone: typeof import('./src/@core/components/DropZone.vue')['default']
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
     I18n: typeof import('./src/@core/components/I18n.vue')['default']
+    MCAutoFontSize: typeof import('./src/components/MCAutoFontSize.vue')['default']
     MCAyahViewBox: typeof import('./src/components/MainDataCollection/MCAyahViewBox.vue')['default']
     MCDataBoxEditableFootnote: typeof import('./src/components/MCDataBoxEditableFootnote.vue')['default']
     MCDataShelfBox: typeof import('./src/components/MainDataShelf/MCDataShelfBox.vue')['default']

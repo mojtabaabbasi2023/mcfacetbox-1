@@ -44,7 +44,7 @@
         //این اندازه گذاری برای ارتفاع متناسب با ارتفاع نوار ابزار بالای فرم و فاصله های تعیین شده آن است
         block-size: calc(100% - 35px) !important;
         padding-block: 0;
-        padding-inline: 6px;
+        // padding-inline: 6px;
 
         .mc-data-container {
             // block-size: 100%;
@@ -73,15 +73,6 @@
 
     .mc-main-tree {
         --tree-block-size-offset: 220px;
-
-        .toolbar {
-            border-radius: 6px;
-            background-color: rgba(var(--v-theme-primary), 0.1);
-            padding-top: 2px;
-            padding-bottom: 2px;
-            padding-inline: 4px;
-            // margin-block-start: 10px !important;
-        }
 
         .header {
             padding: 0 0px;
@@ -303,6 +294,7 @@
         }
     }
 }
+
 
 .close-btn {
     position: absolute;
@@ -626,4 +618,12 @@
     border-radius: 3px;
     color: #D32F2F;
     font-weight: 00;
+}
+
+.v-virtual-scroll {
+    .v-virtual-scroll__container {
+        @include mcvariables.custom-scrollbar;
+        display: grid;
+        justify-items: stretch;
+    }
 }

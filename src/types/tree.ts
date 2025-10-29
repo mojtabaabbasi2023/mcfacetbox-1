@@ -1,6 +1,7 @@
 import { ActionDates } from './baseModels'
 import type { ISimpleDTO, ISimpleTree, baseItemAction, baseItemState, stringnumber } from './baseModels'
 import type { IDataShelfBoxView, IExerptSupervisionStat } from './dataShelf'
+import { ExcerptSupervisionStat } from './dataShelf'
 
 export function createTreeIndex(tree: ISimpleTree[]): Record<number, ISimpleTree> {
   const index: Record<number, ISimpleTree> = {}
@@ -124,6 +125,7 @@ export interface ISimpleNestedNodeActionable extends baseItemAction, baseItemSta
   children?: ISimpleNestedNodeActionable[] | null
   parentId: number | null
   priority: number
+  excerptCount: ExcerptSupervisionStat | null
   hasDescription?: boolean
   relationCount?: number
   referenceCount?: number
@@ -138,6 +140,7 @@ export interface ISimpleFlatNodeActionable extends baseItemAction, baseItemState
   relationCount?: number
   referenceCount?: number
   hasChildren: boolean
+  excerptCount: ExcerptSupervisionStat | null
   depth: number
   isExpanded: boolean
   isLoaded: boolean
@@ -153,7 +156,7 @@ export interface ISimpleNestedNodeExcerptActionable extends baseItemAction, base
   children?: ISimpleNestedNodeExcerptActionable[] | null
   parentId: number
   priority: number
-  excerptCount: IExerptSupervisionStat | null
+  excerptCount: ExcerptSupervisionStat | null
   excerpts: IDataShelfBoxView[] | null
   hasDescription?: boolean
 }
@@ -183,6 +186,8 @@ export class SimpleFlatNodeActionable implements ISimpleFlatNodeActionable {
     this.title = title
     this.parentId = parentid
   }
+
+  excerptCount: ExcerptSupervisionStat | null = new ExcerptSupervisionStat(0)
 
   hasDescription?: boolean | undefined
   relationCount?: number | undefined
@@ -215,6 +220,13 @@ export class SimpleNestedNodeAcionableModel implements ISimpleNestedNodeActionab
     this.title = title
     this.parentId = parentid
   }
+
+  excerptCount: ExcerptSupervisionStat | null = new ExcerptSupervisionStat(0)
+
+  hasDescription?: boolean | undefined
+  relationCount?: number | undefined
+  referenceCount?: number | undefined
+  failed?: boolean | null | undefined
 }
 
 export class SimpleNestedNodeExcerptAcionableModel implements ISimpleNestedNodeExcerptActionable {
@@ -229,7 +241,7 @@ export class SimpleNestedNodeExcerptAcionableModel implements ISimpleNestedNodeE
   tempData: any = null
   selectable?: boolean | undefined = false
   disabled?: boolean | undefined = false
-  excerptCount: IExerptSupervisionStat | null = null
+  excerptCount: ExcerptSupervisionStat | null = new ExcerptSupervisionStat(0)
   excerpts: IDataShelfBoxView[] | null = []
   hasDescription?: boolean | undefined
   failed?: boolean | null | undefined

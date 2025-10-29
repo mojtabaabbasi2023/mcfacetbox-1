@@ -6,8 +6,8 @@ import MCLoading from '../MCLoading.vue'
 import MCDialogTransferNode from '../dialogs/MCDialogTransferNode.vue'
 import MCDialogNodeRelationList from '../dialogs/MCDialogNodeRelationList.vue'
 import { type IRootServiceError, MessageType, SelectionType, SizeType } from '@/types/baseModels'
-import { NodeLocationType, NodeSelectionType, SimpleFlatNodeActionable, getNodeTypeNameSpace } from '@/types/tree'
-import type { INodeChangePriority, ISimpleFlatNodeActionable, ISingleNodeView, ITree, NodeRelationType } from '@/types/tree'
+import { NodeLocationType, NodeRelationType, NodeSelectionType, SimpleFlatNodeActionable, getNodeTypeNameSpace } from '@/types/tree'
+import type { INodeChangePriority, ISimpleFlatNodeActionable, ISingleNodeView, ITree } from '@/types/tree'
 import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import { useSelectedTree } from '@/store/treeStore'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
@@ -98,7 +98,9 @@ const { focused: rootFocused } = useFocus(rootElement, { initialValue: true })
 /**
  * Load children when node is expanded
  */
-const toggleNodeExpansion = async (item: ISimpleFlatNodeActionable): Promise<void> => {
+const toggleNodeExpansion = async (event: MouseEvent, item: ISimpleFlatNodeActionable): Promise<void> => {
+  event.stopPropagation()
+  event.preventDefault()
   treeStore.toggleNodeExpansion(item.id)
   await nextTick()
 }
@@ -857,7 +859,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div ref="rootElement" class="mc-main-tree d-flex flex-column justify-start no-outline h-100" tabindex="0" @keydown="handleTreeKeydown">
+  <div ref="rootElement" class="d-flex flex-column justify-start no-outline h-100" tabindex="0" @keydown="handleTreeKeydown">
     <MCLoading :showloading="isLoading" :loadingsize="SizeType.XL" />
 
     <!-- Dialogs -->
@@ -907,7 +909,7 @@ onMounted(async () => {
     />
 
     <!-- Toolbar -->
-    <div class="btn-box toolbar">
+    <div class="btn-box tree-toolbar">
       <div class="d-flex toolbar">
         <VBtn size="small" variant="text" :disabled="!$can('Create', 'Node')" @click="dialogAddNewNodeVisible = true">
           <VIcon icon="tabler-plus" size="22" />
@@ -958,14 +960,14 @@ onMounted(async () => {
 
     <!-- Header -->
     <div class="d-flex flex-row justify-space-between flex-shrink-0 w-100">
-      <div style="height: 90%;" />
-      <div class="header">
-        {{ $t('tree.nodes') }}
+      <div>&nbsp;</div>
+      <div class="excerpt-count--header">
+        {{ $t('excerptcount') }}
       </div>
     </div>
 
     <!-- Tree View -->
-    <div>
+    <div class="tree-container">
       <VVirtualScroll ref="treeElement" :items="treeStore.flatVisibleNodes" :height="treeSizeHeight" item-height="30">
         <template #default="{ item }">
           <div
@@ -989,29 +991,24 @@ onMounted(async () => {
             @dragleave="onDragLeave"
             @drop="onDrop($event, item)"
             @dragend="resetDragState"
+            @click="treeStore.highlightNode(item.id)" @dblclick="selectTreeNode(item)"
           >
-            <div class="tree-node__icon" :style="{ width: '16px', cursor: item.hasChildren ? 'pointer' : 'default' }" @click="toggleNodeExpansion(item)">
-              <!--
-                <VProgressCircular
-                v-if="loading.has(item.id)"
-                indeterminate
-                size="14"
-                width="2"
-                />
-              -->
-              <VIcon size="16">
-                {{ item.hasChildren ? (item.isExpanded ? 'tabler-chevron-down' : 'tabler-chevron-left') : '' }}
-              </VIcon>
-            </div>
-            <!--
-              <div
-              v-if="dragState.dropTarget?.id === item.id && dragState.validDrop"
-              class="drop-indicator"
-              :class="`drop-indicator--${dragState.dropPosition}`"
-              />
-            -->
-            <div class="w-100" @click="treeStore.highlightNode(item.id)" @dblclick="selectTreeNode(item)">
-              <div>
+            <div class="tree-node__content">
+              <div class="tree-node__icon" :style="{ width: '16px', cursor: item.hasChildren ? 'pointer' : 'default' }" @click="toggleNodeExpansion($event, item)">
+                <!--
+                  <VProgressCircular
+                  v-if="loading.has(item.id)"
+                  indeterminate
+                  size="14"
+                  width="2"
+                  />
+                -->
+                <VIcon size="16">
+                  {{ item.hasChildren ? (item.isExpanded ? 'tabler-chevron-down' : 'tabler-chevron-left') : '' }}
+                </VIcon>
+              </div>
+              <!-- <div class="w-100 tree-node__title-wrapper"> -->
+              <div class="w-100 tree-node__title-wrapper">
                 <span v-if="!item.editing" class="tree-node__title no-select">{{ item.title }}
 
                 </span>
@@ -1027,6 +1024,43 @@ onMounted(async () => {
                   @blur="nodeEditCancel(item)"
                   @keydown="handleEditableNodeKeydown($event, item)"
                 />
+              </div>
+              <!-- </div> -->
+            </div>
+            <div class="tree-node__state-column">
+              <VBtn v-if="item.hasDescription" size="xsmall" variant="plain" @click="addcomment(item)">
+                <VTooltip
+                  activator="parent"
+                  location="top center"
+                >
+                  {{ $t('tree.comment') }}
+                </VTooltip>
+                <VIcon size="16" icon="tabler-message" />
+              </VBtn>
+              <VBtn v-if="(item.relationCount ?? 0) > 0" size="xsmall" variant="plain" @click="showNodeRelationList(item.id, NodeRelationType.relation)">
+                <VTooltip
+                  activator="parent"
+                  location="top center"
+                >
+                  {{ $t('relations') }}
+                </VTooltip>
+                <VIcon size="16" icon="tabler-paperclip" />
+              </VBtn>
+              <VBtn v-if="(item.referenceCount ?? 0) > 0" size="xsmall" variant="plain" @click="showNodeRelationList(item.id, NodeRelationType.reference)">
+                <VTooltip
+                  activator="parent"
+                  location="top center"
+                >
+                  {{ $t('references') }}
+                </VTooltip>
+                <VIcon size="16" icon="tabler-arrow-bounce" />
+              </VBtn>
+            </div>
+            <div class="tree-node__excerpt-column">
+              <div class="tree-node__excerpt-column.excerpt-count" :data-length="String(item.excerptCount?.total || 0).length">
+                <div style="width: 100%;" v-bind="props">
+                  {{ item.excerptCount?.total || 0 }}
+                </div>
               </div>
             </div>
           </div>
@@ -1071,9 +1105,4 @@ onMounted(async () => {
   bottom: 15px;
   right: 10px;
 }
-// اضافه کردن استایل‌های جدید
-
-// .tree-node {
-//
-// }
 </style>

@@ -201,6 +201,17 @@ export interface IExerptSupervisionStat {
   corrected: number
   accepted: number
 }
+export class ExcerptSupervisionStat implements IExerptSupervisionStat {
+  total: number = 0
+  primary: number = 0
+  ready: number = 0
+  review: number = 0
+  corrected: number = 0
+  accepted: number = 0
+  constructor(totalNumber = 0) {
+    this.total = totalNumber
+  }
+}
 export interface IFootNote extends ISimpleDTO<string>, baseItemState {
   index?: number
   order: number

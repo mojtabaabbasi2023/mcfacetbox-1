@@ -255,6 +255,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
           depth: 0,
           isExpanded: false,
           isLoaded: false,
+          excerptCount: node.excerptCount,
         })
 
         nodes.set(node.id, flatNode)

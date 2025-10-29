@@ -1,3 +1,16 @@
+@use "mc-variables.scss" as mcvariables;
+
+.tree-container {
+    position: relative;
+    overflow: hidden;
+
+    // استایل برای VVirtualScroll
+    .v-virtual-scroll {
+        @include mcvariables.custom-scrollbar;
+        overflow-x: auto;
+    }
+}
+
 /* ساختار کلی نود */
 .tree-node {
     position: relative;
@@ -16,6 +29,13 @@
         background-color: rgba(var(--v-theme-primary), 0.04);
     }
 
+}
+
+.tree-node__content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0; // برای truncate شدن متن
 }
 
 .tree-node {
@@ -44,6 +64,88 @@
     }
 }
 
+.tree-node__state-column {
+    padding-left: 3px;
+    position: sticky;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 2;
+    height: 100%;
+}
+
+.tree-node__excerpt-column {
+    position: sticky;
+    left: 0;
+    max-width: 50px;
+    min-width: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    height: 100%;
+    //   background: rgb(var(--v-theme-background));
+
+    // سایه برای جداسازی بهتر هنگام اسکرول
+    &::after {
+        content: '';
+        position: absolute;
+        right: -2px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+        pointer-events: none;
+    }
+
+    .excerpt-count {
+
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.7);
+        min-width: 24px;
+        max-width: 50px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        // تعریف map برای سایزهای فونت بر اساس طول
+        $font-sizes: (
+            1: 14px,
+            2: 14px,
+            3: 14px,
+            4: 14px,
+            5: 13px,
+            6: 12px,
+            7: 11px,
+            8: 10px,
+            9: 9px,
+            10: 9px
+        );
+
+    // استفاده از each برای iterate کردن روی map
+    @each $length, $size in $font-sizes {
+        &[data-length="#{$length}"] {
+            font-size: $size;
+        }
+    }
+}
+
+// هدر ستون‌ها
+.excerpt-count--header {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    width: 55px;
+}
+}
+
 /* آیکون و متن */
 .tree-node__icon {
     width: 20px;
@@ -53,10 +155,23 @@
     margin-right: 6px;
 }
 
-.tree-node__title {
+.tree-node__title-wrapper {
     flex: 1;
-    font-size: 14px;
+    min-width: 0;
+
+    .tree-node__title {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
+
+// .tree-node__title {
+//     flex: 1;
+//     font-size: 14px;
+// }
 
 /* 🌈 Hover */
 .tree-node:hover {
@@ -92,7 +207,16 @@
 .tree-node--inactive.tree-node--highlighted,
 .tree-node--inactive.tree-node--selected {
     background-color: rgba(var(--v-theme-primary), 0.08);
-    // color: rgba(var(--v-theme-on-surface), 0.6);
+    color: rgba(var(--v-theme-on-surface), 0.6);
     font-weight: normal;
     transition: all 0.2s ease;
+}
+
+.tree-toolbar {
+    border-radius: 6px;
+    background-color: rgba(var(--v-theme-primary), 0.1);
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-inline: 4px;
+    // margin-block-start: 10px !important;
 }
