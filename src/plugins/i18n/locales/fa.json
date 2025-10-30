@@ -399,6 +399,7 @@
         "transfernodeasbrotherbefore": "آیا گره '(0)' به قبل از گره '(1)' منتقل شود؟",
         "transfernodeaschild": "آیا گره '(0)' بعنوان فرزند '(1)' منتقل شود؟",
         "unablemergeselectednode": "امکان ادغام گره های انتخاب شده وجود ندارد",
+        "unablemoveselectednode": "امکان انتقال گره های انتخاب شده وجود ندارد"
     },
     "$vuetify": {
         "badge": "نشان",

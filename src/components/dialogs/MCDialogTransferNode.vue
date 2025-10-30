@@ -2,7 +2,7 @@
 // !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
 
 import type { INodeChangePriority, ISimpleNestedNodeActionable } from '@/types/tree'
-import { SelectionType } from '@/types/baseModels'
+import { MessageType, SelectionType } from '@/types/baseModels'
 import { NodeLocationType, getNodeTypeNameSpace } from '@/types/tree'
 import { useTreeStoreV3 } from '@/store/treeStoreV3'
 
@@ -28,7 +28,7 @@ interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
   (e: 'nodeTransfered', sourceNodeId: number, destinationNodeID: number): void
   (e: 'nodeTransferFaild', message: string): void
-
+  (e: 'messageHasOccured', message: string, type: MessageType): void
 }
 
 const onReset = (closedialog: boolean = false) => {
@@ -46,6 +46,8 @@ function dataEntryChanged(phrase: string) {
 }
 
 const transferNodeLocal = async () => {
+  if (treeStore.isDescendant(selectedNodes.value[0], props.selectedNode.id))
+    return emit('messageHasOccured', t('alert.unablemoveselectednode'), MessageType.error)
   loading.value = true
   try {
     const result = await $api<INodeChangePriority>(`app/node/${props.selectedNode.id}/move/${getNodeTypeNameSpace(transfertype.value)}/${selectedNodes.value[0]}`, {

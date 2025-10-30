@@ -890,7 +890,7 @@ onMounted(async () => {
       :parent-node-title="parentNodeTitle(treeStore.highlightedNodeId)"
       :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', null)"
       @node-transfered="nodeTransfered"
-      @node-transfer-faild="nodeaddfailed"
+      @node-transfer-faild="nodeaddfailed" @message-has-occured="handleDataBoxMessages"
     />
 
     <MCDialogNodeRelation
