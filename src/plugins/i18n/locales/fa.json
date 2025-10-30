@@ -397,7 +397,8 @@
         "probleminnodeaddrefreshpage": "مشکلی در افزودن گره بوجود آمده است، درخت را بروزرسانی کنید",
         "transfernodeasbrotherafter": "آیا گره '(0)' به بعد از گره '(1)' منتقل شود؟",
         "transfernodeasbrotherbefore": "آیا گره '(0)' به قبل از گره '(1)' منتقل شود؟",
-        "transfernodeaschild": "آیا گره '(0)' بعنوان فرزند '(1)' منتقل شود؟"
+        "transfernodeaschild": "آیا گره '(0)' بعنوان فرزند '(1)' منتقل شود؟",
+        "unablemergeselectednode": "امکان ادغام گره های انتخاب شده وجود ندارد",
     },
     "$vuetify": {
         "badge": "نشان",

@@ -1,7 +1,8 @@
 import { computed, markRaw, reactive, shallowReactive } from 'vue'
 import { defineStore } from 'pinia'
 import { NodeLocationType } from '@/types/tree'
-import type { ISimpleFlatNodeActionable, ISimpleNestedNodeActionable, ITree } from '@/types/tree'
+import type { INodeChangePriority, ISimpleFlatNodeActionable, ISimpleNestedNodeActionable, ITree } from '@/types/tree'
+import { ExcerptSupervisionStat } from '@/types/dataShelf'
 
 /**
  * Flat visible node for virtual scrolling
@@ -369,6 +370,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
       depth: 0,
       isExpanded: false,
       isLoaded: false,
+      excerptCount: new ExcerptSupervisionStat(0),
     })
 
     nodes.set(newNode.id, newNode)
@@ -456,9 +458,10 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
 
     switch (moveType) {
       case NodeLocationType.Children:
-      // Move as child of destination
         newParentId = destinationId
-        break
+
+        // Move as child of destination
+      break
 
       case NodeLocationType.SiblingBefore:
       case NodeLocationType.SiblingAfter:
@@ -468,11 +471,18 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
       default:
         return false
     }
-
     updateNode(nodeId, {
       parentId: newParentId,
       priority: destinationPriority,
     })
+    if (sourceNode.parentId)
+      updateNode(sourceNode.parentId, { hasChildren: hasChildren(sourceNode.parentId) })
+
+    if (newParentId) {
+      updateNode(newParentId, {
+        hasChildren: true,
+      })
+    }
 
     return true
   }
@@ -480,10 +490,9 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
   /**
    * Merge source node into destination (move all children)
    */
-  const mergeNode = (sourceId: number, destinationId: number): boolean => {
+  const mergeNode = (sourceId: number, destinationId: number, newNodePriority: INodeChangePriority[]): boolean => {
     const sourceNode = nodes.get(sourceId)
     const destNode = nodes.get(destinationId)
-
     if (!sourceNode || !destNode)
       return false
     if (sourceId === destinationId)
@@ -492,14 +501,26 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     // Move all children of source to destination
     const children = getChildren(sourceId)
 
+    console.log('mergechildren', children)
+
     children.forEach(child => {
       updateNode(child.id, {
         parentId: destinationId,
+        priority: newNodePriority.find((a => a.id = child.id))?.priority ?? child.priority,
       })
     })
 
     // Delete source node
     deleteNode(sourceId)
+    console.log('mergecsourceNode', sourceNode)
+
+    if (sourceNode.parentId)
+      updateNode(sourceNode.parentId, { hasChildren: hasChildren(sourceNode.parentId) })
+    if (destNode) {
+      updateNode(destinationId, {
+        hasChildren: children.length > 0,
+      })
+    }
 
     return true
   }
@@ -675,6 +696,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     isLastSibling,
     buildDisplayNode,
     getParentNode,
+    isDescendant,
 
     // Actions: Data
     loadTree,

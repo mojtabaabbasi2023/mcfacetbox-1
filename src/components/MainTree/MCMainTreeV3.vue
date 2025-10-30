@@ -547,7 +547,7 @@ function validateDrop(sourceNode: ISimpleFlatNodeActionable, targetNode: ISimple
     return false
 
   // جلوگیری از انتقال به فرزندان خود
-  const isDescendant = treeStore.getAncestorIds(targetNode.id).includes(sourceNode.id)
+  const isDescendant = treeStore.isDescendant(targetNode.id, sourceNode.id)
   if (isDescendant)
     return false
 
@@ -585,12 +585,13 @@ async function transferNodeWithDraggableMouse(
     'warning',
     async () => {
       try {
-        const result = await $api<INodeChangePriority>(`app/node/${sourceNodeItem.id}/move/${getNodeTypeNameSpace(transfertype)}/${destinationNodeItem.id}`, {
+        const resultService = await $api<INodeChangePriority>(`app/node/${sourceNodeItem.id}/move/${getNodeTypeNameSpace(transfertype)}/${destinationNodeItem.id}`, {
           method: 'PUT',
           ignoreResponseError: false,
         })
 
-        treeStore.moveNode(sourceNodeItem.id, destinationNodeItem.id, result.priority, transfertype)
+        if (!treeStore.moveNode(sourceNodeItem.id, destinationNodeItem.id, resultService.priority, transfertype))
+          toast.error(t('alert.probleminnodeaddrefreshpage'))
       }
       catch (error) {
         serviceError.value = error
@@ -879,7 +880,7 @@ onMounted(async () => {
       :parent-node-title="parentNodeTitle(treeStore.highlightedNodeId)"
       :selected-node="treeStore.highlightedNodeId > 0 ? treeStore.getNode(treeStore.highlightedNodeId) : new SimpleFlatNodeActionable(-1, '', null)"
       @nodemerged="nodeMerged"
-      @node-merge-failed="nodeaddfailed"
+      @node-merge-failed="nodeaddfailed" @message-has-occured="handleDataBoxMessages"
     />
 
     <MCDialogTransferNode

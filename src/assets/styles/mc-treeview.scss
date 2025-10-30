@@ -7,7 +7,7 @@
     // استایل برای VVirtualScroll
     .v-virtual-scroll {
         @include mcvariables.custom-scrollbar;
-        overflow-x: auto;
+        overflow: auto;
     }
 }
 

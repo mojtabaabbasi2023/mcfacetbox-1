@@ -1,22 +1,3 @@
-// {
-//   "root": true,
-//   "parser": "vue-eslint-parser",
-//   "parserOptions": {
-//       "parser": "@typescript-eslint/parser",
-//   },
-//   "extends": [
-//       "plugin:vue/strongly-recommended",
-//       "eslint:recommended",
-//       "@vue/typescript/recommended",
-//       "prettier",
-//   ],
-//   "plugins": ["@typescript-eslint", "prettier"],
-//   "rules": {
-//       "prettier/prettier": "error",
-//       // not needed for vue 3
-//       "vue/no-multiple-template-root": "off"
-//   }
-// }
 module.exports = {
   env: {
     browser: true,
@@ -57,6 +38,7 @@ module.exports = {
         max: 6,
       },
     }],
+    '@typescript-eslint/no-use-before-define': 'off',
     'no-unused-imports': 'off',
     'no-unused-vars': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 // !SECTION این دیالوگ برای جستجو لیست های تک سطحی و انتخاب یک یا چند مورد میباشد
 
-import { useTree } from '@/store/treeStore'
-import type { ISimpleNestedNodeActionable } from '@/types/tree'
-import { SelectionType } from '@/types/baseModels'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
+import type { INodeChangePriority, ISimpleNestedNodeActionable } from '@/types/tree'
+import { MessageType, SelectionType } from '@/types/baseModels'
 
 interface Prop {
   isDialogVisible: boolean
@@ -18,7 +18,7 @@ const selectedNodes = ref<number[]>([])
 const activeActions = ref(false)
 const nodeTitle = ref('')
 const loading = ref(false)
-const { mergeNode } = useTree()
+const treeStore = useTreeStoreV3()
 const { t } = useI18n({ useScope: 'global' })
 
 interface Emit {
@@ -26,6 +26,7 @@ interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
   (e: 'nodemerged', sourceNodeId: number, destinationNodeID: number): void
   (e: 'nodeMergeFailed', message: string): void
+  (e: 'messageHasOccured', message: string, type: MessageType): void
 
 }
 
@@ -44,24 +45,30 @@ function dataEntryChanged(phrase: string) {
 }
 
 const mergenode = async () => {
+  if (treeStore.isDescendant(selectedNodes.value[0], props.selectedNode.id))
+    return emit('messageHasOccured', t('alert.unablemergeselectednode'), MessageType.error)
   loading.value = true
   try {
-    await $api(`app/node/${props.selectedNode.id}/merge/${selectedNodes.value[0]}`, {
+    const result = await $api<INodeChangePriority[]>(`app/node/${props.selectedNode.id}/merge/${selectedNodes.value[0]}`, {
       method: 'DELETE',
       ignoreResponseError: false,
     })
 
-    mergeNode(props.selectedNode.id, selectedNodes.value[0])
-    loading.value = false
-    emit('update:isDialogVisible', false)
+    if (!treeStore.mergeNode(props.selectedNode.id, selectedNodes.value[0], result))
+      emit('nodeMergeFailed', t('alert.probleminnodeaddrefreshpage'))
+    else
 
-    emit('nodemerged', props.selectedNode.id, selectedNodes.value[0])
+      emit('nodemerged', props.selectedNode.id, selectedNodes.value[0])
   }
   catch (error) {
     loading.value = false
     if (error instanceof CustomFetchError && error.code !== '0')
       emit('nodeMergeFailed', error.message)
     else emit('nodeMergeFailed', t('alert.probleminnodeaddrefreshpage'))
+  }
+  finally {
+    loading.value = false
+    emit('update:isDialogVisible', false)
   }
 }
 </script>
@@ -81,7 +88,7 @@ const mergenode = async () => {
       </template>
       <MCSearchApiAutoComplete
         v-model:selected-items="selectedNodes"
-        auto-focus :max-height="400" :api-url="`app/node/simple?treeid=${props.selectedTreeId}`" :selection-type="SelectionType.Single" class="pt-1"
+        auto-focus :max-height="400" :api-url="`app/node/simple?treeid=${props.selectedTreeId}&ExcludeNodeId=${props.selectedNode.id}`" :selection-type="SelectionType.Single" class="pt-1"
         @search-phrase-changed="dataEntryChanged"
       />
       <VDivider v-if="activeActions" />
