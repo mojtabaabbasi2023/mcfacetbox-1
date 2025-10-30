@@ -1,8 +1,19 @@
 import { computed, markRaw, reactive, shallowReactive } from 'vue'
 import { defineStore } from 'pinia'
-import { NodeLocationType } from '@/types/tree'
+import { NodeLocationType, NodeRelationType } from '@/types/tree'
 import type { INodeChangePriority, ISimpleFlatNodeActionable, ISimpleNestedNodeActionable, ITree } from '@/types/tree'
 import { ExcerptSupervisionStat } from '@/types/dataShelf'
+
+/**
+ * این وضعیت برای تغییر شناسه نود در کامپوننت درخت از خارج از آن میباشد،
+ */
+export const useSelectTreeNode = createGlobalState(
+  () => {
+    const treeNodeIdMustBeSelect = ref<number>(0)
+
+    return { treeNodeIdMustBeSelect }
+  },
+)
 
 /**
  * Flat visible node for virtual scrolling
@@ -433,6 +444,31 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     return nodesToDelete
   }
 
+  const increaseRelatedNodeCount = (nodeid: number, relationtype: NodeRelationType) => {
+    const targetNode = nodes.get(nodeid)
+    if (!targetNode)
+      return
+    if (relationtype === NodeRelationType.relation)
+      updateNode(nodeid, { relationCount: (targetNode.relationCount ?? 0) + 1 })
+    else
+      updateNode(nodeid, { referenceCount: (targetNode.referenceCount ?? 0) + 1 })
+  }
+
+  const decreaseRelatedNodeCount = (nodeid: number, relationtype: NodeRelationType) => {
+    const targetNode = nodes.get(nodeid)
+    if (!targetNode)
+      return
+    if (relationtype === NodeRelationType.relation)
+      updateNode(nodeid, { relationCount: (targetNode.relationCount ?? 0) === 0 ? targetNode.relationCount : targetNode.relationCount - 1 })
+
+    //   targetNode.relationCount = (targetNode.relationCount ?? 0) === 0 ? targetNode.relationCount : targetNode.relationCount - 1
+
+    else
+      updateNode(nodeid, { referenceCount: (targetNode.referenceCount ?? 0) === 0 ? targetNode.referenceCount : targetNode.referenceCount - 1 })
+
+    //   targetNode.referenceCount = (targetNode.referenceCount ?? 0) === 0 ? targetNode.referenceCount : targetNode.referenceCount - 1
+  }
+
   /**
    * Move node to new parent with new position
    */
@@ -714,6 +750,8 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     deleteNode,
     moveNode,
     mergeNode,
+    increaseRelatedNodeCount,
+    decreaseRelatedNodeCount,
 
     // Actions: UI State
     highlightNode,

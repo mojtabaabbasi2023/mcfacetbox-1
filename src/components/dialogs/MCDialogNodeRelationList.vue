@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useSelectTreeNode, useTree } from '@/store/treeStore'
+import { useSelectTreeNode, useTreeStoreV3 } from '@/store/treeStoreV3'
 import { MessageType, SizeType } from '@/types/baseModels'
 import type { INodeRelation } from '@/types/tree'
 import { NodeRelationType } from '@/types/tree'
@@ -9,6 +9,7 @@ interface Prop {
 }
 const props = defineProps<Prop>()
 const emit = defineEmits<Emit>()
+
 const { treeNodeIdMustBeSelect } = useSelectTreeNode()
 const relationList = ref<INodeRelation<number>[]>([])
 const loading = ref(false)
@@ -17,7 +18,7 @@ const relationtypetitle = shallowRef('')
 const currentRelationTypeTitle = shallowRef(NodeRelationType.relation)
 const currentNodeId = shallowRef(0)
 const { t } = useI18n({ useScope: 'global' })
-const { decreaseRelatedNode } = useTree()
+const treeStore = useTreeStoreV3()
 
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
@@ -82,8 +83,7 @@ const deleterelation = async (relationItem: INodeRelation<number>) => {
     // setTimeout(() => {
     relationItem.loading = false
     relationItem.selected = false
-    decreaseRelatedNode(currentNodeId.value, currentRelationTypeTitle.value)
-
+    treeStore.decreaseRelatedNodeCount(currentNodeId.value, currentRelationTypeTitle.value)
     relationList.value.splice(relationList.value.indexOf(relationItem), 1)
 
     // }, 1000)

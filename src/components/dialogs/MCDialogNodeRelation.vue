@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { useTree } from '@/store/treeStore'
-import type { ISimpleNestedNodeActionable } from '@/types/tree'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
+import type { ISimpleFlatNodeActionable } from '@/types/tree'
 import { MessageType, SelectionType } from '@/types/baseModels'
 import { NodeRelationType } from '@/types/tree'
 
 interface Prop {
   isDialogVisible: boolean
-  selectedNode: ISimpleNestedNodeActionable
+  selectedNode: ISimpleFlatNodeActionable
   parentNodeTitle: string
   selectedTreeId: number
 }
@@ -17,7 +17,7 @@ const selectedNodes = ref<number[]>([])
 const activeActions = ref(false)
 const nodeTitle = ref('')
 const loading = ref(false)
-const { increaseRelatedNode } = useTree()
+const treeStore = useTreeStoreV3()
 const relationtype = ref(NodeRelationType.relation)
 const { t } = useI18n({ useScope: 'global' })
 
@@ -55,7 +55,7 @@ const transferNodeLocal = async () => {
       ignoreResponseError: false,
     })
 
-    increaseRelatedNode(props.selectedNode.id, relationtype.value)
+    treeStore.increaseRelatedNodeCount(props.selectedNode.id, relationtype.value)
 
     // setRelatedNode(selectedNodes.value[0], relationtype.value)
     loading.value = false

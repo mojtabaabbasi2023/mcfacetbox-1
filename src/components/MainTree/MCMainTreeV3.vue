@@ -8,7 +8,7 @@ import MCDialogNodeRelationList from '../dialogs/MCDialogNodeRelationList.vue'
 import { type IRootServiceError, MessageType, SelectionType, SizeType } from '@/types/baseModels'
 import { NodeLocationType, NodeRelationType, NodeSelectionType, SimpleFlatNodeActionable, getNodeTypeNameSpace } from '@/types/tree'
 import type { INodeChangePriority, ISimpleFlatNodeActionable, ISingleNodeView, ITree } from '@/types/tree'
-import { useTreeStoreV3 } from '@/store/treeStoreV3'
+import { useSelectTreeNode, useTreeStoreV3 } from '@/store/treeStoreV3'
 import { useSelectedTree } from '@/store/treeStore'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 import { useShortcutManager } from '@/composables/useShortcutManager'
@@ -46,7 +46,6 @@ const treeStore = useTreeStoreV3()
 
 const searchbox = ref()
 
-const activatedNode = ref<number[]>([])
 const isLoading = ref(false)
 const treeElement = shallowRef()
 const rootElement = shallowRef()
@@ -81,7 +80,7 @@ const { height: rootElementHeight } = useElementSize(rootElement)
 
 // Legacy store for tree selection (keeping for compatibility)
 const selectedTreeStore = useSelectedTree()
-
+const { treeNodeIdMustBeSelect } = useSelectTreeNode()
 const { routerTreeId, routerNodeId, clearUnNeededQueryItems, addTreeIdToQuery, addNodeIdToQuery } = useRouterForGlobalVariables()
 const { lastShortcutTriggered } = useShortcutManager()
 const { x: cursorX, y: cursorY } = usePointer()
@@ -825,7 +824,13 @@ watch(() => searchBoxHeight.value, () => {
   else
     treeBlockSize.value = 500
 })
-
+watch(treeNodeIdMustBeSelect, newval => {
+  if (newval > 0) {
+    treeStore.highlightNode(newval)
+    gotoNode(newval, NodeSelectionType.highlighted, false)
+    treeNodeIdMustBeSelect.value = 0
+  }
+})
 watch(lastShortcutTriggered, newval => {
   if (newval === ShortcutName.nodesearch)
     activeSearch.value = !activeSearch.value
@@ -839,7 +844,7 @@ watch(() => treeStore.currentTreeId, async (newval, oldVal) => {
 })
 
 watch(searchResultSelectedNodes, () => {
-  treeStore.highlightedNodeId = searchResultSelectedNodes.value[0]
+  treeStore.highlightNode(searchResultSelectedNodes.value[0])
   gotoNode(searchResultSelectedNodes.value[0], NodeSelectionType.highlighted, false)
 })
 
