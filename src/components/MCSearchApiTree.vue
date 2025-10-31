@@ -114,10 +114,10 @@ async function replaceNodeTitle() {
 
   const selectedItem = searchResult.findLast(item => item.id === selectedItemsLocal.value[0])
   if (selectedItem) {
-    await props.onUpdateNodeTitle(treeStore.getNode(selectedItem.id), replacePhrase.value)
+    await props.onUpdateNodeTitle(treeStore.getNode(selectedItem.id), replaceTag(selectedItem.title, 'em', replacePhrase.value))
 
     // replaceTag(selectedItem.title, 'em', replacePhrase.value)
-    selectedItem.title = replacePhrase.value
+    selectedItem.title = replaceTag(selectedItem.title, 'em', replacePhrase.value)
   }
   replaceloading.value = false
 }
