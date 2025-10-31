@@ -87,7 +87,7 @@ export class DataShelfBoxModelNew implements IDataShelfBoxNew {
     this.sourceId = sourceId
   }
 
-  isContentComplete: boolean = true
+  isContentComplete: boolean = false
 }
 
 /**

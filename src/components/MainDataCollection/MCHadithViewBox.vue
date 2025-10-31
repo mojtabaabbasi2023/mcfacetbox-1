@@ -176,6 +176,8 @@ const onContextMenu = (e: MouseEvent, contentType: DataBoxType, contentdata: IDa
   // NOTE - با توجه به اینکه پاورقی بصورت دستی اضافه میشود، اگر محتوا درای پاورقی باشد به سرور اطلاع میدهیم که متن کامل نیست و در سرور متن کامل بعلاوه محتوای پاورقی میشود
   if (contentdata.content.length <= 0)
     contentdata.isContentComplete = false
+  else
+    contentdata.isContentComplete = true
 
   contentdata.content += createFootnoteTag(uuid, '1')
   contentdata.footNotes.push(footnoteTemp)

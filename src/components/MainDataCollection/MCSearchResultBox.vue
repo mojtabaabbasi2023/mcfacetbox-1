@@ -152,6 +152,8 @@ function openContextMenu(e: MouseEvent, connectedboxType: DataBoxType, contentda
           //   tempSelectedTabBoxItem.content = selectedItem.title
           currentContentToConnectToNode.sourceId = contentdata.sourceId
           currentContentToConnectToNode.content = contentdata.content
+          currentContentToConnectToNode.footNotes = contentdata.footNotes
+          currentContentToConnectToNode.isContentComplete = contentdata.isContentComplete
           dialogSelectNodeVisible.value = true
         },
       },
@@ -222,8 +224,20 @@ function openBoxLink() {
 
     <MCDialogSelectNode
       v-if="dialogSelectNodeVisible" v-model:is-dialog-visible="dialogSelectNodeVisible"
-      :selected-tree-id="props.selectedTreeId ?? 0" @nodehasbeenselected="(nodeid) => addContentToNode(new DataShelfBoxModelNew(0, props.selectedTreeId ?? 0, nodeid, currentContentToConnectToNode.content, '', [], [], currentContentToConnectToNode.sourceId), false)"
+      :selected-tree-id="props.selectedTreeId ?? 0"
+      @nodehasbeenselected="(nodeid) => addContentToNode({
+        content: currentContentToConnectToNode.content,
+        description: '',
+        footNotes: currentContentToConnectToNode.footNotes,
+        id: 0,
+        nodeId: nodeid,
+        isContentComplete: currentContentToConnectToNode.isContentComplete,
+        labels: [],
+        sourceId: currentContentToConnectToNode.sourceId,
+        treeId: props.selectedTreeId ?? 0,
+      }, false)"
     />
+    <!-- new DataShelfBoxModelNew(0, props.selectedTreeId ?? 0, nodeid, currentContentToConnectToNode.content, '', currentContentToConnectToNode.footNotes, [], currentContentToConnectToNode.sourceId) -->
     <!-- <VFadeTransition> -->
     <div v-if="showTools" class="result-box-actions-container">
       <VBtn icon size="22" variant="text" @click="openBoxLink">
