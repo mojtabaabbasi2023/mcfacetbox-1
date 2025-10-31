@@ -9,7 +9,6 @@ import { type IRootServiceError, MessageType, SelectionType, SizeType } from '@/
 import { NodeLocationType, NodeRelationType, NodeSelectionType, SimpleFlatNodeActionable, getNodeTypeNameSpace } from '@/types/tree'
 import type { INodeChangePriority, ISimpleFlatNodeActionable, ISingleNodeView, ITree } from '@/types/tree'
 import { useSelectTreeNode, useTreeStoreV3 } from '@/store/treeStoreV3'
-import { useSelectedTree } from '@/store/treeStore'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 import { useShortcutManager } from '@/composables/useShortcutManager'
 import { SHORTCUTKeys, ShortcutName } from '@/types/shortcutKeys'
@@ -54,8 +53,8 @@ const searchResultSelectedNodes = ref<number[]>([])
 
 // Dialog visibility
 const activeSearch = shallowRef(false)
-const dialogAddNewNodeVisible = ref(false)
-const dialogMergeNodeVisible = ref(false)
+const dialogAddNewNodeVisible = shallowRef(false)
+const dialogMergeNodeVisible = shallowRef(false)
 const dialogDescriptionVisible = shallowRef(false)
 const dialogTransferNodeVisible = shallowRef(false)
 const dialogNodeRelationVisible = shallowRef(false)
@@ -63,7 +62,6 @@ const dialogTreeNodeStats = shallowRef(false)
 const dialogNodeRelationListVisible = shallowRef(false)
 const dialognoderelationlist = ref(VDialog)
 
-const treeBlockSize = ref(500)
 const activeTooltipPath = shallowRef('')
 
 // در بخش stateها اضافه کنید
@@ -79,7 +77,6 @@ const { height: searchBoxHeight } = useElementSize(searchbox)
 const { height: rootElementHeight } = useElementSize(rootElement)
 
 // Legacy store for tree selection (keeping for compatibility)
-const selectedTreeStore = useSelectedTree()
 const { treeNodeIdMustBeSelect } = useSelectTreeNode()
 const { routerTreeId, routerNodeId, clearUnNeededQueryItems, addTreeIdToQuery, addNodeIdToQuery } = useRouterForGlobalVariables()
 const { lastShortcutTriggered } = useShortcutManager()
@@ -124,9 +121,6 @@ const refreshTree = async () => {
 
       return
     }
-
-    selectedTreeStore.id = data.value.id
-    selectedTreeStore.title = data?.value.title
 
     if (!data.value.nodes || data.value.nodes <= 0) {
       treeStore.clearTree()
@@ -183,7 +177,7 @@ async function gotoNode(nodeId: number, selectionType: NodeSelectionType, mustSe
     return
 
   if (mustSelectNode)
-    treeStore.selectNode(nodeId, treeElement.value?.$el.scrollTop ?? 0)
+    treeStore.selectNode(nodeId)
 
   const parentIds = treeStore.getAncestorIds(nodeId)
 
@@ -816,12 +810,6 @@ watch(activeSearch, (newval, oldVal) => {
 //     console.log('tree element focused')
 //   else console.log('input element has lost focus')
 // })
-watch(() => searchBoxHeight.value, () => {
-  if (activeSearch.value)
-    treeBlockSize.value = 500 + searchBoxHeight.value
-  else
-    treeBlockSize.value = 500
-})
 watch(treeNodeIdMustBeSelect, newval => {
   if (newval > 0) {
     treeStore.highlightNode(newval)

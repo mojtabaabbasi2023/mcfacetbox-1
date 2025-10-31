@@ -40,8 +40,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
   // Currently selected node
   const selectedNodeId = ref<number>(-1)
 
-  const selecteNodeScrollPosition = ref<number>(0)
-
   const highlightedNodeId = ref<number>(-1)
 
   // Tree metadata
@@ -618,7 +616,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
   /**
    * Select a node
    */
-  const selectNode = (nodeId: number, scrollPosition: number = 0) => {
+  const selectNode = (nodeId: number) => {
     // Deselect previous
     if (selectedNodeId.value > 0 || selectedNodeId.value === -currentTreeId.value)
       updateNode(selectedNodeId.value, { selected: false })
@@ -627,11 +625,9 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     if (nodes.has(nodeId)) {
       updateNode(nodeId, { selected: true })
       selectedNodeId.value = nodeId
-      selecteNodeScrollPosition.value = scrollPosition
     }
     else {
       selectedNodeId.value = -1
-      selecteNodeScrollPosition.value = 0
     }
   }
 
@@ -715,7 +711,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     currentTreeId,
     highlightedNodeId,
     currentTreeTitle,
-    selecteNodeScrollPosition,
 
     // Computed
     treeData,

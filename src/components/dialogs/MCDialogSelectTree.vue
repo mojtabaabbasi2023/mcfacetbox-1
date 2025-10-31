@@ -7,7 +7,7 @@ import type { VForm } from 'vuetify/components/VForm'
 import type { IUserEdit } from '@/types/users'
 import { UserEditModel } from '@/types/users'
 import { type GridResult, type ISimpleDTO, SimpleDTOModel } from '@/types/baseModels'
-import { useSelectedTree } from '@/store/treeStore'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 import type { Rule } from '@/plugins/casl/ability'
 
@@ -42,7 +42,7 @@ const gateList = ref<ISimpleDTO<number>[]>([])
 const treeList = ref<ISimpleDTO<number>[]>([])
 
 const router = useRouter()
-const selectedTreeItem = useSelectedTree()
+const treeStore = useTreeStoreV3()
 
 // watch(selectedGate, () => {
 //   loadProjects()
@@ -127,8 +127,6 @@ onMounted(async () => {
 async function startWorkWithTree() {
   const result = await setPermissions()
   if (result) {
-    selectedTreeItem.id = selectedTree.value.id
-    selectedTreeItem.title = selectedTree.value.title
     router.replace({ name: 'rs', query: { ...treeIdQuery(selectedTree.value.id) } })
     emit('update:isDialogVisible', false)
   }

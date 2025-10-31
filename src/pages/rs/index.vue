@@ -6,7 +6,7 @@ import MCMainDataShelf from '@/components/MainDataShelf/MCMainDataShelf.vue'
 import useRouterForGlobalVariables from '@/composables/useRouterVariables'
 
 import 'splitpanes/dist/splitpanes.css'
-import { useSelectedTree } from '@/store/treeStore'
+import { useTreeStoreV3 } from '@/store/treeStoreV3'
 import { useNavLinkSelectState } from '@/store/baseStore'
 import { useShortcutManager } from '@/composables/useShortcutManager'
 import { NavLinkStateName } from '@/@layouts/types'
@@ -15,7 +15,7 @@ const menu = ref(false)
 const topComponentOrder = ref(2)
 const bottomComponentOrder = ref(2)
 const dialogSelectTreeVisible = ref(false)
-const selectedTreeItem = useSelectedTree()
+const treeStore = useTreeStoreV3()
 const dialogTreePreviewVisible = shallowRef(false)
 const showgathering = shallowRef(true)
 const showtree = shallowRef(true)
@@ -81,7 +81,7 @@ function changeWindowTitle(status: boolean) {
 
     <Splitpanes style="block-size: calc(100vh - 70px);" rtl class="default-theme">
       <Pane v-if="showtree" size="30">
-        <MCWindow :title="selectedTreeItem.title" @close="menu = true">
+        <MCWindow :title="treeStore.currentTreeTitle" @close="menu = true">
           <MCMainTreeV3 @show-select-tree="dialogSelectTreeVisible = true" />
           <template #actions>
             <VTooltip location="right center">
