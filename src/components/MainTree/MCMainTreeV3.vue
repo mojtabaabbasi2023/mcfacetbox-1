@@ -152,11 +152,13 @@ function checkTreeRoute() {
     return
   }
 
+  console.log('routernodeid', routerNodeId.value)
+
   if (treeStore.currentTreeId === routerTreeId.value) {
     // if (deselectAll)
     //   treeStore.deselectAll()
 
-    if (routerNodeId.value === 0)
+    if (routerNodeId.value === -treeStore.currentTreeId)
       gotoNode(-treeStore.currentTreeId, NodeSelectionType.selected)
 
     else
@@ -1062,7 +1064,7 @@ onMounted(async () => {
     <!-- Selected Node Info -->
     <div>
       <VBtn
-        v-if="treeStore.selectedNode && treeStore.selectedNode.id > 0"
+        v-if="treeStore.selectedNode && (treeStore.selectedNode.id > 0 || treeStore.selectedNode.id === -treeStore.currentTreeId) "
         class="selected-node pr-1 pl-1 text-body-2"
         variant="text"
         @click="gotoNode(treeStore.selectedNode.id, NodeSelectionType.selected, false)"

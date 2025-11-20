@@ -222,7 +222,17 @@ function handlepasteaction(event: ClipboardEvent) {
     range?.deleteContents() // حذف محتویات انتخاب‌شده
     range?.insertNode(document.createTextNode(text)) // درج متن ساده
     setTimeout(() => {
+    //   selection?.removeAllRanges()
+      editor.value?.focus()
+
+      // قرار دادن cursor در انتهای متن اضافه شده
+      const newRange = document.createRange()
+
+      newRange.selectNodeContents(editor.value)
+      newRange.collapse(false) // false = به انتها برو
+
       selection?.removeAllRanges()
+      selection?.addRange(newRange)
     }, 0)
   }
 }
