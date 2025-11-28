@@ -72,6 +72,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
    */
   const hasChildren = (nodeId: number): boolean => {
     const arr = childrenByParent.get(nodeId)
+
     return !!(arr && arr.length > 0)
   }
 
@@ -140,44 +141,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
 
     return siblings[siblings.length - 1]?.id === nodeId
   }
-
-  /**
-   * Build display tree for VTreeview (with lazy loading support)
-   * Note: Do NOT use markRaw here - we need reactivity for VTreeview
-   */
-  const buildDisplayNode = (nodeId: number): ISimpleNestedNodeActionable | null => {
-    const node = nodes.get(nodeId)
-    if (!node)
-      return null
-
-    // Create reactive object for display (not marked as raw)
-    return reactive({
-      id: node.id,
-      parentId: node.parentId,
-      title: node.title,
-      priority: node.priority,
-      hasDescription: node.hasDescription,
-      relationCount: node.relationCount,
-      referenceCount: node.referenceCount,
-      selected: node.selected,
-      editing: node.editing,
-      loading: node.loading,
-      failed: node.failed,
-      tempData: node.tempData,
-
-      // For lazy loading: empty array if has children, undefined otherwise
-      children: hasChildren(node.id) ? [] : undefined,
-    }) as ISimpleNestedNodeActionable
-  }
-
-  /**
-   * Build tree structure for display (only root level initially)
-   */
-  const treeData = computed<ISimpleNestedNodeActionable[]>(() => {
-    return rootNodes.value
-      .map(node => buildDisplayNode(node.id))
-      .filter((node): node is ISimpleNestedNodeActionable => node !== null)
-  })
 
   /**
    * Get currently selected node
@@ -270,10 +233,12 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
         })
         nodes.set(node.id, flatNode)
         childrenByParent.get(parentId)!.push(node.id)
+
         // Maintain ordering right away (priority descending)
         childrenByParent.get(parentId)!.sort((a, b) => {
           const na = nodes.get(a)!
           const nb = nodes.get(b)!
+
           return nb.priority - na.priority
         })
         if (node.children && node.children.length > 0)
@@ -283,22 +248,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
 
     if (data.nodes && data.nodes.length > 0)
       flattenTree(data.nodes)
-  }
-
-  /**
-   * Load children for lazy loading
-   *
-   * Since we used expandedNodes to determine which nodes must be shown, we don't need to use this function for now.
-   */
-  const loadChildrenForDisplay = (nodeId: number): ISimpleNestedNodeActionable[] => {
-    const children = getChildren(nodeId)
-
-    expandedNodes.add(nodeId)
-    loadedNodes.add(nodeId)
-
-    return children
-      .map(node => buildDisplayNode(node.id))
-      .filter((node): node is ISimpleNestedNodeActionable => node !== null)
   }
 
   /**
@@ -392,8 +341,10 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     if (!childrenByParent.has(parentId))
       childrenByParent.set(parentId, [])
     childrenByParent.get(parentId)!.push(newNode.id)
+
     // Reorder children by priority
     childrenByParent.get(parentId)!.sort((a, b) => (nodes.get(b)!.priority - nodes.get(a)!.priority))
+
     return newNode
   }
 
@@ -426,6 +377,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     const parentNode = getParentNode(nodeId)
     const findDescendants = (parentId: number) => {
       const childIds = childrenByParent.get(parentId) || []
+
       childIds.forEach(id => {
         nodesToDelete.push(id)
         findDescendants(id)
@@ -438,10 +390,12 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     nodesToDelete.forEach(id => {
       nodes.delete(id)
       expandedNodes.delete(id)
+
       const arr = childrenByParent.get(id)
       if (arr)
         childrenByParent.delete(id)
     })
+
     // Remove from parent's children array
     if (parentNode) {
       const siblings = childrenByParent.get(parentNode.id)
@@ -529,6 +483,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
       parentId: newParentId,
       priority: destinationPriority,
     })
+
     // Update children index: remove from old parent list
     const oldParentId = sourceNode.parentId
     if (oldParentId !== newParentId) {
@@ -542,10 +497,11 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
         childrenByParent.set(newParentId, [])
       childrenByParent.get(newParentId)!.push(nodeId)
     }
+
     // Reorder destination siblings by priority
-    if (childrenByParent.get(newParentId)) {
+    if (childrenByParent.get(newParentId))
       childrenByParent.get(newParentId)!.sort((a, b) => (nodes.get(b)!.priority - nodes.get(a)!.priority))
-    }
+
     if (sourceNode.parentId)
       updateNode(sourceNode.parentId, { hasChildren: hasChildren(sourceNode.parentId) })
 
@@ -571,14 +527,14 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     // Move all children of source to destination
     const children = getChildren(sourceId)
 
-    console.log('mergechildren', children)
-
     children.forEach(child => {
       const updatedPriority = newNodePriority.find(a => a.id === child.id)?.priority ?? child.priority
+
       updateNode(child.id, {
         parentId: destinationId,
         priority: updatedPriority,
       })
+
       // Remove child from old parent index list
       const oldArr = childrenByParent.get(sourceId)
       if (oldArr) {
@@ -590,6 +546,7 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
         childrenByParent.set(destinationId, [])
       childrenByParent.get(destinationId)!.push(child.id)
     })
+
     // Reorder destination children
     const destArr = childrenByParent.get(destinationId)
     if (destArr)
@@ -597,7 +554,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
 
     // Delete source node
     deleteNode(sourceId)
-    console.log('mergecsourceNode', sourceNode)
 
     if (sourceNode.parentId)
       updateNode(sourceNode.parentId, { hasChildren: hasChildren(sourceNode.parentId) })
@@ -765,7 +721,6 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     currentTreeTitle,
 
     // Computed
-    treeData,
     rootNodes,
     selectedNode,
     flatVisibleNodes, // For virtual scrolling
@@ -778,13 +733,11 @@ export const useTreeStoreV3 = defineStore('treeV3', () => {
     getNodePath,
     getAncestorIds,
     isLastSibling,
-    buildDisplayNode,
     getParentNode,
     isDescendant,
 
     // Actions: Data
     loadTree,
-    loadChildrenForDisplay,
     clearTree,
 
     // Actions: Node Expansion (for virtual scroll)
