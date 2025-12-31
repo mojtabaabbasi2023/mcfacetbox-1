@@ -96,9 +96,9 @@ function searchinfacet(e: any) {
   <v-defaults-provider :defaults="defaults">
 
     <div :dir="effectiveDir" class="mc-facet-box">
-      <VCardTitle v-if="props.facettype !== FacetType.switch">
+      <div class="title" v-if="props.facettype !== FacetType.switch">
         {{ props.facettitle }}
-      </VCardTitle>
+      </div>
       <div class="search-container">
         <VTextField v-show="props.searchable" :placeholder="!searchPlaceholder ? 'Search' : searchPlaceholder"
           :append-inner-icon="effectiveDir === 'ltr' ? 'tabler-search' : undefined"
@@ -114,6 +114,7 @@ function searchinfacet(e: any) {
 
       <component :is="facetComponent(dataitems)" :title="facettitle" :items="dataitems.itemList" v-model="internalValue"
         :searchable="searchable" :istree="istree" :direction="effectiveDir" :searchDirection="searchDirection" />
+      <v-divider></v-divider>
     </div>
   </v-defaults-provider>
 
@@ -125,12 +126,12 @@ function searchinfacet(e: any) {
   padding: 2px;
   // background-color: rgba(var(--v-theme-primary), 0.1) !important;
 
-  .v-card-title {
-    font-size: 1em;
+  .title {
     margin-block: 3px;
     margin-inline: 0;
     padding-block: 0;
     padding-inline: 10px;
+    font-weight: bold;
   }
 
   // .v-text-field {

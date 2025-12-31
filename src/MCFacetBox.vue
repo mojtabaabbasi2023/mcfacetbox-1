@@ -86,13 +86,13 @@ function removeAllFilter() {
     CHIPS
   ======================== -->
 
-    <div class="remove-filter">
+    <div class="remove-filter" v-if="getSelectedFacetItems(dataitems, activeFilters).length>0">
 
       <div class="row justify-content-between align-items-center">
-        <VCardTitle class="filter-title">
-         {{ !filterTitle ? 'Applied filters' : filterTitle }}
-        </VCardTitle>
-        
+        <div class="filter-title">
+          {{ !filterTitle ? 'Applied filters' : filterTitle }}
+        </div>
+
         <v-btn icon variant="text" @click="removeAllFilter" density="compact">
           <v-icon :size="16">mdi-close</v-icon>
         </v-btn>
@@ -101,9 +101,9 @@ function removeAllFilter() {
       <div v-for="facet in getSelectedFacetItems(dataitems, activeFilters)"
         class="row justify-content-between align-items-center">
 
-        <VCardTitle>
+        <div class="title" style="width: 100%;">
           {{ facet.title }}:
-        </VCardTitle>
+        </div>
 
         <div style="width: calc(100% - 30px);">
           <VChip v-for="selectedItem in facet.selectedItems" :key="selectedItem.key" class="mr-1 mb-1" closable
@@ -116,7 +116,7 @@ function removeAllFilter() {
           <v-icon :size="16">mdi-close</v-icon>
         </v-btn>
       </div>
-      <v-divider></v-divider>
+      <v-divider style="margin: 0 -8px;"></v-divider>
     </div>
 
 
