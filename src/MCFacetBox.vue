@@ -86,7 +86,7 @@ function removeAllFilter() {
     CHIPS
   ======================== -->
 
-    <div class="remove-filter" v-if="getSelectedFacetItems(dataitems, activeFilters).length>0">
+    <div class="remove-filter" v-if="getSelectedFacetItems(dataitems, activeFilters).length > 0">
 
       <div class="row justify-content-between align-items-center">
         <div class="filter-title">
@@ -116,7 +116,7 @@ function removeAllFilter() {
           <v-icon :size="16">mdi-close</v-icon>
         </v-btn>
       </div>
-      <v-divider style="margin: 0 -8px;"></v-divider>
+      <v-divider style="margin: 0px -8px -4px -8px;"></v-divider>
     </div>
 
 
@@ -124,14 +124,23 @@ function removeAllFilter() {
     DYNAMIC FACETS
   ======================== -->
 
-    <MCFacetRender v-for="facet in dataitems" :key="facet.key" :facettitle="facet.title" :dataitems="facet"
-      :facettype="facet.type" v-model:selectedItems="activeFilters[facet.key]" :searchable="facet.hasSearchBox"
-      @search="val => handleSearch(facet.key, val)" :isLoading="facetLoading?.[facet.key]" :direction="direction"
-      :searchDirection="searchDirection" :searchPlaceholder="searchPlaceholder" />
+    <v-expansion-panels multiple :elevation="0" variant="accordion">
+      <v-expansion-panel v-for="facet in dataitems" :key="facet.key" :static="true">
+        <v-expansion-panel-title>
+          {{ facet.title }}
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <MCFacetRender :dataitems="facet" :facettype="facet.type" v-model:selectedItems="activeFilters[facet.key]"
+            :searchable="facet.hasSearchBox" @search="val => handleSearch(facet.key, val)"
+            :isLoading="facetLoading?.[facet.key]" :direction="direction" :searchDirection="searchDirection"
+            :searchPlaceholder="searchPlaceholder" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 .mb-1 {
   margin-bottom: 0.25rem;
 }
@@ -196,5 +205,28 @@ function removeAllFilter() {
   margin-inline: 0;
   padding-block: 0;
   padding-inline: 10px;
+}
+
+.v-expansion-panels {
+
+  .v-expansion-panel {
+    margin-bottom: 0 !important;
+
+    .v-expansion-panel-title {
+      min-height: 30px !important;
+      padding: 12px 10px !important;
+      // border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+      border-radius: 0;
+      font-size: 1em;
+    }
+
+    .v-expansion-panel-text {
+      .v-expansion-panel-text__wrapper {
+        padding: 0;
+      }
+    }
+
+
+  }
 }
 </style>

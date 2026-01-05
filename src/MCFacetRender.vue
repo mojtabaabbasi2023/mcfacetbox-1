@@ -18,8 +18,8 @@ import { VProgressCircular } from 'vuetify/components/VProgressCircular'
 
 
 interface Props {
-  facettype: FacetType
-  facettitle: string
+  facettype?: FacetType
+  facettitle?: string
   dataitems: IFacetBox
   searchable?: boolean
   isLoading?: boolean
@@ -113,7 +113,7 @@ function searchinfacet(e: any) {
 
       <component :is="facetComponent(dataitems)" :title="facettitle" :items="dataitems.itemList" v-model="internalValue"
         :searchable="searchable" :direction="effectiveDir" :searchDirection="searchDirection" />
-      <v-divider></v-divider>
+      <!-- <v-divider></v-divider> -->
     </div>
   </v-defaults-provider>
 
