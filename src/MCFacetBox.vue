@@ -18,14 +18,17 @@ interface Props {
   searchPlaceholder?: string
   filterTitle?: string
   facetLoading?: Record<string, boolean>
-  serverFilterable?: boolean
+  serverFilterable?: boolean,
+  filterTags?: boolean
 }
 interface Emit {
   (e: 'update:selectedItems', selectdItems: ActiveFilters): void,
   (e: 'search', key: string, value: string): void
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  filterTags: true, // default value
+});
 const emit = defineEmits<Emit>()
 
 /* =========================
@@ -87,7 +90,7 @@ function removeAllFilter() {
     CHIPS
   ======================== -->
 
-    <div class="remove-filter" v-if="getSelectedFacetItems(dataitems, activeFilters).length > 0">
+    <div class="remove-filter" v-if="filterTags && getSelectedFacetItems(dataitems, activeFilters).length > 0">
 
       <div class="row justify-content-between align-items-center">
         <div class="filter-title">
@@ -134,7 +137,7 @@ function removeAllFilter() {
           <MCFacetRender :dataitems="facet" :facettype="facet.type" v-model:selectedItems="activeFilters[facet.key]"
             :searchable="facet.hasSearchBox" @search="val => handleSearch(facet.key, val)"
             :isLoading="facetLoading?.[facet.key]" :direction="direction" :searchDirection="searchDirection"
-            :searchPlaceholder="searchPlaceholder" :serverFilterable="serverFilterable"/>
+            :searchPlaceholder="searchPlaceholder" :serverFilterable="serverFilterable" />
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
