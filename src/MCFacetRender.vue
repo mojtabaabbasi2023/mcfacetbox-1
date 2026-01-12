@@ -102,7 +102,7 @@ const filteredItems = computed<IFacetItem[]>(() => {
       <div class="title" v-if="props.facettype !== FacetType.switch">
         {{ props.facettitle }}
       </div>
-      <div class="search-container">
+      <div class="facet-search-container">
         <VTextField v-show="props.searchable" :placeholder="!searchPlaceholder ? 'Search' : searchPlaceholder"
           :append-inner-icon="effectiveDir === 'ltr' ? 'tabler-search' : undefined"
           :prepend-inner-icon="effectiveDir === 'rtl' ? 'tabler-search' : undefined"

@@ -182,7 +182,7 @@ function removeAllFilter() {
   align-content: center;
 }
 
-.search-container {
+.facet-search-container {
   padding-inline: 10px;
 }
 
