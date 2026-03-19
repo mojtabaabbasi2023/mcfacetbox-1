@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import MCFacetRender from './MCFacetRender.vue'
+import MCFacetSwitch from './MCFacetSwitch.vue'
 import { VChip } from 'vuetify/components/VChip'
 import type { IFacetBox } from './types'
 import { VBtn } from 'vuetify/components'
@@ -28,6 +29,7 @@ interface Emit {
 
 const props = withDefaults(defineProps<Props>(), {
   filterTags: true, // default value
+  dataitems: () => []
 });
 const emit = defineEmits<Emit>()
 
@@ -82,6 +84,18 @@ function removeFilter(facetKey: string) {
 function removeAllFilter() {
   activeFilters.value = {};
 }
+
+
+// openPanels فقط خواندنی - بر اساس فیلترهای فعال
+const selectedValues = Object.keys(activeFilters.value);
+
+const facet3Items = computed(() =>
+  props.dataitems.filter(f => Number(f.type) === 3)
+)
+
+const nonFacet3Items = computed(() =>
+  props.dataitems.filter(f => Number(f.type) !== 3)
+)
 </script>
 
 <template>
@@ -127,9 +141,8 @@ function removeAllFilter() {
     <!-- =======================
     DYNAMIC FACETS
   ======================== -->
-
-    <v-expansion-panels multiple :elevation="0" variant="accordion">
-      <v-expansion-panel v-for="facet in dataitems" :key="facet.key" :static="true">
+    <v-expansion-panels multiple :elevation="0" variant="accordion" :model-value="selectedValues">
+      <v-expansion-panel v-for="facet in nonFacet3Items" :key="facet.key" :static="true" :value="facet.key">
         <v-expansion-panel-title>
           {{ facet.title }}
         </v-expansion-panel-title>
@@ -137,10 +150,18 @@ function removeAllFilter() {
           <MCFacetRender :dataitems="facet" :facettype="facet.type" v-model:selectedItems="activeFilters[facet.key]"
             :searchable="facet.hasSearchBox" @search="val => handleSearch(facet.key, val)"
             :isLoading="facetLoading?.[facet.key]" :direction="direction" :searchDirection="searchDirection"
-            :searchPlaceholder="searchPlaceholder" :serverFilterable="serverFilterable" />
+            :searchPlaceholder="searchPlaceholder" :serverFilterable="serverFilterable"
+            :scroll-item-count="facet.scrollSize" />
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
+
+    <div class="facet-switch-container">
+      <div v-for="facet in facet3Items" :key="facet.key" class="facet3-container">
+        <MCFacetSwitch :items="facet.itemList" v-model="activeFilters[facet.key]" :direction="direction" />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -232,5 +253,9 @@ function removeAllFilter() {
 
 
   }
+}
+
+.facet-switch-container {
+  padding: 0 16px;
 }
 </style>
