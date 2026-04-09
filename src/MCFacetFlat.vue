@@ -39,7 +39,10 @@ const internalValue = computed({
 
   <v-list v-model:selected="internalValue" item-value="key" item-title="title" lines="one" select-strategy="leaf"
     :return-object="false">
-    <v-virtual-scroll :items="items" item-height="28" :height="(props.scrollItemCount ?? 10) * 28">
+    <v-virtual-scroll :items="items" item-height="28" :height="Math.min(
+      (items?.length ?? 0),
+      (props.scrollItemCount ?? 10)
+    ) * 28">
       <template #default="{ item }">
         <v-list-item :value="item.key">
           <template #prepend="{ isSelected, select }">
